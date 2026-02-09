@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Word-Texteditor</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -12,7 +13,7 @@
         }
 
         body {
-            font-family: Aeropus Sans, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             background: #f0f2f5;
             min-height: 100vh;
         }
@@ -192,6 +193,10 @@
             min-width: 70px;
         }
 
+        #zoomSelect {
+            min-width: 80px;
+        }
+
         input[type="color"].toolbar-btn {
             padding: 2px;
             cursor: pointer;
@@ -227,6 +232,8 @@
             background: white;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             margin-bottom: 20px;
+            transform-origin: top center;
+            transition: transform 0.2s ease;
         }
 
         #editor {
@@ -344,6 +351,71 @@
             margin: 6pt 0;
         }
 
+        /* Custom Context Menu */
+        .custom-context-menu {
+            position: fixed;
+            background: white;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 10000;
+            min-width: 180px;
+            padding: 4px 0;
+            display: none;
+        }
+
+        .context-menu-item {
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #374151;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .context-menu-item:hover {
+            background: #f3f4f6;
+        }
+
+        .context-menu-divider {
+            height: 1px;
+            background: #e5e7eb;
+            margin: 4px 0;
+        }
+
+        /* Image Resize Handles */
+        #editor img {
+            max-width: 100%;
+            height: auto;
+            cursor: pointer;
+        }
+
+        #editor img.selected-image {
+            outline: 2px solid #2b579a;
+            outline-offset: 2px;
+        }
+
+        .image-resize-container {
+            position: relative;
+            display: inline-block;
+            max-width: 100%;
+        }
+
+        .resize-handle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: white;
+            border: 2px solid #2b579a;
+            cursor: nwse-resize;
+        }
+
+        .resize-handle.nw { top: -4px; left: -4px; cursor: nw-resize; }
+        .resize-handle.ne { top: -4px; right: -4px; cursor: ne-resize; }
+        .resize-handle.sw { bottom: -4px; left: -4px; cursor: sw-resize; }
+        .resize-handle.se { bottom: -4px; right: -4px; cursor: se-resize; }
+
         @media (max-width: 1200px) {
             .page {
                 width: 100%;
@@ -431,6 +503,8 @@
             <button class="ribbon-tab" onclick="switchTab('insert')">Einfügen</button>
             <button class="ribbon-tab" onclick="switchTab('layout')">Layout</button>
             <button class="ribbon-tab" onclick="switchTab('view')">Ansicht</button>
+            <button class="ribbon-tab" onclick="switchTab('extras')">Extras</button>
+            <button class="ribbon-tab" id="tableTab" onclick="switchTab('table')" style="display: none;">Tabelle</button>
         </div>
 
         <!-- Start Ribbon -->
@@ -445,9 +519,13 @@
                         <span class="icon">📁</span>
                         <span>Öffnen</span>
                     </button>
-                    <button class="toolbar-btn large" onclick="downloadHTML()" title="Speichern">
+                    <button class="toolbar-btn large" onclick="downloadHTML()" title="Speichern als HTML">
                         <span class="icon">💾</span>
-                        <span>Speichern</span>
+                        <span>HTML</span>
+                    </button>
+                    <button class="toolbar-btn large" onclick="downloadPDF()" title="Als PDF speichern">
+                        <span class="icon">📕</span>
+                        <span>PDF</span>
                     </button>
                     <button class="toolbar-btn large" onclick="printDocument()" title="Drucken">
                         <span class="icon">🖨️</span>
@@ -469,13 +547,29 @@
                 <div class="ribbon-controls">
                     <select class="toolbar-btn" onchange="changeFont(this.value)" id="fontSelect">
                         <option value="Arial">Arial</option>
+                        <option value="Arial Black">Arial Black</option>
+                        <option value="Book Antiqua">Book Antiqua</option>
                         <option value="Calibri" selected>Calibri</option>
-                        <option value="Times New Roman">Times New Roman</option>
-                        <option value="Georgia">Georgia</option>
-                        <option value="Verdana">Verdana</option>
-                        <option value="Courier New">Courier New</option>
+                        <option value="Cambria">Cambria</option>
+                        <option value="Candara">Candara</option>
+                        <option value="Century Gothic">Century Gothic</option>
                         <option value="Comic Sans MS">Comic Sans MS</option>
+                        <option value="Consolas">Consolas</option>
+                        <option value="Courier">Courier</option>
+                        <option value="Courier New">Courier New</option>
+                        <option value="Garamond">Garamond</option>
+                        <option value="Georgia">Georgia</option>
+                        <option value="Helvetica">Helvetica</option>
                         <option value="Impact">Impact</option>
+                        <option value="Lucida Console">Lucida Console</option>
+                        <option value="Lucida Sans Unicode">Lucida Sans Unicode</option>
+                        <option value="Palatino">Palatino</option>
+                        <option value="Segoe UI">Segoe UI</option>
+                        <option value="Tahoma">Tahoma</option>
+                        <option value="Times">Times</option>
+                        <option value="Times New Roman">Times New Roman</option>
+                        <option value="Trebuchet MS">Trebuchet MS</option>
+                        <option value="Verdana">Verdana</option>
                     </select>
                     <select class="toolbar-btn" onchange="changeFontSize(this.value)" id="sizeSelect">
                         <option value="8">8</option>
@@ -501,10 +595,10 @@
 
             <div class="ribbon-group">
                 <div class="ribbon-controls">
-                    <button class="toolbar-btn" onclick="formatText('bold')" title="Fett (Ctrl+B)"><b>F</b></button>
-                    <button class="toolbar-btn" onclick="formatText('italic')" title="Kursiv (Ctrl+I)"><i>K</i></button>
-                    <button class="toolbar-btn" onclick="formatText('underline')" title="Unterstrichen (Ctrl+U)"><u>U</u></button>
-                    <button class="toolbar-btn" onclick="formatText('strikeThrough')" title="Durchgestrichen"><s>S</s></button>
+                    <button class="toolbar-btn" id="boldBtn" onclick="formatText('bold')" title="Fett (Ctrl+B)"><b>F</b></button>
+                    <button class="toolbar-btn" id="italicBtn" onclick="formatText('italic')" title="Kursiv (Ctrl+I)"><i>K</i></button>
+                    <button class="toolbar-btn" id="underlineBtn" onclick="formatText('underline')" title="Unterstrichen (Ctrl+U)"><u>U</u></button>
+                    <button class="toolbar-btn" id="strikeBtn" onclick="formatText('strikeThrough')" title="Durchgestrichen"><s>S</s></button>
                     <div class="color-btn-wrapper">
                         <input type="color" class="toolbar-btn" id="textColor" value="#000000" onchange="changeTextColor(this.value)" title="Textfarbe">
                         <div class="color-preview" id="textColorPreview" style="background: #000000;"></div>
@@ -563,6 +657,10 @@
                         <span class="icon">─</span>
                         <span>Linie</span>
                     </button>
+                    <button class="toolbar-btn large" onclick="insertWritingLine()" title="Schreiblinie (Linie + Leerzeile)">
+                        <span class="icon">✎</span>
+                        <span>Schreiblinie</span>
+                    </button>
                 </div>
                 <div class="ribbon-group-label">Symbole</div>
             </div>
@@ -606,6 +704,81 @@
                 </div>
                 <div class="ribbon-group-label">Anzeigen</div>
             </div>
+
+            <div class="ribbon-group">
+                <div class="ribbon-controls">
+                    <button class="toolbar-btn" onclick="zoomOut()" title="Verkleinern">🔍-</button>
+                    <select class="toolbar-btn" onchange="setZoom(this.value)" id="zoomSelect">
+                        <option value="50">50%</option>
+                        <option value="75">75%</option>
+                        <option value="90">90%</option>
+                        <option value="100" selected>100%</option>
+                        <option value="110">110%</option>
+                        <option value="125">125%</option>
+                        <option value="150">150%</option>
+                        <option value="200">200%</option>
+                    </select>
+                    <button class="toolbar-btn" onclick="zoomIn()" title="Vergrößern">🔍+</button>
+                </div>
+                <div class="ribbon-group-label">Zoom</div>
+            </div>
+        </div>
+
+        <!-- Extras Ribbon -->
+        <div class="ribbon" id="ribbon-extras">
+            <div class="ribbon-group">
+                <div class="ribbon-controls">
+                    <button class="toolbar-btn large" onclick="toggleSpellCheck()" title="Rechtschreibprüfung ein/ausschalten">
+                        <span class="icon">✓</span>
+                        <span id="spellCheckLabel">Rechtschreibung: An</span>
+                    </button>
+                </div>
+                <div class="ribbon-group-label">Rechtschreibung</div>
+            </div>
+
+            <div class="ribbon-group">
+                <div class="ribbon-controls">
+                    <button class="toolbar-btn" onclick="changeCase('upper')" title="GROSSBUCHSTABEN">AA</button>
+                    <button class="toolbar-btn" onclick="changeCase('lower')" title="kleinbuchstaben">aa</button>
+                    <button class="toolbar-btn" onclick="changeCase('title')" title="Jedes Wort Groß">Aa</button>
+                </div>
+                <div class="ribbon-group-label">Groß-/Kleinschreibung</div>
+            </div>
+
+            <div class="ribbon-group">
+                <div class="ribbon-controls">
+                    <button class="toolbar-btn" onclick="removeFormatting()" title="Formatierung entfernen">🧹 Formatierung löschen</button>
+                </div>
+                <div class="ribbon-group-label">Bereinigen</div>
+            </div>
+        </div>
+
+        <!-- Table Ribbon (contextual) -->
+        <div class="ribbon" id="ribbon-table">
+            <div class="ribbon-group">
+                <div class="ribbon-controls">
+                    <button class="toolbar-btn" onclick="tableInsertRowAbove()" title="Zeile oberhalb einfügen">↑ Zeile</button>
+                    <button class="toolbar-btn" onclick="tableInsertRowBelow()" title="Zeile unterhalb einfügen">↓ Zeile</button>
+                    <button class="toolbar-btn" onclick="tableDeleteRow()" title="Zeile löschen">✗ Zeile</button>
+                </div>
+                <div class="ribbon-group-label">Zeilen</div>
+            </div>
+
+            <div class="ribbon-group">
+                <div class="ribbon-controls">
+                    <button class="toolbar-btn" onclick="tableInsertColumnLeft()" title="Spalte links einfügen">← Spalte</button>
+                    <button class="toolbar-btn" onclick="tableInsertColumnRight()" title="Spalte rechts einfügen">→ Spalte</button>
+                    <button class="toolbar-btn" onclick="tableDeleteColumn()" title="Spalte löschen">✗ Spalte</button>
+                </div>
+                <div class="ribbon-group-label">Spalten</div>
+            </div>
+
+            <div class="ribbon-group">
+                <div class="ribbon-controls">
+                    <button class="toolbar-btn" onclick="tableDeleteTable()" title="Tabelle löschen">🗑️ Tabelle</button>
+                </div>
+                <div class="ribbon-group-label">Tabelle</div>
+            </div>
         </div>
 
         <!-- Ruler -->
@@ -615,7 +788,7 @@
 
         <!-- Editor -->
         <div class="editor-container">
-            <div class="page">
+            <div class="page" id="pageContainer">
                 <div id="editor" contenteditable="true" spellcheck="true">
                     <p>Beginne hier zu schreiben...</p>
                 </div>
@@ -642,8 +815,28 @@
         </div>
     </div>
 
+    <!-- Custom Context Menu -->
+    <div id="contextMenu" class="custom-context-menu">
+        <div class="context-menu-item" onclick="formatText('cut')">
+            <span>✂️</span><span>Ausschneiden</span>
+        </div>
+        <div class="context-menu-item" onclick="formatText('copy')">
+            <span>📋</span><span>Kopieren</span>
+        </div>
+        <div class="context-menu-item" onclick="formatText('paste')">
+            <span>📄</span><span>Einfügen</span>
+        </div>
+        <div class="context-menu-divider"></div>
+        <div class="context-menu-item" onclick="formatText('selectAll')">
+            <span>⬜</span><span>Alles auswählen</span>
+        </div>
+    </div>
+
     <!-- Hidden file input for opening files -->
     <input type="file" id="fileInput" accept=".html,.txt" style="display: none;">
+    
+    <!-- Hidden file input for images -->
+    <input type="file" id="imageInput" accept="image/*" style="display: none;">
 
     <script>
         const editor = document.getElementById('editor');
@@ -695,16 +888,60 @@
                 updateStats();
             }
             initRuler();
+            updateFormatToolbar();
+            
+            // Restore saved zoom level
+            const savedZoom = localStorage.getItem('editorZoom');
+            if (savedZoom) {
+                setZoom(savedZoom);
+            }
         });
 
         // Auto-save
         let saveTimeout;
         editor.addEventListener('input', () => {
             updateStats();
+            updateFormatToolbar();
             clearTimeout(saveTimeout);
             saveTimeout = setTimeout(() => {
                 localStorage.setItem('editorHTML', editor.innerHTML);
             }, 1000);
+        });
+
+        // Update toolbar on selection change
+        document.addEventListener('selectionchange', () => {
+            if (document.activeElement === editor || editor.contains(document.activeElement)) {
+                updateFormatToolbar();
+            }
+        });
+
+        // Update toolbar on click
+        editor.addEventListener('click', () => {
+            updateFormatToolbar();
+            checkTableContext();
+        });
+
+        // Update toolbar on keyup (for arrow keys)
+        editor.addEventListener('keyup', () => {
+            updateFormatToolbar();
+            checkTableContext();
+        });
+
+        // Custom context menu
+        const contextMenu = document.getElementById('contextMenu');
+        
+        editor.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            
+            contextMenu.style.display = 'block';
+            contextMenu.style.left = e.pageX + 'px';
+            contextMenu.style.top = e.pageY + 'px';
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!contextMenu.contains(e.target)) {
+                contextMenu.style.display = 'none';
+            }
         });
 
         function updateStats() {
@@ -716,13 +953,99 @@
             paraCount.textContent = Math.max(paragraphs.length, 1);
         }
 
+        function updateFormatToolbar() {
+            const selection = window.getSelection();
+            if (!selection.rangeCount) return;
+
+            // Get the current element at cursor position
+            let node = selection.anchorNode;
+            if (node.nodeType === Node.TEXT_NODE) {
+                node = node.parentElement;
+            }
+
+            // Get computed styles
+            const styles = window.getComputedStyle(node);
+            
+            // Update font family
+            const fontFamily = styles.fontFamily.split(',')[0].replace(/['"]/g, '').trim();
+            const fontSelect = document.getElementById('fontSelect');
+            for (let option of fontSelect.options) {
+                if (option.value.toLowerCase() === fontFamily.toLowerCase()) {
+                    fontSelect.value = option.value;
+                    break;
+                }
+            }
+
+            // Update font size (convert from px to pt)
+            const fontSize = styles.fontSize;
+            if (fontSize) {
+                // Convert px to pt (1pt = 1.333px approximately)
+                const fontSizePx = parseFloat(fontSize);
+                const fontSizePt = Math.round(fontSizePx * 0.75);
+                
+                const sizeSelect = document.getElementById('sizeSelect');
+                // Try to find exact match or closest match
+                let closestValue = '11';
+                let closestDiff = Math.abs(11 - fontSizePt);
+                
+                for (let option of sizeSelect.options) {
+                    const optionValue = parseInt(option.value);
+                    const diff = Math.abs(optionValue - fontSizePt);
+                    if (diff < closestDiff) {
+                        closestDiff = diff;
+                        closestValue = option.value;
+                    }
+                    if (optionValue === fontSizePt) {
+                        sizeSelect.value = option.value;
+                        return;
+                    }
+                }
+                sizeSelect.value = closestValue;
+            }
+
+            // Update formatting buttons (bold, italic, underline)
+            updateFormattingButtons();
+        }
+
+        function updateFormattingButtons() {
+            // Update bold button
+            const isBold = document.queryCommandState('bold');
+            const boldBtn = document.getElementById('boldBtn');
+            if (boldBtn) {
+                boldBtn.classList.toggle('active', isBold);
+            }
+
+            // Update italic button
+            const isItalic = document.queryCommandState('italic');
+            const italicBtn = document.getElementById('italicBtn');
+            if (italicBtn) {
+                italicBtn.classList.toggle('active', isItalic);
+            }
+
+            // Update underline button
+            const isUnderline = document.queryCommandState('underline');
+            const underlineBtn = document.getElementById('underlineBtn');
+            if (underlineBtn) {
+                underlineBtn.classList.toggle('active', isUnderline);
+            }
+
+            // Update strikethrough button
+            const isStrikeThrough = document.queryCommandState('strikeThrough');
+            const strikeBtn = document.getElementById('strikeBtn');
+            if (strikeBtn) {
+                strikeBtn.classList.toggle('active', isStrikeThrough);
+            }
+        }
+
         function formatText(command, value = null) {
             document.execCommand(command, false, value);
             editor.focus();
+            updateFormattingButtons();
         }
 
         function changeFont(font) {
             formatText('fontName', font);
+            updateFormatToolbar();
         }
 
         function changeFontSize(size) {
@@ -745,6 +1068,7 @@
                     });
                 }
             }
+            updateFormatToolbar();
         }
 
         function changeTextColor(color) {
@@ -767,29 +1091,239 @@
         function insertTable() {
             const rows = prompt('Anzahl Zeilen:', '3');
             const cols = prompt('Anzahl Spalten:', '3');
-            if (rows && cols) {
-                let table = '<table border="1" style="border-collapse: collapse; width: 100%; margin: 10px 0;"><tbody>';
-                for (let i = 0; i < parseInt(rows); i++) {
-                    table += '<tr>';
-                    for (let j = 0; j < parseInt(cols); j++) {
-                        table += '<td style="padding: 8px; border: 1px solid #000;">&nbsp;</td>';
-                    }
-                    table += '</tr>';
-                }
-                table += '</tbody></table>';
-                formatText('insertHTML', table);
+            
+            if (!rows || !cols) return;
+            
+            const numRows = parseInt(rows);
+            const numCols = parseInt(cols);
+            
+            if (isNaN(numRows) || isNaN(numCols) || numRows < 1 || numCols < 1) {
+                alert('Bitte geben Sie gültige Zahlen ein.');
+                return;
             }
+            
+            let tableHTML = '<table contenteditable="true" style="border-collapse: collapse; width: 100%; margin: 10px 0; border: 1px solid #000;"><tbody>';
+            
+            for (let i = 0; i < numRows; i++) {
+                tableHTML += '<tr>';
+                for (let j = 0; j < numCols; j++) {
+                    tableHTML += '<td contenteditable="true" style="padding: 8px; border: 1px solid #000; min-width: 50px;">&nbsp;</td>';
+                }
+                tableHTML += '</tr>';
+            }
+            
+            tableHTML += '</tbody></table><p><br></p>';
+            
+            // Focus editor first
+            editor.focus();
+            
+            // Insert using different method
+            document.execCommand('insertHTML', false, tableHTML);
+            
+            // Update stats
+            updateStats();
         }
 
         function insertImage() {
-            const url = prompt('Bild-URL eingeben:');
-            if (url) {
-                formatText('insertImage', url);
-            }
+            const imageInput = document.getElementById('imageInput');
+            imageInput.onchange = function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const base64 = event.target.result;
+                    const img = `<img src="${base64}" style="max-width: 100%; height: auto;" alt="Bild">`;
+                    formatText('insertHTML', img);
+                };
+                reader.readAsDataURL(file);
+                
+                imageInput.value = '';
+            };
+            imageInput.click();
         }
 
         function insertHR() {
             formatText('insertHorizontalRule');
+        }
+
+        function insertWritingLine() {
+            // Insert a horizontal line followed by an empty paragraph for writing
+            const writingLine = '<hr style="border: none; border-bottom: 1px solid #000; margin: 20px 0 5px 0;"><p style="min-height: 1.5em;">&nbsp;</p>';
+            formatText('insertHTML', writingLine);
+        }
+
+        // Table manipulation functions
+        function getCurrentTableCell() {
+            const selection = window.getSelection();
+            let node = selection.anchorNode;
+            while (node && node !== editor) {
+                if (node.nodeName === 'TD' || node.nodeName === 'TH') {
+                    return node;
+                }
+                node = node.parentNode;
+            }
+            return null;
+        }
+
+        function tableInsertRowAbove() {
+            const cell = getCurrentTableCell();
+            if (!cell) {
+                alert('Bitte klicken Sie in eine Tabellenzelle.');
+                return;
+            }
+            
+            const row = cell.parentNode;
+            const tbody = row.parentNode;
+            const newRow = row.cloneNode(true);
+            
+            // Clear content of new cells
+            Array.from(newRow.cells).forEach(cell => cell.innerHTML = '&nbsp;');
+            
+            tbody.insertBefore(newRow, row);
+            editor.focus();
+        }
+
+        function tableInsertRowBelow() {
+            const cell = getCurrentTableCell();
+            if (!cell) {
+                alert('Bitte klicken Sie in eine Tabellenzelle.');
+                return;
+            }
+            
+            const row = cell.parentNode;
+            const tbody = row.parentNode;
+            const newRow = row.cloneNode(true);
+            
+            // Clear content of new cells
+            Array.from(newRow.cells).forEach(cell => cell.innerHTML = '&nbsp;');
+            
+            if (row.nextSibling) {
+                tbody.insertBefore(newRow, row.nextSibling);
+            } else {
+                tbody.appendChild(newRow);
+            }
+            editor.focus();
+        }
+
+        function tableDeleteRow() {
+            const cell = getCurrentTableCell();
+            if (!cell) {
+                alert('Bitte klicken Sie in eine Tabellenzelle.');
+                return;
+            }
+            
+            const row = cell.parentNode;
+            const tbody = row.parentNode;
+            
+            if (tbody.rows.length > 1) {
+                row.remove();
+            } else {
+                alert('Eine Tabelle muss mindestens eine Zeile haben.');
+            }
+            editor.focus();
+        }
+
+        function tableInsertColumnLeft() {
+            const cell = getCurrentTableCell();
+            if (!cell) {
+                alert('Bitte klicken Sie in eine Tabellenzelle.');
+                return;
+            }
+            
+            const cellIndex = cell.cellIndex;
+            const table = cell.closest('table');
+            const tbody = table.querySelector('tbody');
+            
+            Array.from(tbody.rows).forEach(row => {
+                const newCell = document.createElement('td');
+                newCell.style.padding = '8px';
+                newCell.style.border = '1px solid #000';
+                newCell.innerHTML = '&nbsp;';
+                row.insertBefore(newCell, row.cells[cellIndex]);
+            });
+            editor.focus();
+        }
+
+        function tableInsertColumnRight() {
+            const cell = getCurrentTableCell();
+            if (!cell) {
+                alert('Bitte klicken Sie in eine Tabellenzelle.');
+                return;
+            }
+            
+            const cellIndex = cell.cellIndex;
+            const table = cell.closest('table');
+            const tbody = table.querySelector('tbody');
+            
+            Array.from(tbody.rows).forEach(row => {
+                const newCell = document.createElement('td');
+                newCell.style.padding = '8px';
+                newCell.style.border = '1px solid #000';
+                newCell.innerHTML = '&nbsp;';
+                if (cellIndex + 1 < row.cells.length) {
+                    row.insertBefore(newCell, row.cells[cellIndex + 1]);
+                } else {
+                    row.appendChild(newCell);
+                }
+            });
+            editor.focus();
+        }
+
+        function tableDeleteColumn() {
+            const cell = getCurrentTableCell();
+            if (!cell) {
+                alert('Bitte klicken Sie in eine Tabellenzelle.');
+                return;
+            }
+            
+            const cellIndex = cell.cellIndex;
+            const table = cell.closest('table');
+            const tbody = table.querySelector('tbody');
+            
+            // Check if this is the last column
+            if (tbody.rows[0].cells.length <= 1) {
+                alert('Eine Tabelle muss mindestens eine Spalte haben.');
+                return;
+            }
+            
+            Array.from(tbody.rows).forEach(row => {
+                if (row.cells[cellIndex]) {
+                    row.cells[cellIndex].remove();
+                }
+            });
+            editor.focus();
+        }
+
+        function tableDeleteTable() {
+            const cell = getCurrentTableCell();
+            if (!cell) {
+                alert('Bitte klicken Sie in eine Tabellenzelle.');
+                return;
+            }
+            
+            const table = cell.closest('table');
+            if (table && confirm('Tabelle wirklich löschen?')) {
+                table.remove();
+                editor.focus();
+            }
+        }
+
+        // Check if cursor is in table and show table ribbon
+        function checkTableContext() {
+            const cell = getCurrentTableCell();
+            const tableTab = document.getElementById('tableTab');
+            
+            if (cell) {
+                tableTab.style.display = 'block';
+            } else {
+                tableTab.style.display = 'none';
+                // Switch back to start tab if currently on table tab
+                if (document.getElementById('ribbon-table').classList.contains('active')) {
+                    switchTab('start');
+                    document.querySelector('.ribbon-tab').classList.add('active');
+                }
+            }
         }
 
         function increaseIndent() {
@@ -804,9 +1338,110 @@
             formatText('formatBlock', 'h' + level);
         }
 
+        // Extras functions
+        function toggleSpellCheck() {
+            const currentState = editor.getAttribute('spellcheck') === 'true';
+            editor.setAttribute('spellcheck', !currentState);
+            
+            const label = document.getElementById('spellCheckLabel');
+            if (label) {
+                label.textContent = currentState ? 'Rechtschreibung: Aus' : 'Rechtschreibung: An';
+            }
+        }
+
+        function changeCase(caseType) {
+            const selection = window.getSelection();
+            if (!selection.toString()) {
+                alert('Bitte markieren Sie zuerst Text.');
+                return;
+            }
+            
+            const selectedText = selection.toString();
+            let newText = '';
+            
+            switch(caseType) {
+                case 'upper':
+                    newText = selectedText.toUpperCase();
+                    break;
+                case 'lower':
+                    newText = selectedText.toLowerCase();
+                    break;
+                case 'title':
+                    newText = selectedText.replace(/\w\S*/g, function(txt) {
+                        return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+                    });
+                    break;
+            }
+            
+            document.execCommand('insertText', false, newText);
+        }
+
+        function removeFormatting() {
+            const selection = window.getSelection();
+            if (!selection.toString()) {
+                alert('Bitte markieren Sie zuerst Text.');
+                return;
+            }
+            
+            document.execCommand('removeFormat', false, null);
+            document.execCommand('unlink', false, null);
+            
+            // Remove inline styles
+            const range = selection.getRangeAt(0);
+            const tempDiv = document.createElement('div');
+            tempDiv.appendChild(range.cloneContents());
+            
+            // Strip all styles
+            const allElements = tempDiv.querySelectorAll('*');
+            allElements.forEach(el => {
+                el.removeAttribute('style');
+                el.removeAttribute('class');
+            });
+            
+            const plainText = tempDiv.textContent;
+            document.execCommand('insertText', false, plainText);
+        }
+
         function toggleRuler() {
             const ruler = document.getElementById('ruler');
             ruler.style.display = ruler.style.display === 'none' ? 'flex' : 'none';
+        }
+
+        let currentZoom = 100;
+
+        function setZoom(value) {
+            currentZoom = parseInt(value);
+            const pageContainer = document.getElementById('pageContainer');
+            if (pageContainer) {
+                pageContainer.style.transform = `scale(${currentZoom / 100})`;
+            }
+            const zoomSelect = document.getElementById('zoomSelect');
+            if (zoomSelect) {
+                zoomSelect.value = value;
+            }
+            
+            // Save zoom preference
+            localStorage.setItem('editorZoom', currentZoom);
+        }
+
+        function zoomIn() {
+            const zoomSelect = document.getElementById('zoomSelect');
+            const options = Array.from(zoomSelect.options);
+            const currentIndex = options.findIndex(opt => parseInt(opt.value) === currentZoom);
+            
+            if (currentIndex < options.length - 1) {
+                setZoom(options[currentIndex + 1].value);
+            }
+        }
+
+        function zoomOut() {
+            const zoomSelect = document.getElementById('zoomSelect');
+            const options = Array.from(zoomSelect.options);
+            const currentIndex = options.findIndex(opt => parseInt(opt.value) === currentZoom);
+            
+            if (currentIndex > 0) {
+                setZoom(options[currentIndex - 1].value);
+            }
         }
 
         function newDocument() {
@@ -888,6 +1523,31 @@ ${editor.innerHTML}
             window.print();
         }
 
+        function downloadPDF() {
+            const element = editor.cloneNode(true);
+            
+            // Create a temporary container with proper styling
+            const container = document.createElement('div');
+            container.style.width = '21cm';
+            container.style.padding = '2.54cm';
+            container.style.fontFamily = 'Calibri, Arial, sans-serif';
+            container.style.fontSize = '11pt';
+            container.style.lineHeight = '1.5';
+            container.style.color = '#000';
+            container.style.background = 'white';
+            container.appendChild(element);
+            
+            const opt = {
+                margin: 0,
+                filename: 'dokument-' + new Date().toISOString().slice(0, 10) + '.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            
+            html2pdf().set(opt).from(container).save();
+        }
+
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
             if ((e.ctrlKey || e.metaKey) && e.key === 's') {
@@ -903,6 +1563,23 @@ ${editor.innerHTML}
             if ((e.ctrlKey || e.metaKey) && e.key === 'o') {
                 e.preventDefault();
                 openDocument();
+            }
+            
+            // Zoom shortcuts
+            if ((e.ctrlKey || e.metaKey) && (e.key === '+' || e.key === '=')) {
+                e.preventDefault();
+                zoomIn();
+            }
+            
+            if ((e.ctrlKey || e.metaKey) && (e.key === '-' || e.key === '_')) {
+                e.preventDefault();
+                zoomOut();
+            }
+            
+            // Reset zoom to 100%
+            if ((e.ctrlKey || e.metaKey) && e.key === '0') {
+                e.preventDefault();
+                setZoom('100');
             }
         });
 
