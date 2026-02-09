@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word-Texteditor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f0f2f5;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            border-bottom: 1px solid #d1d5db;
+            padding: 8px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .app-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2b579a;
+        }
+
+        .doc-title {
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        .header-right {
+            font-size: 12px;
+            color: #9ca3af;
+        }
+
+        /* Ribbon Tabs */
+        .ribbon-tabs {
+            background: white;
+            border-bottom: 1px solid #d1d5db;
+            display: flex;
+            gap: 0;
+            padding: 0 20px;
+            position: sticky;
+            top: 41px;
+            z-index: 99;
+        }
+
+        .ribbon-tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #374151;
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .ribbon-tab:hover {
+            background: #f3f4f6;
+        }
+
+        .ribbon-tab.active {
+            color: #2b579a;
+            border-bottom-color: #2b579a;
+            font-weight: 500;
+        }
+
+        /* Ribbon Content */
+        .ribbon {
+            background: #f9fafb;
+            border-bottom: 1px solid #d1d5db;
+            padding: 12px 20px;
+            display: none;
+            position: sticky;
+            top: 82px;
+            z-index: 98;
+        }
+
+        .ribbon.active {
+            display: flex;
+        }
+
+        .ribbon-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 0 15px;
+            position: relative;
+        }
+
+        .ribbon-group:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            background: #d1d5db;
+        }
+
+        .ribbon-group-label {
+            font-size: 11px;
+            color: #6b7280;
+            text-align: center;
+            margin-top: 4px;
+        }
+
+        .ribbon-controls {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+
+        .toolbar-btn {
+            padding: 6px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 3px;
+            background: white;
+            color: #374151;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.15s;
+            min-width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+        }
+
+        .toolbar-btn:hover {
+            background: #e5e7eb;
+            border-color: #9ca3af;
+        }
+
+        .toolbar-btn.active {
+            background: #dbeafe;
+            border-color: #2b579a;
+            color: #2b579a;
+        }
+
+        .toolbar-btn.large {
+            height: 50px;
+            flex-direction: column;
+            padding: 6px 16px;
+            font-size: 11px;
+            gap: 4px;
+        }
+
+        .toolbar-btn.large .icon {
+            font-size: 20px;
+        }
+
+        select.toolbar-btn {
+            padding: 6px 10px;
+            cursor: pointer;
+        }
+
+        #fontSelect {
+            min-width: 150px;
+        }
+
+        #sizeSelect {
+            min-width: 70px;
+        }
+
+        input[type="color"].toolbar-btn {
+            padding: 2px;
+            cursor: pointer;
+            width: 50px;
+        }
+
+        .color-btn-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .color-preview {
+            width: 40px;
+            height: 4px;
+            border-radius: 2px;
+        }
+
+        /* Editor Area */
+        .editor-container {
+            display: flex;
+            justify-content: center;
+            padding: 30px 20px;
+            background: #e5e7eb;
+            min-height: calc(100vh - 250px);
+        }
+
+        .page {
+            width: 21cm;
+            min-height: 29.7cm;
+            padding: 2.54cm;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        #editor {
+            width: 100%;
+            min-height: 24.62cm;
+            font-family: 'Calibri', 'Arial', sans-serif;
+            font-size: 11pt;
+            line-height: 1.5;
+            outline: none;
+            color: #000;
+        }
+
+        #editor:focus {
+            outline: none;
+        }
+
+        /* Ruler */
+        .ruler {
+            height: 25px;
+            background: #f3f4f6;
+            border-bottom: 1px solid #d1d5db;
+            position: sticky;
+            top: 158px;
+            z-index: 97;
+            display: flex;
+            align-items: flex-end;
+            padding: 0 20px;
+        }
+
+        .ruler-marks {
+            width: 21cm;
+            margin: 0 auto;
+            height: 100%;
+            position: relative;
+        }
+
+        .ruler-mark {
+            position: absolute;
+            bottom: 0;
+            width: 1px;
+            background: #9ca3af;
+            height: 8px;
+        }
+
+        .ruler-mark.major {
+            height: 12px;
+        }
+
+        .ruler-number {
+            position: absolute;
+            bottom: 12px;
+            font-size: 9px;
+            color: #6b7280;
+            transform: translateX(-50%);
+        }
+
+        /* Stats */
+        .stats {
+            padding: 10px 20px;
+            background: white;
+            border-top: 1px solid #d1d5db;
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .stat-value {
+            font-weight: 600;
+            color: #374151;
+        }
+
+        /* Formatting in Editor */
+        #editor b, #editor strong {
+            font-weight: bold;
+        }
+
+        #editor i, #editor em {
+            font-style: italic;
+        }
+
+        #editor u {
+            text-decoration: underline;
+        }
+
+        #editor ul, #editor ol {
+            margin-left: 40px;
+        }
+
+        #editor h1 {
+            font-size: 24pt;
+            font-weight: bold;
+            margin: 12pt 0;
+        }
+
+        #editor h2 {
+            font-size: 18pt;
+            font-weight: bold;
+            margin: 10pt 0;
+        }
+
+        #editor h3 {
+            font-size: 14pt;
+            font-weight: bold;
+            margin: 8pt 0;
+        }
+
+        #editor p {
+            margin: 6pt 0;
+        }
+
+        @media (max-width: 1200px) {
+            .page {
+                width: 100%;
+            }
+
+            .editor-container {
+                padding: 20px 10px;
+            }
+
+            .ribbon {
+                flex-wrap: wrap;
+            }
+
+            .ribbon-group {
+                padding: 0 10px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .ribbon-tabs {
+                overflow-x: auto;
+                padding: 0 10px;
+            }
+
+            .ribbon-tab {
+                padding: 8px 12px;
+                font-size: 13px;
+                white-space: nowrap;
+            }
+
+            .toolbar-btn {
+                min-width: 28px;
+                height: 28px;
+                font-size: 12px;
+                padding: 4px 8px;
+            }
+
+            #fontSelect {
+                min-width: 100px;
+            }
+
+            #sizeSelect {
+                min-width: 60px;
+            }
+        }
+
+        @media print {
+            .header, .ribbon-tabs, .ribbon, .ruler, .stats {
+                display: none !important;
+            }
+            
+            .editor-container {
+                padding: 0;
+                background: white;
+            }
+
+            .page {
+                box-shadow: none;
+                margin: 0;
+                width: 100%;
+            }
+
+            #editor {
+                min-height: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-left">
+                <span class="app-title">📄 Word</span>
+                <span class="doc-title">Dokument1</span>
+            </div>
+            <div class="header-right">
+                Automatisch gespeichert
+            </div>
+        </div>
+
+        <!-- Ribbon Tabs -->
+        <div class="ribbon-tabs">
+            <button class="ribbon-tab active" onclick="switchTab('start')">Start</button>
+            <button class="ribbon-tab" onclick="switchTab('insert')">Einfügen</button>
+            <button class="ribbon-tab" onclick="switchTab('layout')">Layout</button>
+            <button class="ribbon-tab" onclick="switchTab('view')">Ansicht</button>
+        </div>
+
+        <!-- Start Ribbon -->
+        <div class="ribbon active" id="ribbon-start">
+            <div class="ribbon-group">
+                <div class="ribbon-controls">
+                    <button class="toolbar-btn large" onclick="newDocument()" title="Neues Dokument">
+                        <span class="icon">📄</span>
+                        <span>Neu</span>
+                    </button>
+                    <button class="toolbar-btn large" onclick="openDocument()" title="Öffnen">
+                        <span class="icon">📁</span>
+                        <span>Öffnen</span>
+                    </button>
+                    <button class="toolbar-btn large" onclick="downloadHTML()" title="Speichern">
+                        <span class="icon">💾</span>
+                        <span>Speichern</span>
+                    </button>
+                    <button class="toolbar-btn large" onclick="printDocument()" title="Drucken">
+                        <span class="icon">🖨️</span>
+                        <span>Drucken</span>
+                    </button>
+                </div>
+                <div class="ribbon-group-label">Datei</div>
+            </div>
+
+            <div class="ribbon-group">
+                <div class="ribbon-controls">
+                    <button class="toolbar-btn" onclick="formatText('undo')" title="Rückgängig">↶</button>
+                    <button class="toolbar-btn" onclick="formatText('redo')" title="Wiederholen">↷</button>
+                </div>
+                <div class="ribbon-group-label">Rückgängig</div>
+            </div>
+
+            <div class="ribbon-group">
+                <div class="ribbon-controls">
+                    <select class="toolbar-btn" onchange="changeFont(this.value)" id="fontSelect">
+                        <option value="Arial">Arial</option>
+                        <option value="Calibri" selected>Calibri</option>
+                        <option value="Times New Roman">Times New Roman</option>
+                        <option value="Georgia">Georgia</option>
+                        <option value="Verdana">Verdana</option>
+                        <option value="Courier New">Courier New</option>
+                        <option value="Comic Sans MS">Comic Sans MS</option>
+                        <option value="Impact">Impact</option>
+                    </select>
+                    <select class="toolbar-btn" onchange="changeFontSize(this.value)" id="sizeSelect">
+                        <option value="8">8</option>
+                        <option value="9">9</option>
+                        <option value="10">10</option>
+                        <option value="11" selected>11</option>
+                        <option value="12">12</option>
+                        <option value="14">14</option>
+                        <option value="16">16</option>
+                        <option value="18">18</option>
+                        <option value="20">20</option>
+                        <option value="22">22</option>
+                        <option value="24">24</option>
+                        <option value="26">26</option>
+                        <option value="28">28</option>
+                        <option value="36">36</option>
+                        <option value="48">48</option>
+                        <option value="72">72</option>
+                    </select>
+                </div>
+                <div class="ribbon-group-label">Schriftart</div>
+            </div>
+
+            <div class="ribbon-group">
+                <div class="ribbon-controls">
+                    <button class="toolbar-btn" onclick="formatText('bold')" title="Fett (Ctrl+B)"><b>F</b></button>
+                    <button class="toolbar-btn" onclick="formatText('italic')" title="Kursiv (Ctrl+I)"><i>K</i></button>
+                    <button class="toolbar-btn" onclick="formatText('underline')" title="Unterstrichen (Ctrl+U)"><u>U</u></button>
+                    <button class="toolbar-btn" onclick="formatText('strikeThrough')" title="Durchgestrichen"><s>S</s></button>
+                    <div class="color-btn-wrapper">
+                        <input type="color" class="toolbar-btn" id="textColor" value="#000000" onchange="changeTextColor(this.value)" title="Textfarbe">
+                        <div class="color-preview" id="textColorPreview" style="background: #000000;"></div>
+                    </div>
+                    <div class="color-btn-wrapper">
+                        <button class="toolbar-btn" onclick="document.getElementById('bgColor').click()" title="Texthervorhebung">🎨</button>
+                        <input type="color" class="toolbar-btn" id="bgColor" value="#ffff00" onchange="changeBackgroundColor(this.value)" style="display: none;">
+                        <div class="color-preview" id="bgColorPreview" style="background: #ffff00;"></div>
+                    </div>
+                </div>
+                <div class="ribbon-group-label">Schriftart</div>
+            </div>
+
+            <div class="ribbon-group">
+                <div class="ribbon-controls">
+                    <button class="toolbar-btn" onclick="formatText('justifyLeft')" title="Linksbündig">☰</button>
+                    <button class="toolbar-btn" onclick="formatText('justifyCenter')" title="Zentriert">☰</button>
+                    <button class="toolbar-btn" onclick="formatText('justifyRight')" title="Rechtsbündig">☰</button>
+                    <button class="toolbar-btn" onclick="formatText('justifyFull')" title="Blocksatz">☰</button>
+                </div>
+                <div class="ribbon-group-label">Absatz</div>
+            </div>
+
+            <div class="ribbon-group">
+                <div class="ribbon-controls">
+                    <button class="toolbar-btn" onclick="formatText('insertUnorderedList')" title="Aufzählung">• Liste</button>
+                    <button class="toolbar-btn" onclick="formatText('insertOrderedList')" title="Nummerierung">1. Liste</button>
+                </div>
+                <div class="ribbon-group-label">Absatz</div>
+            </div>
+        </div>
+
+        <!-- Insert Ribbon -->
+        <div class="ribbon" id="ribbon-insert">
+            <div class="ribbon-group">
+                <div class="ribbon-controls">
+                    <button class="toolbar-btn large" onclick="insertLink()" title="Hyperlink">
+                        <span class="icon">🔗</span>
+                        <span>Link</span>
+                    </button>
+                    <button class="toolbar-btn large" onclick="insertTable()" title="Tabelle">
+                        <span class="icon">📊</span>
+                        <span>Tabelle</span>
+                    </button>
+                    <button class="toolbar-btn large" onclick="insertImage()" title="Bild">
+                        <span class="icon">🖼️</span>
+                        <span>Bild</span>
+                    </button>
+                </div>
+                <div class="ribbon-group-label">Einfügen</div>
+            </div>
+
+            <div class="ribbon-group">
+                <div class="ribbon-controls">
+                    <button class="toolbar-btn large" onclick="insertHR()" title="Horizontale Linie">
+                        <span class="icon">─</span>
+                        <span>Linie</span>
+                    </button>
+                </div>
+                <div class="ribbon-group-label">Symbole</div>
+            </div>
+        </div>
+
+        <!-- Layout Ribbon -->
+        <div class="ribbon" id="ribbon-layout">
+            <div class="ribbon-group">
+                <div class="ribbon-controls">
+                    <button class="toolbar-btn" onclick="increaseIndent()" title="Einzug vergrößern">→</button>
+                    <button class="toolbar-btn" onclick="decreaseIndent()" title="Einzug verkleinern">←</button>
+                </div>
+                <div class="ribbon-group-label">Einzug</div>
+            </div>
+
+            <div class="ribbon-group">
+                <div class="ribbon-controls">
+                    <button class="toolbar-btn" onclick="insertHeading(1)" title="Überschrift 1">Ü1</button>
+                    <button class="toolbar-btn" onclick="insertHeading(2)" title="Überschrift 2">Ü2</button>
+                    <button class="toolbar-btn" onclick="insertHeading(3)" title="Überschrift 3">Ü3</button>
+                </div>
+                <div class="ribbon-group-label">Formatvorlagen</div>
+            </div>
+        </div>
+
+        <!-- View Ribbon -->
+        <div class="ribbon" id="ribbon-view">
+            <div class="ribbon-group">
+                <div class="ribbon-controls">
+                    <button class="toolbar-btn large" onclick="printDocument()" title="Drucken">
+                        <span class="icon">🖨️</span>
+                        <span>Drucken</span>
+                    </button>
+                </div>
+                <div class="ribbon-group-label">Drucken</div>
+            </div>
+
+            <div class="ribbon-group">
+                <div class="ribbon-controls">
+                    <button class="toolbar-btn" onclick="toggleRuler()" title="Lineal ein/ausblenden">📏 Lineal</button>
+                </div>
+                <div class="ribbon-group-label">Anzeigen</div>
+            </div>
+        </div>
+
+        <!-- Ruler -->
+        <div class="ruler" id="ruler">
+            <div class="ruler-marks"></div>
+        </div>
+
+        <!-- Editor -->
+        <div class="editor-container">
+            <div class="page">
+                <div id="editor" contenteditable="true" spellcheck="true">
+                    <p>Beginne hier zu schreiben...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats">
+            <div class="stat-item">
+                <span>Zeichen:</span>
+                <span class="stat-value" id="charCount">0</span>
+            </div>
+            <div class="stat-item">
+                <span>Wörter:</span>
+                <span class="stat-value" id="wordCount">0</span>
+            </div>
+            <div class="stat-item">
+                <span>Absätze:</span>
+                <span class="stat-value" id="paraCount">1</span>
+            </div>
+            <div class="stat-item">
+                <span>Seite: 1 von 1</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden file input for opening files -->
+    <input type="file" id="fileInput" accept=".html,.txt" style="display: none;">
+
+    <script>
+        const editor = document.getElementById('editor');
+        const charCount = document.getElementById('charCount');
+        const wordCount = document.getElementById('wordCount');
+        const paraCount = document.getElementById('paraCount');
+
+        // Initialize ruler
+        function initRuler() {
+            const rulerMarks = document.querySelector('.ruler-marks');
+            const cmWidth = 96 / 2.54; // pixels per cm
+            
+            for (let i = 0; i <= 16; i++) {
+                const mark = document.createElement('div');
+                mark.className = i % 5 === 0 ? 'ruler-mark major' : 'ruler-mark';
+                mark.style.left = (i * cmWidth) + 'px';
+                rulerMarks.appendChild(mark);
+                
+                if (i % 5 === 0) {
+                    const number = document.createElement('div');
+                    number.className = 'ruler-number';
+                    number.textContent = i;
+                    number.style.left = (i * cmWidth) + 'px';
+                    rulerMarks.appendChild(number);
+                }
+            }
+        }
+
+        // Switch ribbon tabs
+        function switchTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.ribbon-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Update ribbon content
+            document.querySelectorAll('.ribbon').forEach(ribbon => {
+                ribbon.classList.remove('active');
+            });
+            document.getElementById('ribbon-' + tabName).classList.add('active');
+        }
+
+        // Load saved content
+        window.addEventListener('load', () => {
+            const savedHTML = localStorage.getItem('editorHTML');
+            if (savedHTML) {
+                editor.innerHTML = savedHTML;
+                updateStats();
+            }
+            initRuler();
+        });
+
+        // Auto-save
+        let saveTimeout;
+        editor.addEventListener('input', () => {
+            updateStats();
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => {
+                localStorage.setItem('editorHTML', editor.innerHTML);
+            }, 1000);
+        });
+
+        function updateStats() {
+            const text = editor.innerText;
+            charCount.textContent = text.trim().length;
+            const words = text.trim().split(/\s+/).filter(word => word.length > 0);
+            wordCount.textContent = words.length;
+            const paragraphs = editor.querySelectorAll('p, div, h1, h2, h3');
+            paraCount.textContent = Math.max(paragraphs.length, 1);
+        }
+
+        function formatText(command, value = null) {
+            document.execCommand(command, false, value);
+            editor.focus();
+        }
+
+        function changeFont(font) {
+            formatText('fontName', font);
+        }
+
+        function changeFontSize(size) {
+            // Convert to pt
+            const selection = window.getSelection();
+            if (selection.rangeCount > 0) {
+                const range = selection.getRangeAt(0);
+                const span = document.createElement('span');
+                span.style.fontSize = size + 'pt';
+                
+                try {
+                    range.surroundContents(span);
+                } catch (e) {
+                    // If surroundContents fails, use execCommand as fallback
+                    formatText('fontSize', '7');
+                    const fontElements = editor.querySelectorAll('font[size="7"]');
+                    fontElements.forEach(el => {
+                        el.removeAttribute('size');
+                        el.style.fontSize = size + 'pt';
+                    });
+                }
+            }
+        }
+
+        function changeTextColor(color) {
+            formatText('foreColor', color);
+            document.getElementById('textColorPreview').style.background = color;
+        }
+
+        function changeBackgroundColor(color) {
+            formatText('backColor', color);
+            document.getElementById('bgColorPreview').style.background = color;
+        }
+
+        function insertLink() {
+            const url = prompt('URL eingeben:');
+            if (url) {
+                formatText('createLink', url);
+            }
+        }
+
+        function insertTable() {
+            const rows = prompt('Anzahl Zeilen:', '3');
+            const cols = prompt('Anzahl Spalten:', '3');
+            if (rows && cols) {
+                let table = '<table border="1" style="border-collapse: collapse; width: 100%; margin: 10px 0;"><tbody>';
+                for (let i = 0; i < parseInt(rows); i++) {
+                    table += '<tr>';
+                    for (let j = 0; j < parseInt(cols); j++) {
+                        table += '<td style="padding: 8px; border: 1px solid #000;">&nbsp;</td>';
+                    }
+                    table += '</tr>';
+                }
+                table += '</tbody></table>';
+                formatText('insertHTML', table);
+            }
+        }
+
+        function insertImage() {
+            const url = prompt('Bild-URL eingeben:');
+            if (url) {
+                formatText('insertImage', url);
+            }
+        }
+
+        function insertHR() {
+            formatText('insertHorizontalRule');
+        }
+
+        function increaseIndent() {
+            formatText('indent');
+        }
+
+        function decreaseIndent() {
+            formatText('outdent');
+        }
+
+        function insertHeading(level) {
+            formatText('formatBlock', 'h' + level);
+        }
+
+        function toggleRuler() {
+            const ruler = document.getElementById('ruler');
+            ruler.style.display = ruler.style.display === 'none' ? 'flex' : 'none';
+        }
+
+        function newDocument() {
+            if (confirm('Neues Dokument erstellen? Ungespeicherte Änderungen gehen verloren.')) {
+                editor.innerHTML = '<p>Beginne hier zu schreiben...</p>';
+                localStorage.removeItem('editorHTML');
+                updateStats();
+            }
+        }
+
+        function openDocument() {
+            const fileInput = document.getElementById('fileInput');
+            fileInput.onchange = function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const content = event.target.result;
+                    
+                    // If HTML file, try to extract body content
+                    if (file.name.endsWith('.html')) {
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(content, 'text/html');
+                        const bodyContent = doc.body.innerHTML;
+                        editor.innerHTML = bodyContent || content;
+                    } else {
+                        // For text files, wrap in paragraph
+                        const textContent = content.replace(/\n/g, '<br>');
+                        editor.innerHTML = '<p>' + textContent + '</p>';
+                    }
+                    
+                    updateStats();
+                    localStorage.setItem('editorHTML', editor.innerHTML);
+                };
+                reader.readAsText(file);
+                
+                // Reset input so same file can be opened again
+                fileInput.value = '';
+            };
+            fileInput.click();
+        }
+
+        function downloadHTML() {
+            const html = `<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dokument</title>
+    <style>
+        body {
+            font-family: Calibri, Arial, sans-serif;
+            font-size: 11pt;
+            line-height: 1.5;
+            max-width: 21cm;
+            margin: 2.54cm auto;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+${editor.innerHTML}
+</body>
+</html>`;
+            
+            const blob = new Blob([html], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'dokument-' + new Date().toISOString().slice(0, 10) + '.html';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function printDocument() {
+            window.print();
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                e.preventDefault();
+                downloadHTML();
+            }
+            
+            if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+                e.preventDefault();
+                printDocument();
+            }
+            
+            if ((e.ctrlKey || e.metaKey) && e.key === 'o') {
+                e.preventDefault();
+                openDocument();
+            }
+        });
+
+        // Initial stats
+        updateStats();
+    </script>
+</body>
+</html>
