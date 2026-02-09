@@ -1,1 +1,130 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Arbeitsblatt-Maker</title>
+
+<style>
+@font-face {
+    font-family: "Aeropus Sans";
+    src: url("/Fonts/aersans.ttf") format("truetype");
+}
+@font-face {
+    font-family: "Aeropus Sans";
+    src: url("/Fonts/aersansit.ttf") format("truetype");
+    font-style: italic;
+}
+
+body {
+    margin: 0;
+    font-family: "Aeropus Sans", system-ui, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: #eef2f7;
+    flex-direction: column;
+    text-align: center;
+}
+
+h1 {
+    font-size: 2rem;
+    margin-bottom: 10px;
+}
+
+h2 {
+    font-size: 1.2rem;
+    font-weight: normal;
+    color: #555;
+}
+
+#nameBox {
+    margin-top: 20px;
+    display: none;
+}
+
+#nameInput {
+    padding: 10px;
+    font-size: 1rem;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    width: 200px;
+}
+
+button {
+    margin-top: 15px;
+    padding: 10px 20px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 8px;
+    background: #2b579a;
+    color: white;
+    cursor: pointer;
+}
+
+button.secondary {
+    background: #666;
+    margin-left: 10px;
+}
+</style>
+</head>
+<body>
+
+<h1 id="title">Arbeitsblatt-Maker</h1>
+<h2 id="subtitle">Lade...</h2>
+
+<div id="nameBox">
+    <input id="nameInput" placeholder="Bitte Namen eingeben">
+    <button onclick="saveName()">Speichern</button>
+</div>
+
+<div style="margin-top: 30px;">
+    <button onclick="location.href='/settings.html'">⚙️ Einstellungen</button>
+</div>
+
+<script>
+const nameKey = "abm_username";
+const GREETING_KEY = "abm_useGreeting";
+
+const title = document.getElementById("title");
+const subtitle = document.getElementById("subtitle");
+const nameBox = document.getElementById("nameBox");
+const nameInput = document.getElementById("nameInput");
+
+function saveName() {
+    const name = nameInput.value.trim();
+    if (!name) return alert("Bitte einen Namen eingeben!");
+    localStorage.setItem(nameKey, name);
+    checkName();
+}
+
+function getGreeting(name) {
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 11) return "Guten Morgen, " + name;
+    if (hour >= 11 && hour < 14) return "Schön Sie zu Sehen, " + name;
+    if (hour >= 14 && hour < 17.5) return "Willkommen zurück, " + name;
+    return "Guten Abend, " + name;
+}
+
+function checkName() {
+    const name = localStorage.getItem(nameKey);
+    const useGreeting = localStorage.getItem(GREETING_KEY) !== "false";
+
+    if (name) {
+        const text = useGreeting ? getGreeting(name) : "Willkommen, " + name;
+        title.textContent = text + " 👋";
+        subtitle.textContent = "Bereit für das nächste Arbeitsblatt?";
+        nameBox.style.display = "none";
+    } else {
+        nameBox.style.display = "block";
+        title.textContent = "Arbeitsblatt-Maker";
+        subtitle.textContent = "Bitte Namen eingeben";
+    }
+}
+
+checkName();
+</script>
+
+</body>
+</html>
 
