@@ -378,39 +378,6 @@
             margin: 6pt 0;
         }
 
-        /* Custom Context Menu */
-        .custom-context-menu {
-            position: fixed;
-            background: white;
-            border: 1px solid #d1d5db;
-            border-radius: 4px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            z-index: 10000;
-            min-width: 180px;
-            padding: 4px 0;
-            display: none;
-        }
-
-        .context-menu-item {
-            padding: 8px 16px;
-            cursor: pointer;
-            font-size: 14px;
-            color: #374151;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .context-menu-item:hover {
-            background: #f3f4f6;
-        }
-
-        .context-menu-divider {
-            height: 1px;
-            background: #e5e7eb;
-            margin: 4px 0;
-        }
-
         /* Image Resize Handles */
         #editor img {
             max-width: 100%;
@@ -643,10 +610,10 @@
 
             <div class="ribbon-group">
                 <div class="ribbon-controls">
-                    <button class="toolbar-btn" onclick="formatText('justifyLeft')" title="Linksbündig">☰ L</button>
-                    <button class="toolbar-btn" onclick="formatText('justifyCenter')" title="Zentriert">☰ Z</button>
-                    <button class="toolbar-btn" onclick="formatText('justifyRight')" title="Rechtsbündig">☰ R</button>
-                    <button class="toolbar-btn" onclick="formatText('justifyFull')" title="Blocksatz">☰ B</button>
+                    <button class="toolbar-btn" onclick="formatText('justifyLeft')" title="Linksbündig">☰</button>
+                    <button class="toolbar-btn" onclick="formatText('justifyCenter')" title="Zentriert">☰</button>
+                    <button class="toolbar-btn" onclick="formatText('justifyRight')" title="Rechtsbündig">☰</button>
+                    <button class="toolbar-btn" onclick="formatText('justifyFull')" title="Blocksatz">☰</button>
                 </div>
                 <div class="ribbon-group-label">Absatz</div>
             </div>
@@ -814,69 +781,6 @@
         <div class="ruler" id="ruler">
             <div class="ruler-marks"></div>
         </div>
-        <!-- Toolbar -->
-        <div id="editorToolbar" class="toolbar">
-              <button onclick="cutText()" title="Ausschneiden">✂️</button>
-              <button onclick="copyText()" title="Kopieren">📋</button>
-              <button onclick="pasteText()" title="Einfügen">📄</button>
-              <button onclick="selectAllText()" title="Alles auswählen">🔹</button>
-        </div>
-        <script>
-            const editor = document.getElementById('editor');
-
-            // CUT
-            function cutText() {
-                editor.focus();
-                document.execCommand('cut');
-            }
-
-            // COPY
-            function copyText() {
-                editor.focus();
-            document.execCommand('copy');
-            }
-
-            // PASTE
-            async function pasteText() {
-                editor.focus();
-                 try {
-                    const text = await navigator.clipboard.readText();
-                    document.execCommand('insertText', false, text);
-                } catch {
-            alert('Einfügen blockiert');
-            }
-        }
-
-        // SELECT ALL
-        function selectAllText() {
-            editor.focus();
-            document.execCommand('selectAll');
-            }
-    </script>
-    <style>
-        /* Toolbar Styling */
-.toolbar {
-    display: flex;
-    gap: 5px;
-    background: #f9f9f9;
-    border-bottom: 1px solid #aaa;
-    padding: 4px;
-    font-family: 'Aeropus Sans', sans-serif;
-}
-
-.toolbar button {
-    padding: 4px 8px;
-    font-size: 16px;
-    cursor: pointer;
-    border: 1px solid #ccc;
-    background: #fff;
-    border-radius: 4px;
-}
-
-.toolbar button:hover {
-    background-color: #eee;
-}
-</style>
 
         <!-- Editor -->
         <div class="editor-container">
@@ -1017,23 +921,6 @@
         editor.addEventListener('keyup', () => {
             updateFormatToolbar();
             checkTableContext();
-        });
-
-        // Custom context menu
-        const contextMenu = document.getElementById('contextMenu');
-        
-        editor.addEventListener('contextmenu', (e) => {
-            e.preventDefault();
-            
-            contextMenu.style.display = 'block';
-            contextMenu.style.left = e.pageX + 'px';
-            contextMenu.style.top = e.pageY + 'px';
-        });
-
-        document.addEventListener('click', (e) => {
-            if (!contextMenu.contains(e.target)) {
-                contextMenu.style.display = 'none';
-            }
         });
 
         function updateStats() {
