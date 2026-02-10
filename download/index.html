@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>App Download Setup</title>
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Work+Sans&display=swap" rel="stylesheet">
+
+<style>
+  body {
+    font-family: 'Work Sans', sans-serif;
+    background: #f0f2f5;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+  }
+
+  .container {
+    background: #fff;
+    padding: 40px 30px;
+    border-radius: 16px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    max-width: 600px;
+    width: 100%;
+    text-align: center;
+  }
+
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    margin-bottom: 25px;
+    color: #222;
+  }
+
+  .step {
+    display: none;
+    text-align: left;
+  }
+
+  .step.active {
+    display: block;
+  }
+
+  label {
+    display: block;
+    margin: 15px 0 5px;
+    font-weight: bold;
+    color: #333;
+  }
+
+  select, textarea {
+    width: 100%;
+    padding: 12px;
+    font-size: 1rem;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+  }
+
+  textarea {
+    height: 140px;
+    resize: none;
+  }
+
+  .buttons {
+    margin-top: 25px;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .buttons button, .buttons a {
+    padding: 12px 25px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+
+  .next-btn {
+    background-color: #007bff;
+    color: #fff;
+  }
+  .next-btn:hover {
+    background-color: #0056b3;
+  }
+
+  .back-btn {
+    background-color: #6c757d;
+    color: #fff;
+  }
+  .back-btn:hover {
+    background-color: #5a6268;
+  }
+
+  .download-btn {
+    display: inline-block;
+    background-color: #28a745;
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .download-btn:hover {
+    background-color: #1e7e34;
+  }
+
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>App Download</h1>
+
+  <!-- Schritt 1: Version auswählen -->
+  <div class="step active" id="step1">
+    <label for="action">Version auswählen:</label>
+    <select id="action">
+      <option value="html">HTML-Package</option>
+      <option value="exe">EXE</option>
+    </select>
+    <div class="buttons">
+      <div></div>
+      <button class="next-btn" onclick="nextStep()">Weiter</button>
+    </div>
+  </div>
+
+  <!-- Schritt 2: Lizenz -->
+  <div class="step" id="step2">
+    <label for="license">Lizenz:</label>
+    <textarea id="license" readonly>
+MIT License
+
+Copyright (c) 2026 Dein Name
+
+Permission is hereby granted, free of charge, to any person obtaining a copy...
+    </textarea>
+    <div class="buttons">
+      <button class="back-btn" onclick="prevStep()">Zurück</button>
+      <button class="next-btn" onclick="nextStep()">Weiter</button>
+    </div>
+  </div>
+
+  <!-- Schritt 3: Download -->
+  <div class="step" id="step3">
+    <p>Klicke auf den Button, um die ausgewählte Version herunterzuladen:</p>
+    <a id="downloadLink" class="download-btn" href="https://github.com/username/repo/releases/latest/download/app-html.zip" download>Download</a>
+    <div class="buttons" style="margin-top:20px;">
+      <button class="back-btn" onclick="prevStep()">Zurück</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  let currentStep = 1;
+  const totalSteps = 3;
+
+  function showStep(step) {
+    for (let i = 1; i <= totalSteps; i++) {
+      document.getElementById('step' + i).classList.remove('active');
+    }
+    document.getElementById('step' + step).classList.add('active');
+
+    // Update download link in Schritt 3
+    const action = document.getElementById('action').value;
+    const link = document.getElementById('downloadLink');
+    if (action === 'html') {
+      link.href = "https://github.com/dasfohlen1900/worksheets/releases";
+      link.textContent = "HTML-Package herunterladen";
+    } else {
+      link.href = "https://--";
+      link.textContent = "EXE herunterladen";
+    }
+  }
+
+  function nextStep() {
+    if (currentStep < totalSteps) {
+      currentStep++;
+      showStep(currentStep);
+    }
+  }
+
+  function prevStep() {
+    if (currentStep > 1) {
+      currentStep--;
+      showStep(currentStep);
+    }
+  }
+
+  // initial show
+  showStep(currentStep);
+</script>
+
+</body>
+</html>
