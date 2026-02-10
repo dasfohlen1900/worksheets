@@ -1,0 +1,1609 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NotizStudio - Deine kreative Notizen-App</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2d5f8d;
+            --primary-dark: #1e4060;
+            --accent: #e8927c;
+            --accent-light: #f4b59f;
+            --bg-main: #fafaf9;
+            --bg-sidebar: #1a1a1a;
+            --text-dark: #1a1a1a;
+            --text-light: #666;
+            --text-white: #ffffff;
+            --border: #e5e5e0;
+            --success: #5fb383;
+            --warning: #f0ad4e;
+            --shadow: rgba(0,0,0,0.08);
+        }
+
+        body {
+            font-family: 'Work Sans', sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            background: var(--bg-main);
+            color: var(--text-dark);
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+            position: relative;
+        }
+
+        /* Notizbuch-Sidebar */
+        .notebooks-sidebar {
+            width: 260px;
+            background: var(--bg-sidebar);
+            color: var(--text-white);
+            display: flex;
+            flex-direction: column;
+            box-shadow: 4px 0 20px var(--shadow);
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 30px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .app-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 26px;
+            font-weight: 900;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .app-subtitle {
+            font-size: 12px;
+            color: rgba(255,255,255,0.6);
+            font-weight: 300;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .add-notebook-btn {
+            width: 100%;
+            padding: 12px 16px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border: none;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .add-notebook-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(45, 95, 141, 0.4);
+        }
+
+        .notebooks-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+        }
+
+        .notebook-item {
+            padding: 14px 16px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .notebook-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 3px;
+            background: var(--accent);
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .notebook-item:hover {
+            background: rgba(255,255,255,0.05);
+        }
+
+        .notebook-item.active {
+            background: rgba(45, 95, 141, 0.3);
+        }
+
+        .notebook-item.active::before {
+            transform: scaleY(1);
+        }
+
+        .notebook-name {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-weight: 400;
+        }
+
+        .delete-notebook {
+            opacity: 0;
+            background: rgba(232, 146, 124, 0.2);
+            border: none;
+            color: var(--accent);
+            cursor: pointer;
+            padding: 6px 10px;
+            font-size: 16px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .notebook-item:hover .delete-notebook {
+            opacity: 1;
+        }
+
+        .delete-notebook:hover {
+            background: var(--accent);
+            color: white;
+        }
+
+        /* Abschnitte-Sidebar */
+        .sections-sidebar {
+            width: 220px;
+            background: #f5f5f3;
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+        }
+
+        .sections-header {
+            padding: 25px 20px;
+            border-bottom: 1px solid var(--border);
+            background: white;
+        }
+
+        .sections-header h2 {
+            font-size: 15px;
+            margin-bottom: 12px;
+            color: var(--text-dark);
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .add-section-btn {
+            width: 100%;
+            padding: 10px 14px;
+            background: var(--primary);
+            border: none;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .add-section-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .sections-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+        }
+
+        .section-item {
+            padding: 12px 14px;
+            margin-bottom: 6px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text-dark);
+            font-size: 14px;
+        }
+
+        .section-item:hover {
+            background: #e8e8e5;
+        }
+
+        .section-item.active {
+            background: var(--primary);
+            color: white;
+            font-weight: 500;
+        }
+
+        .delete-section {
+            opacity: 0;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+            font-size: 16px;
+            color: inherit;
+            transition: all 0.2s ease;
+        }
+
+        .section-item:hover .delete-section {
+            opacity: 1;
+        }
+
+        /* Seiten-Panel */
+        .pages-panel {
+            width: 240px;
+            background: white;
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 10px var(--shadow);
+        }
+
+        .pages-header {
+            padding: 25px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .pages-header h3 {
+            font-size: 13px;
+            margin-bottom: 12px;
+            color: var(--text-light);
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .add-page-btn {
+            width: 100%;
+            padding: 10px 14px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-light));
+            border: none;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .add-page-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(232, 146, 124, 0.3);
+        }
+
+        .pages-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+        }
+
+        .page-item {
+            padding: 12px 14px;
+            margin-bottom: 6px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text-dark);
+            font-size: 14px;
+            border: 1px solid transparent;
+        }
+
+        .page-item:hover {
+            background: #fafaf9;
+            border-color: var(--border);
+        }
+
+        .page-item.active {
+            background: linear-gradient(135deg, rgba(232, 146, 124, 0.1), rgba(244, 181, 159, 0.1));
+            border-color: var(--accent);
+            color: var(--primary-dark);
+            font-weight: 500;
+        }
+
+        .delete-page {
+            opacity: 0;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+            font-size: 16px;
+            color: inherit;
+            transition: all 0.2s ease;
+        }
+
+        .page-item:hover .delete-page {
+            opacity: 1;
+        }
+
+        /* Editor-Bereich */
+        .editor-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: white;
+            position: relative;
+        }
+
+        .editor-toolbar {
+            padding: 15px 25px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            background: #fafaf9;
+            flex-wrap: wrap;
+        }
+
+        .toolbar-group {
+            display: flex;
+            gap: 4px;
+            padding-right: 12px;
+            border-right: 1px solid var(--border);
+        }
+
+        .toolbar-group:last-child {
+            border-right: none;
+        }
+
+        .toolbar-btn {
+            padding: 8px 12px;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            color: var(--text-dark);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 500;
+        }
+
+        .toolbar-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .toolbar-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .color-picker {
+            width: 32px;
+            height: 32px;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .color-picker:hover {
+            transform: scale(1.1);
+            box-shadow: 0 2px 8px var(--shadow);
+        }
+
+        .editor-header {
+            padding: 30px 40px 20px;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(to bottom, white, #fafaf9);
+        }
+
+        .page-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 36px;
+            border: none;
+            outline: none;
+            width: 100%;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 10px;
+            background: transparent;
+        }
+
+        .page-meta {
+            font-size: 13px;
+            color: var(--text-light);
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .editor-content {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .content-editor {
+            min-height: 100%;
+            font-size: 16px;
+            line-height: 1.8;
+            border: none;
+            outline: none;
+            resize: none;
+            width: 100%;
+            color: var(--text-dark);
+            font-family: 'Work Sans', sans-serif;
+            font-weight: 400;
+        }
+
+        /* Handwriting Canvas */
+        .drawing-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            cursor: crosshair;
+            touch-action: none;
+        }
+
+        .canvas-container {
+            position: relative;
+            min-height: 400px;
+            border: 2px dashed var(--border);
+            border-radius: 8px;
+            margin: 20px 0;
+            background: #fafaf9;
+        }
+
+        .canvas-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 8px;
+            z-index: 10;
+        }
+
+        .canvas-btn {
+            padding: 8px 12px;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            color: var(--text-dark);
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px var(--shadow);
+        }
+
+        .canvas-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--text-light);
+            text-align: center;
+            padding: 60px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .empty-state-icon {
+            font-size: 72px;
+            margin-bottom: 25px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .empty-state h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 24px;
+            margin-bottom: 12px;
+            color: var(--text-dark);
+        }
+
+        .empty-state p {
+            font-size: 15px;
+            color: var(--text-light);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            width: 460px;
+            max-width: 90%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-content h3 {
+            margin-bottom: 25px;
+            color: var(--text-dark);
+            font-family: 'Playfair Display', serif;
+            font-size: 26px;
+            font-weight: 700;
+        }
+
+        .modal-content input,
+        .modal-content select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 15px;
+            margin-bottom: 20px;
+            font-family: 'Work Sans', sans-serif;
+            transition: all 0.2s ease;
+        }
+
+        .modal-content input:focus,
+        .modal-content select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(45, 95, 141, 0.1);
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 30px;
+        }
+
+        .modal-buttons button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .btn-cancel {
+            background: #f5f5f3;
+            color: var(--text-dark);
+        }
+
+        .btn-confirm {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+        }
+
+        .btn-confirm:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(45, 95, 141, 0.3);
+        }
+
+        .btn-cancel:hover {
+            background: #e8e8e5;
+        }
+
+        /* Tags */
+        .page-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .tag {
+            padding: 6px 12px;
+            background: linear-gradient(135deg, var(--accent-light), var(--accent));
+            color: white;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .tag-remove {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .tag-input {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .tag-input input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 13px;
+        }
+
+        .tag-input button {
+            padding: 8px 16px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        /* Checklisten */
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            margin: 8px 0;
+            background: #fafaf9;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .checklist-item:hover {
+            background: #f5f5f3;
+        }
+
+        .checklist-checkbox {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--primary);
+            border-radius: 4px;
+            cursor: pointer;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .checklist-checkbox.checked {
+            background: var(--success);
+            border-color: var(--success);
+        }
+
+        .checklist-checkbox.checked::after {
+            content: '✓';
+            position: absolute;
+            color: white;
+            font-size: 14px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .checklist-text {
+            flex: 1;
+            font-size: 15px;
+            color: var(--text-dark);
+        }
+
+        .checklist-text.checked {
+            text-decoration: line-through;
+            color: var(--text-light);
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #d0d0ce;
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #b0b0ae;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .notebooks-sidebar {
+                width: 220px;
+            }
+            .sections-sidebar {
+                width: 180px;
+            }
+            .pages-panel {
+                width: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Notizbücher -->
+        <div class="notebooks-sidebar">
+            <div class="sidebar-header">
+                <div class="app-title">NotizStudio</div>
+                <div class="app-subtitle">Deine Kreative Gedankenwelt</div>
+                <button class="add-notebook-btn" onclick="showAddNotebookModal()">
+                    <span>📚</span> Neues Notizbuch
+                </button>
+            </div>
+            <div class="notebooks-list" id="notebooksList"></div>
+        </div>
+
+        <!-- Abschnitte -->
+        <div class="sections-sidebar">
+            <div class="sections-header">
+                <h2>Abschnitte</h2>
+                <button class="add-section-btn" onclick="showAddSectionModal()">+ Neuer Abschnitt</button>
+            </div>
+            <div class="sections-list" id="sectionsList"></div>
+        </div>
+
+        <!-- Seiten -->
+        <div class="pages-panel">
+            <div class="pages-header">
+                <h3>Seiten</h3>
+                <button class="add-page-btn" onclick="showAddPageModal()">+ Neue Seite</button>
+            </div>
+            <div class="pages-list" id="pagesList"></div>
+        </div>
+
+        <!-- Editor -->
+        <div class="editor-area" id="editorArea">
+            <div class="empty-state">
+                <div class="empty-state-icon">✨</div>
+                <h3>Bereit für deine Ideen</h3>
+                <p>Erstelle ein Notizbuch, füge Abschnitte hinzu und beginne zu schreiben</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal" id="notebookModal">
+        <div class="modal-content">
+            <h3>Neues Notizbuch erstellen</h3>
+            <input type="text" id="notebookNameInput" placeholder="Name des Notizbuchs">
+            <div class="modal-buttons">
+                <button class="btn-cancel" onclick="closeModal('notebookModal')">Abbrechen</button>
+                <button class="btn-confirm" onclick="addNotebook()">Erstellen</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="sectionModal">
+        <div class="modal-content">
+            <h3>Neuer Abschnitt</h3>
+            <input type="text" id="sectionNameInput" placeholder="Name des Abschnitts">
+            <div class="modal-buttons">
+                <button class="btn-cancel" onclick="closeModal('sectionModal')">Abbrechen</button>
+                <button class="btn-confirm" onclick="addSection()">Erstellen</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="pageModal">
+        <div class="modal-content">
+            <h3>Neue Seite</h3>
+            <input type="text" id="pageNameInput" placeholder="Titel der Seite">
+            <select id="pageTypeSelect">
+                <option value="text">📝 Textnotiz</option>
+                <option value="drawing">✏️ Handschriftliche Notiz</option>
+                <option value="checklist">✅ Checkliste</option>
+            </select>
+            <div class="modal-buttons">
+                <button class="btn-cancel" onclick="closeModal('pageModal')">Abbrechen</button>
+                <button class="btn-confirm" onclick="addPage()">Erstellen</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Datenstruktur
+        let data = {
+            notebooks: [],
+            currentNotebook: null,
+            currentSection: null,
+            currentPage: null
+        };
+
+        let drawingCanvas = null;
+        let drawingContext = null;
+        let isDrawing = false;
+        let currentColor = '#1a1a1a';
+        let currentLineWidth = 2;
+
+        // LocalStorage laden
+        function loadData() {
+            const saved = localStorage.getItem('notizstudio-data');
+            if (saved) {
+                data = JSON.parse(saved);
+            } else {
+                // Beispieldaten erstellen
+                data.notebooks = [
+                    {
+                        id: 1,
+                        name: 'Willkommen',
+                        sections: [
+                            {
+                                id: 1,
+                                name: 'Start',
+                                pages: [
+                                    {
+                                        id: 1,
+                                        title: 'Willkommen im NotizStudio',
+                                        content: 'Herzlich willkommen in deiner neuen Notizen-App!\n\n🎨 Erstelle handschriftliche Notizen\n📝 Schreibe formatierten Text\n✅ Organisiere Aufgaben mit Checklisten\n🏷️ Kategorisiere mit Tags\n\nViel Spaß beim Notieren!',
+                                        type: 'text',
+                                        tags: ['Willkommen', 'Start'],
+                                        created: new Date().toISOString(),
+                                        modified: new Date().toISOString()
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ];
+                data.currentNotebook = 1;
+                data.currentSection = 1;
+                data.currentPage = 1;
+                saveData();
+            }
+            render();
+        }
+
+        // Daten speichern
+        function saveData() {
+            localStorage.setItem('notizstudio-data', JSON.stringify(data));
+        }
+
+        // Render-Funktionen
+        function render() {
+            renderNotebooks();
+            renderSections();
+            renderPages();
+            renderEditor();
+        }
+
+        function renderNotebooks() {
+            const list = document.getElementById('notebooksList');
+            list.innerHTML = data.notebooks.map(nb => `
+                <div class="notebook-item ${data.currentNotebook === nb.id ? 'active' : ''}" 
+                     onclick="selectNotebook(${nb.id})">
+                    <span class="notebook-name">${nb.name}</span>
+                    <button class="delete-notebook" onclick="event.stopPropagation(); deleteNotebook(${nb.id})">×</button>
+                </div>
+            `).join('');
+        }
+
+        function renderSections() {
+            const list = document.getElementById('sectionsList');
+            const notebook = data.notebooks.find(nb => nb.id === data.currentNotebook);
+            if (!notebook) {
+                list.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-light);">Kein Notizbuch ausgewählt</div>';
+                return;
+            }
+            list.innerHTML = notebook.sections.map(sec => `
+                <div class="section-item ${data.currentSection === sec.id ? 'active' : ''}" 
+                     onclick="selectSection(${sec.id})">
+                    <span>${sec.name}</span>
+                    <button class="delete-section" onclick="event.stopPropagation(); deleteSection(${sec.id})">×</button>
+                </div>
+            `).join('');
+        }
+
+        function renderPages() {
+            const list = document.getElementById('pagesList');
+            const notebook = data.notebooks.find(nb => nb.id === data.currentNotebook);
+            if (!notebook) {
+                list.innerHTML = '';
+                return;
+            }
+            const section = notebook.sections.find(sec => sec.id === data.currentSection);
+            if (!section) {
+                list.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-light);">Kein Abschnitt ausgewählt</div>';
+                return;
+            }
+            list.innerHTML = section.pages.map(page => {
+                const icon = page.type === 'drawing' ? '✏️' : page.type === 'checklist' ? '✅' : '📝';
+                return `
+                    <div class="page-item ${data.currentPage === page.id ? 'active' : ''}" 
+                         onclick="selectPage(${page.id})">
+                        <span>${icon} ${page.title || 'Unbenannte Seite'}</span>
+                        <button class="delete-page" onclick="event.stopPropagation(); deletePage(${page.id})">×</button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderEditor() {
+            const editorArea = document.getElementById('editorArea');
+            const notebook = data.notebooks.find(nb => nb.id === data.currentNotebook);
+            if (!notebook) {
+                editorArea.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">✨</div>
+                        <h3>Bereit für deine Ideen</h3>
+                        <p>Erstelle ein Notizbuch, füge Abschnitte hinzu und beginne zu schreiben</p>
+                    </div>
+                `;
+                return;
+            }
+            const section = notebook.sections.find(sec => sec.id === data.currentSection);
+            if (!section) {
+                editorArea.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📑</div>
+                        <h3>Wähle einen Abschnitt aus</h3>
+                        <p>Oder erstelle einen neuen Abschnitt für deine Notizen</p>
+                    </div>
+                `;
+                return;
+            }
+            const page = section.pages.find(p => p.id === data.currentPage);
+            if (!page) {
+                editorArea.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📄</div>
+                        <h3>Wähle eine Seite aus</h3>
+                        <p>Oder erstelle eine neue Seite zum Notieren</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const dateCreated = new Date(page.created).toLocaleDateString('de-DE', {
+                year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
+            });
+            const dateModified = new Date(page.modified).toLocaleDateString('de-DE', {
+                year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
+            });
+
+            if (page.type === 'drawing') {
+                renderDrawingEditor(page, dateCreated, dateModified);
+            } else if (page.type === 'checklist') {
+                renderChecklistEditor(page, dateCreated, dateModified);
+            } else {
+                renderTextEditor(page, dateCreated, dateModified);
+            }
+        }
+
+        function renderTextEditor(page, dateCreated, dateModified) {
+            const editorArea = document.getElementById('editorArea');
+            editorArea.innerHTML = `
+                <div class="editor-toolbar">
+                    <div class="toolbar-group">
+                        <button class="toolbar-btn" onclick="formatText('bold')"><strong>B</strong></button>
+                        <button class="toolbar-btn" onclick="formatText('italic')"><em>I</em></button>
+                        <button class="toolbar-btn" onclick="formatText('underline')"><u>U</u></button>
+                    </div>
+                    <div class="toolbar-group">
+                        <button class="toolbar-btn" onclick="insertBulletList()">• Liste</button>
+                        <button class="toolbar-btn" onclick="insertNumberedList()">1. Liste</button>
+                    </div>
+                    <div class="toolbar-group">
+                        <button class="toolbar-btn" onclick="showTagInput()">🏷️ Tag hinzufügen</button>
+                    </div>
+                </div>
+                <div class="editor-header">
+                    <input type="text" class="page-title" value="${page.title}" 
+                           onchange="updatePageTitle(this.value)" placeholder="Seitentitel">
+                    <div class="page-meta">
+                        <span class="meta-item">📅 Erstellt: ${dateCreated}</span>
+                        <span class="meta-item">✏️ Geändert: ${dateModified}</span>
+                    </div>
+                    <div class="page-tags" id="pageTags">${renderTags(page.tags || [])}</div>
+                    <div class="tag-input" id="tagInput" style="display: none;">
+                        <input type="text" id="newTagInput" placeholder="Neuer Tag...">
+                        <button onclick="addTag()">Hinzufügen</button>
+                    </div>
+                </div>
+                <div class="editor-content">
+                    <textarea class="content-editor" 
+                              oninput="updatePageContent(this.value)"
+                              placeholder="Beginne hier zu schreiben...">${page.content || ''}</textarea>
+                </div>
+            `;
+        }
+
+        function renderDrawingEditor(page, dateCreated, dateModified) {
+            const editorArea = document.getElementById('editorArea');
+            editorArea.innerHTML = `
+                <div class="editor-toolbar">
+                    <div class="toolbar-group">
+                        <button class="toolbar-btn" onclick="changeDrawingTool('pen')">✏️ Stift</button>
+                        <button class="toolbar-btn" onclick="changeDrawingTool('eraser')">🧹 Radierer</button>
+                    </div>
+                    <div class="toolbar-group">
+                        <input type="color" class="color-picker" value="${currentColor}" onchange="changeDrawingColor(this.value)">
+                        <select class="toolbar-btn" onchange="changeLineWidth(this.value)">
+                            <option value="1">Dünn</option>
+                            <option value="2" selected>Normal</option>
+                            <option value="4">Dick</option>
+                            <option value="8">Sehr dick</option>
+                        </select>
+                    </div>
+                    <div class="toolbar-group">
+                        <button class="toolbar-btn" onclick="clearCanvas()">🗑️ Löschen</button>
+                        <button class="toolbar-btn" onclick="saveDrawing()">💾 Speichern</button>
+                    </div>
+                </div>
+                <div class="editor-header">
+                    <input type="text" class="page-title" value="${page.title}" 
+                           onchange="updatePageTitle(this.value)" placeholder="Seitentitel">
+                    <div class="page-meta">
+                        <span class="meta-item">📅 Erstellt: ${dateCreated}</span>
+                    </div>
+                </div>
+                <div class="editor-content">
+                    <div class="canvas-container" id="canvasContainer">
+                        <canvas id="drawingCanvas" class="drawing-canvas"></canvas>
+                    </div>
+                </div>
+            `;
+            
+            setTimeout(() => initDrawingCanvas(page), 100);
+        }
+
+        function renderChecklistEditor(page, dateCreated, dateModified) {
+            const editorArea = document.getElementById('editorArea');
+            const checklist = page.checklist || [];
+            
+            editorArea.innerHTML = `
+                <div class="editor-toolbar">
+                    <div class="toolbar-group">
+                        <button class="toolbar-btn" onclick="addChecklistItem()">+ Neuer Punkt</button>
+                    </div>
+                    <div class="toolbar-group">
+                        <button class="toolbar-btn" onclick="showTagInput()">🏷️ Tag hinzufügen</button>
+                    </div>
+                </div>
+                <div class="editor-header">
+                    <input type="text" class="page-title" value="${page.title}" 
+                           onchange="updatePageTitle(this.value)" placeholder="Seitentitel">
+                    <div class="page-meta">
+                        <span class="meta-item">📅 Erstellt: ${dateCreated}</span>
+                        <span class="meta-item">✅ ${checklist.filter(i => i.checked).length}/${checklist.length} erledigt</span>
+                    </div>
+                    <div class="page-tags" id="pageTags">${renderTags(page.tags || [])}</div>
+                    <div class="tag-input" id="tagInput" style="display: none;">
+                        <input type="text" id="newTagInput" placeholder="Neuer Tag...">
+                        <button onclick="addTag()">Hinzufügen</button>
+                    </div>
+                </div>
+                <div class="editor-content" id="checklistContent">
+                    ${checklist.map((item, index) => `
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox ${item.checked ? 'checked' : ''}" 
+                                 onclick="toggleChecklistItem(${index})"></div>
+                            <input type="text" class="checklist-text ${item.checked ? 'checked' : ''}" 
+                                   value="${item.text}" 
+                                   onchange="updateChecklistItem(${index}, this.value)"
+                                   style="border: none; outline: none; background: transparent; flex: 1;">
+                            <button class="delete-page" onclick="deleteChecklistItem(${index})" 
+                                    style="opacity: 1; padding: 5px 10px;">×</button>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function renderTags(tags) {
+            return tags.map(tag => `
+                <span class="tag">
+                    ${tag}
+                    <button class="tag-remove" onclick="removeTag('${tag}')">×</button>
+                </span>
+            `).join('');
+        }
+
+        // Drawing Canvas Functions
+        function initDrawingCanvas(page) {
+            const container = document.getElementById('canvasContainer');
+            drawingCanvas = document.getElementById('drawingCanvas');
+            drawingContext = drawingCanvas.getContext('2d');
+            
+            drawingCanvas.width = container.offsetWidth;
+            drawingCanvas.height = Math.max(container.offsetHeight, 600);
+            
+            // Load saved drawing
+            if (page.drawing) {
+                const img = new Image();
+                img.onload = () => {
+                    drawingContext.drawImage(img, 0, 0);
+                };
+                img.src = page.drawing;
+            }
+            
+            // Drawing events
+            drawingCanvas.addEventListener('mousedown', startDrawing);
+            drawingCanvas.addEventListener('mousemove', draw);
+            drawingCanvas.addEventListener('mouseup', stopDrawing);
+            drawingCanvas.addEventListener('mouseout', stopDrawing);
+            
+            // Touch events
+            drawingCanvas.addEventListener('touchstart', handleTouch);
+            drawingCanvas.addEventListener('touchmove', handleTouch);
+            drawingCanvas.addEventListener('touchend', stopDrawing);
+        }
+
+        function startDrawing(e) {
+            isDrawing = true;
+            const rect = drawingCanvas.getBoundingClientRect();
+            drawingContext.beginPath();
+            drawingContext.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            const rect = drawingCanvas.getBoundingClientRect();
+            drawingContext.lineWidth = currentLineWidth;
+            drawingContext.lineCap = 'round';
+            drawingContext.strokeStyle = currentColor;
+            drawingContext.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+            drawingContext.stroke();
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+            saveDrawing();
+        }
+
+        function handleTouch(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const mouseEvent = new MouseEvent(e.type === 'touchstart' ? 'mousedown' : 'mousemove', {
+                clientX: touch.clientX,
+                clientY: touch.clientY
+            });
+            drawingCanvas.dispatchEvent(mouseEvent);
+        }
+
+        function changeDrawingColor(color) {
+            currentColor = color;
+        }
+
+        function changeLineWidth(width) {
+            currentLineWidth = parseInt(width);
+        }
+
+        function changeDrawingTool(tool) {
+            if (tool === 'eraser') {
+                currentColor = '#fafaf9';
+                currentLineWidth = 20;
+            } else {
+                currentColor = '#1a1a1a';
+                currentLineWidth = 2;
+            }
+        }
+
+        function clearCanvas() {
+            if (!confirm('Möchtest du die Zeichnung wirklich löschen?')) return;
+            drawingContext.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
+            saveDrawing();
+        }
+
+        function saveDrawing() {
+            if (!drawingCanvas) return;
+            const page = getCurrentPage();
+            if (!page) return;
+            page.drawing = drawingCanvas.toDataURL();
+            page.modified = new Date().toISOString();
+            saveData();
+        }
+
+        // Checklist Functions
+        function addChecklistItem() {
+            const page = getCurrentPage();
+            if (!page) return;
+            if (!page.checklist) page.checklist = [];
+            page.checklist.push({ text: 'Neuer Punkt', checked: false });
+            page.modified = new Date().toISOString();
+            saveData();
+            renderEditor();
+        }
+
+        function toggleChecklistItem(index) {
+            const page = getCurrentPage();
+            if (!page) return;
+            page.checklist[index].checked = !page.checklist[index].checked;
+            page.modified = new Date().toISOString();
+            saveData();
+            renderEditor();
+        }
+
+        function updateChecklistItem(index, text) {
+            const page = getCurrentPage();
+            if (!page) return;
+            page.checklist[index].text = text;
+            page.modified = new Date().toISOString();
+            saveData();
+        }
+
+        function deleteChecklistItem(index) {
+            const page = getCurrentPage();
+            if (!page) return;
+            page.checklist.splice(index, 1);
+            page.modified = new Date().toISOString();
+            saveData();
+            renderEditor();
+        }
+
+        // Tag Functions
+        function showTagInput() {
+            const tagInput = document.getElementById('tagInput');
+            tagInput.style.display = tagInput.style.display === 'none' ? 'flex' : 'none';
+            if (tagInput.style.display === 'flex') {
+                document.getElementById('newTagInput').focus();
+            }
+        }
+
+        function addTag() {
+            const input = document.getElementById('newTagInput');
+            const tag = input.value.trim();
+            if (!tag) return;
+            
+            const page = getCurrentPage();
+            if (!page) return;
+            if (!page.tags) page.tags = [];
+            if (!page.tags.includes(tag)) {
+                page.tags.push(tag);
+                page.modified = new Date().toISOString();
+                saveData();
+                document.getElementById('pageTags').innerHTML = renderTags(page.tags);
+            }
+            input.value = '';
+        }
+
+        function removeTag(tag) {
+            const page = getCurrentPage();
+            if (!page) return;
+            page.tags = page.tags.filter(t => t !== tag);
+            page.modified = new Date().toISOString();
+            saveData();
+            document.getElementById('pageTags').innerHTML = renderTags(page.tags);
+        }
+
+        // Text Formatting Functions
+        function formatText(format) {
+            const textarea = document.querySelector('.content-editor');
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const selectedText = textarea.value.substring(start, end);
+            
+            if (!selectedText) return;
+            
+            let formattedText = selectedText;
+            if (format === 'bold') formattedText = `**${selectedText}**`;
+            if (format === 'italic') formattedText = `*${selectedText}*`;
+            if (format === 'underline') formattedText = `__${selectedText}__`;
+            
+            textarea.value = textarea.value.substring(0, start) + formattedText + textarea.value.substring(end);
+            updatePageContent(textarea.value);
+        }
+
+        function insertBulletList() {
+            const textarea = document.querySelector('.content-editor');
+            const start = textarea.selectionStart;
+            textarea.value = textarea.value.substring(0, start) + '\n• ' + textarea.value.substring(start);
+            updatePageContent(textarea.value);
+        }
+
+        function insertNumberedList() {
+            const textarea = document.querySelector('.content-editor');
+            const start = textarea.selectionStart;
+            textarea.value = textarea.value.substring(0, start) + '\n1. ' + textarea.value.substring(start);
+            updatePageContent(textarea.value);
+        }
+
+        // Helper Functions
+        function getCurrentPage() {
+            const notebook = data.notebooks.find(nb => nb.id === data.currentNotebook);
+            if (!notebook) return null;
+            const section = notebook.sections.find(sec => sec.id === data.currentSection);
+            if (!section) return null;
+            return section.pages.find(p => p.id === data.currentPage);
+        }
+
+        // Selection Functions
+        function selectNotebook(id) {
+            data.currentNotebook = id;
+            const notebook = data.notebooks.find(nb => nb.id === id);
+            if (notebook.sections.length > 0) {
+                data.currentSection = notebook.sections[0].id;
+                if (notebook.sections[0].pages.length > 0) {
+                    data.currentPage = notebook.sections[0].pages[0].id;
+                } else {
+                    data.currentPage = null;
+                }
+            } else {
+                data.currentSection = null;
+                data.currentPage = null;
+            }
+            saveData();
+            render();
+        }
+
+        function selectSection(id) {
+            data.currentSection = id;
+            const notebook = data.notebooks.find(nb => nb.id === data.currentNotebook);
+            const section = notebook.sections.find(sec => sec.id === id);
+            if (section.pages.length > 0) {
+                data.currentPage = section.pages[0].id;
+            } else {
+                data.currentPage = null;
+            }
+            saveData();
+            render();
+        }
+
+        function selectPage(id) {
+            data.currentPage = id;
+            saveData();
+            render();
+        }
+
+        // Add Functions
+        function showAddNotebookModal() {
+            document.getElementById('notebookModal').classList.add('active');
+            document.getElementById('notebookNameInput').value = '';
+            document.getElementById('notebookNameInput').focus();
+        }
+
+        function showAddSectionModal() {
+            if (!data.currentNotebook) {
+                alert('Bitte wähle zuerst ein Notizbuch aus!');
+                return;
+            }
+            document.getElementById('sectionModal').classList.add('active');
+            document.getElementById('sectionNameInput').value = '';
+            document.getElementById('sectionNameInput').focus();
+        }
+
+        function showAddPageModal() {
+            if (!data.currentNotebook || !data.currentSection) {
+                alert('Bitte wähle zuerst ein Notizbuch und einen Abschnitt aus!');
+                return;
+            }
+            document.getElementById('pageModal').classList.add('active');
+            document.getElementById('pageNameInput').value = '';
+            document.getElementById('pageNameInput').focus();
+        }
+
+        function addNotebook() {
+            const name = document.getElementById('notebookNameInput').value.trim();
+            if (!name) return;
+            
+            const id = Date.now();
+            data.notebooks.push({
+                id,
+                name,
+                sections: []
+            });
+            data.currentNotebook = id;
+            data.currentSection = null;
+            data.currentPage = null;
+            
+            closeModal('notebookModal');
+            saveData();
+            render();
+        }
+
+        function addSection() {
+            const name = document.getElementById('sectionNameInput').value.trim();
+            if (!name) return;
+            
+            const notebook = data.notebooks.find(nb => nb.id === data.currentNotebook);
+            const id = Date.now();
+            notebook.sections.push({
+                id,
+                name,
+                pages: []
+            });
+            data.currentSection = id;
+            data.currentPage = null;
+            
+            closeModal('sectionModal');
+            saveData();
+            render();
+        }
+
+        function addPage() {
+            const name = document.getElementById('pageNameInput').value.trim();
+            const type = document.getElementById('pageTypeSelect').value;
+            if (!name) return;
+            
+            const notebook = data.notebooks.find(nb => nb.id === data.currentNotebook);
+            const section = notebook.sections.find(sec => sec.id === data.currentSection);
+            const id = Date.now();
+            
+            const newPage = {
+                id,
+                title: name,
+                content: '',
+                type: type,
+                tags: [],
+                created: new Date().toISOString(),
+                modified: new Date().toISOString()
+            };
+            
+            if (type === 'checklist') {
+                newPage.checklist = [];
+            }
+            
+            section.pages.push(newPage);
+            data.currentPage = id;
+            
+            closeModal('pageModal');
+            saveData();
+            render();
+        }
+
+        // Delete Functions
+        function deleteNotebook(id) {
+            if (!confirm('Möchtest du dieses Notizbuch wirklich löschen?')) return;
+            data.notebooks = data.notebooks.filter(nb => nb.id !== id);
+            if (data.currentNotebook === id) {
+                data.currentNotebook = data.notebooks.length > 0 ? data.notebooks[0].id : null;
+                data.currentSection = null;
+                data.currentPage = null;
+            }
+            saveData();
+            render();
+        }
+
+        function deleteSection(id) {
+            if (!confirm('Möchtest du diesen Abschnitt wirklich löschen?')) return;
+            const notebook = data.notebooks.find(nb => nb.id === data.currentNotebook);
+            notebook.sections = notebook.sections.filter(sec => sec.id !== id);
+            if (data.currentSection === id) {
+                data.currentSection = notebook.sections.length > 0 ? notebook.sections[0].id : null;
+                data.currentPage = null;
+            }
+            saveData();
+            render();
+        }
+
+        function deletePage(id) {
+            if (!confirm('Möchtest du diese Seite wirklich löschen?')) return;
+            const notebook = data.notebooks.find(nb => nb.id === data.currentNotebook);
+            const section = notebook.sections.find(sec => sec.id === data.currentSection);
+            section.pages = section.pages.filter(p => p.id !== id);
+            if (data.currentPage === id) {
+                data.currentPage = section.pages.length > 0 ? section.pages[0].id : null;
+            }
+            saveData();
+            render();
+        }
+
+        // Update Functions
+        function updatePageTitle(title) {
+            const page = getCurrentPage();
+            if (!page) return;
+            page.title = title;
+            page.modified = new Date().toISOString();
+            saveData();
+            renderPages();
+        }
+
+        function updatePageContent(content) {
+            const page = getCurrentPage();
+            if (!page) return;
+            page.content = content;
+            page.modified = new Date().toISOString();
+            saveData();
+        }
+
+        // Modal Functions
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // Enter-Taste für Modals
+        document.getElementById('notebookNameInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addNotebook();
+        });
+        document.getElementById('sectionNameInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addSection();
+        });
+        document.getElementById('pageNameInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addPage();
+        });
+
+        // Modal schließen bei Klick außerhalb
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    closeModal(modal.id);
+                }
+            });
+        });
+
+        // App initialisieren
+        loadData();
+    </script>
+</body>
+</html>
