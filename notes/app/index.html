@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NotizStudio - Deine kreative Notizen-App</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Work+Sans:wght@300;400;500;600&family=Merriweather:wght@700;900&family=Lora:wght@600;700&family=Crimson+Text:wght@600;700&family=Libre+Baskerville:wght@700&family=Roboto:wght@300;400;500&family=Open+Sans:wght@300;400;500;600&family=Lato:wght@300;400;700&family=Montserrat:wght@300;400;500;600&family=Poppins:wght@300;400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -26,10 +26,14 @@
             --success: #5fb383;
             --warning: #f0ad4e;
             --shadow: rgba(0,0,0,0.08);
+            
+            /* Font customization */
+            --font-header: 'Playfair Display', serif;
+            --font-body: 'Work Sans', sans-serif;
         }
 
         body {
-            font-family: 'Work Sans', sans-serif;
+            font-family: var(--font-body);
             height: 100vh;
             overflow: hidden;
             background: var(--bg-main);
@@ -57,13 +61,29 @@
         .sidebar-header {
             padding: 30px 20px;
             border-bottom: 1px solid rgba(255,255,255,0.1);
+            position: relative;
         }
 
         .app-title {
-            font-family: 'Playfair Display', serif;
+            font-family: var(--font-header);
             font-size: 26px;
             font-weight: 900;
             margin-bottom: 8px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .app-title:hover {
+            opacity: 0.8;
+            transform: translateX(2px);
+        }
+
+        .app-title a {
+            text-decoration: none;
             background: linear-gradient(135deg, var(--accent), var(--accent-light));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -76,6 +96,45 @@
             font-weight: 300;
             letter-spacing: 1px;
             text-transform: uppercase;
+        }
+
+        .settings-btn {
+            position: absolute;
+            top: 25px;
+            right: 15px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.2s ease;
+        }
+
+        .settings-btn:hover {
+            background: rgba(255,255,255,0.2);
+            transform: rotate(45deg);
+        }
+
+        .font-selector {
+            margin-bottom: 20px;
+        }
+
+        .font-selector label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+
+        .font-preview {
+            padding: 15px;
+            background: #fafaf9;
+            border-radius: 6px;
+            margin-top: 10px;
+            text-align: center;
+            border: 1px solid var(--border);
         }
 
         .add-notebook-btn {
@@ -152,23 +211,27 @@
             font-weight: 400;
         }
 
-        .delete-notebook {
-            opacity: 0;
+        .notebook-actions {
+            display: none;
+            gap: 4px;
+        }
+
+        .notebook-item:hover .notebook-actions {
+            display: flex;
+        }
+
+        .notebook-action-btn {
             background: rgba(232, 146, 124, 0.2);
             border: none;
             color: var(--accent);
             cursor: pointer;
             padding: 6px 10px;
-            font-size: 16px;
+            font-size: 14px;
             border-radius: 4px;
             transition: all 0.2s ease;
         }
 
-        .notebook-item:hover .delete-notebook {
-            opacity: 1;
-        }
-
-        .delete-notebook:hover {
+        .notebook-action-btn:hover {
             background: var(--accent);
             color: white;
         }
@@ -427,7 +490,7 @@
         }
 
         .page-title {
-            font-family: 'Playfair Display', serif;
+            font-family: var(--font-header);
             font-size: 36px;
             border: none;
             outline: none;
@@ -468,7 +531,7 @@
             resize: none;
             width: 100%;
             color: var(--text-dark);
-            font-family: 'Work Sans', sans-serif;
+            font-family: var(--font-body);
             font-weight: 400;
         }
 
@@ -545,7 +608,7 @@
         }
 
         .empty-state h3 {
-            font-family: 'Playfair Display', serif;
+            font-family: var(--font-header);
             font-size: 24px;
             margin-bottom: 12px;
             color: var(--text-dark);
@@ -594,7 +657,7 @@
         .modal-content h3 {
             margin-bottom: 25px;
             color: var(--text-dark);
-            font-family: 'Playfair Display', serif;
+            font-family: var(--font-header);
             font-size: 26px;
             font-weight: 700;
         }
@@ -607,7 +670,7 @@
             border-radius: 8px;
             font-size: 15px;
             margin-bottom: 20px;
-            font-family: 'Work Sans', sans-serif;
+            font-family: var(--font-body);
             transition: all 0.2s ease;
         }
 
@@ -808,8 +871,12 @@
             <div class="sidebar-header">
                 <div class="app-title"><a href="/">NotizStudio</a></div>
                 <div class="app-subtitle">Deine Kreative Gedankenwelt</div>
+                <button class="settings-btn" onclick="showSettingsModal()" title="Einstellungen">⚙️</button>
                 <button class="add-notebook-btn" onclick="showAddNotebookModal()">
                     <span>📚</span> Neues Notizbuch
+                </button>
+                <button class="add-notebook-btn" onclick="showImportModal()" style="margin-top: 8px; background: linear-gradient(135deg, var(--accent), var(--accent-light));">
+                    <span>📥</span> Notizbuch importieren
                 </button>
             </div>
             <div class="notebooks-list" id="notebooksList"></div>
@@ -882,6 +949,62 @@
         </div>
     </div>
 
+    <div class="modal" id="importModal">
+        <div class="modal-content">
+            <h3>Notizbuch importieren</h3>
+            <p style="font-size: 14px; color: var(--text-light); margin-bottom: 15px;">
+                Wähle eine .onb Datei zum Importieren
+            </p>
+            <input type="file" id="importFileInput" accept=".onb" style="margin-bottom: 20px;">
+            <div class="modal-buttons">
+                <button class="btn-cancel" onclick="closeModal('importModal')">Abbrechen</button>
+                <button class="btn-confirm" onclick="importNotebook()">Importieren</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="settingsModal">
+        <div class="modal-content" style="max-width: 600px;">
+            <h3>Einstellungen</h3>
+            
+            <div class="font-selector">
+                <label>Schriftart für Überschriften:</label>
+                <select id="headerFontSelect" onchange="changeHeaderFont(this.value)">
+                    <option value="'Playfair Display', serif">Playfair Display (Standard)</option>
+                    <option value="'Merriweather', serif">Merriweather</option>
+                    <option value="'Lora', serif">Lora</option>
+                    <option value="'Crimson Text', serif">Crimson Text</option>
+                    <option value="'Libre Baskerville', serif">Libre Baskerville</option>
+                    <option value="'Montserrat', sans-serif">Montserrat</option>
+                    <option value="'Poppins', sans-serif">Poppins</option>
+                </select>
+                <div class="font-preview" id="headerPreview" style="font-family: var(--font-header); font-size: 24px; font-weight: 700;">
+                    Beispiel Überschrift
+                </div>
+            </div>
+
+            <div class="font-selector">
+                <label>Schriftart für Fließtext:</label>
+                <select id="bodyFontSelect" onchange="changeBodyFont(this.value)">
+                    <option value="'Work Sans', sans-serif">Work Sans (Standard)</option>
+                    <option value="'Roboto', sans-serif">Roboto</option>
+                    <option value="'Open Sans', sans-serif">Open Sans</option>
+                    <option value="'Lato', sans-serif">Lato</option>
+                    <option value="'Montserrat', sans-serif">Montserrat</option>
+                    <option value="'Poppins', sans-serif">Poppins</option>
+                    <option value="'Inter', sans-serif">Inter</option>
+                </select>
+                <div class="font-preview" id="bodyPreview" style="font-family: var(--font-body); font-size: 16px;">
+                    Dies ist ein Beispieltext in der gewählten Schriftart. So wird dein Fließtext aussehen.
+                </div>
+            </div>
+
+            <div class="modal-buttons">
+                <button class="btn-cancel" onclick="closeModal('settingsModal')">Schließen</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Datenstruktur
         let data = {
@@ -932,7 +1055,55 @@
                 data.currentPage = 1;
                 saveData();
             }
+            
+            // Load font preferences
+            loadFontPreferences();
             render();
+        }
+
+        // Font Preferences Functions
+        function loadFontPreferences() {
+            const headerFont = localStorage.getItem('notizstudio-header-font') || "'Playfair Display', serif";
+            const bodyFont = localStorage.getItem('notizstudio-body-font') || "'Work Sans', sans-serif";
+            
+            document.documentElement.style.setProperty('--font-header', headerFont);
+            document.documentElement.style.setProperty('--font-body', bodyFont);
+            
+            // Update select elements if they exist
+            const headerSelect = document.getElementById('headerFontSelect');
+            const bodySelect = document.getElementById('bodyFontSelect');
+            if (headerSelect) headerSelect.value = headerFont;
+            if (bodySelect) bodySelect.value = bodyFont;
+        }
+
+        function showSettingsModal() {
+            document.getElementById('settingsModal').classList.add('active');
+            loadFontPreferences();
+            updateFontPreviews();
+        }
+
+        function changeHeaderFont(font) {
+            document.documentElement.style.setProperty('--font-header', font);
+            localStorage.setItem('notizstudio-header-font', font);
+            updateFontPreviews();
+        }
+
+        function changeBodyFont(font) {
+            document.documentElement.style.setProperty('--font-body', font);
+            localStorage.setItem('notizstudio-body-font', font);
+            updateFontPreviews();
+        }
+
+        function updateFontPreviews() {
+            const headerPreview = document.getElementById('headerPreview');
+            const bodyPreview = document.getElementById('bodyPreview');
+            
+            if (headerPreview) {
+                headerPreview.style.fontFamily = getComputedStyle(document.documentElement).getPropertyValue('--font-header');
+            }
+            if (bodyPreview) {
+                bodyPreview.style.fontFamily = getComputedStyle(document.documentElement).getPropertyValue('--font-body');
+            }
         }
 
         // Daten speichern
@@ -954,7 +1125,10 @@
                 <div class="notebook-item ${data.currentNotebook === nb.id ? 'active' : ''}" 
                      onclick="selectNotebook(${nb.id})">
                     <span class="notebook-name">${nb.name}</span>
-                    <button class="delete-notebook" onclick="event.stopPropagation(); deleteNotebook(${nb.id})">×</button>
+                    <div class="notebook-actions">
+                        <button class="notebook-action-btn" onclick="event.stopPropagation(); exportNotebook(${nb.id})" title="Exportieren">💾</button>
+                        <button class="notebook-action-btn" onclick="event.stopPropagation(); deleteNotebook(${nb.id})" title="Löschen">×</button>
+                    </div>
                 </div>
             `).join('');
         }
@@ -1575,6 +1749,112 @@
             page.content = content;
             page.modified = new Date().toISOString();
             saveData();
+        }
+
+        // Export & Import Functions
+        function exportNotebook(id) {
+            const notebook = data.notebooks.find(nb => nb.id === id);
+            if (!notebook) {
+                alert('Notizbuch nicht gefunden!');
+                return;
+            }
+
+            // Create export data with custom header
+            const exportData = {
+                fileType: 'OneNoteBook',
+                version: '1.0',
+                application: 'NotizStudio',
+                exportDate: new Date().toISOString(),
+                notebook: notebook
+            };
+
+            // Convert to JSON
+            const jsonString = JSON.stringify(exportData, null, 2);
+            
+            // Create blob and download with .onb extension
+            const blob = new Blob([jsonString], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${notebook.name.replace(/[^a-z0-9]/gi, '_')}_${Date.now()}.onb`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            // Show success message
+            alert(`✅ Notizbuch "${notebook.name}" wurde erfolgreich als .onb Datei exportiert!`);
+        }
+
+        function showImportModal() {
+            document.getElementById('importModal').classList.add('active');
+            document.getElementById('importFileInput').value = '';
+        }
+
+        function importNotebook() {
+            const fileInput = document.getElementById('importFileInput');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('Bitte wähle eine Datei aus!');
+                return;
+            }
+
+            // Check file extension
+            if (!file.name.endsWith('.onb')) {
+                if (!confirm('Diese Datei hat nicht die .onb Erweiterung. Trotzdem importieren?')) {
+                    return;
+                }
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importData = JSON.parse(e.target.result);
+                    
+                    // Validate import data
+                    if (!importData.notebook || !importData.fileType || importData.fileType !== 'OneNoteBook') {
+                        throw new Error('Ungültiges Dateiformat. Bitte wähle eine gültige .onb Datei.');
+                    }
+
+                    // Version check
+                    if (!importData.version) {
+                        console.warn('Keine Versionsinformation gefunden');
+                    }
+
+                    const notebook = importData.notebook;
+                    
+                    // Generate new ID to avoid conflicts
+                    const newId = Date.now();
+                    notebook.id = newId;
+                    
+                    // Generate new IDs for all sections and pages
+                    notebook.sections.forEach(section => {
+                        section.id = Date.now() + Math.random();
+                        section.pages.forEach(page => {
+                            page.id = Date.now() + Math.random();
+                        });
+                    });
+
+                    // Add to notebooks
+                    data.notebooks.push(notebook);
+                    data.currentNotebook = newId;
+                    data.currentSection = notebook.sections.length > 0 ? notebook.sections[0].id : null;
+                    data.currentPage = notebook.sections.length > 0 && notebook.sections[0].pages.length > 0 
+                        ? notebook.sections[0].pages[0].id 
+                        : null;
+
+                    saveData();
+                    render();
+                    closeModal('importModal');
+                    
+                    alert(`✅ Notizbuch "${notebook.name}" wurde erfolgreich importiert!\n\n📊 Importiert: ${notebook.sections.length} Abschnitte mit insgesamt ${notebook.sections.reduce((sum, s) => sum + s.pages.length, 0)} Seiten`);
+                } catch (error) {
+                    alert(`❌ Fehler beim Importieren: ${error.message}`);
+                }
+            };
+            
+            reader.readAsText(file);
         }
 
         // Modal Functions
