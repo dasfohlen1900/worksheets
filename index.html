@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>KlassenBlatt</title>
-<!-- Favicon im <head> einfügen -->
+
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 
 <style>
@@ -17,88 +17,180 @@
     font-style: italic;
 }
 
+:root {
+    --primary: #2b579a;
+    --primary-dark: #1f3f72;
+    --bg: #eef2f7;
+    --card-bg: #ffffff;
+    --text-main: #111827;
+    --text-muted: #6b7280;
+    --border-soft: #e5e7eb;
+}
+
 body {
     margin: 0;
     font-family: "Aeropus Sans", system-ui, sans-serif;
+    background: linear-gradient(135deg, #e8eef7, #f7f9fc);
+    min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
-    background: #eef2f7;
-    flex-direction: column;
+}
+
+/* Hauptkarte */
+.app-shell {
+    background: var(--card-bg);
+    max-width: 880px;
+    width: calc(100% - 40px);
+    padding: 56px;
+    border-radius: 22px;
+    box-shadow:
+        0 30px 60px rgba(0,0,0,.12),
+        0 10px 20px rgba(0,0,0,.05);
     text-align: center;
 }
 
+/* Titel */
 h1 {
-    font-size: 2rem;
-    margin-bottom: 10px;
+    font-size: 2.6rem;
+    margin: 0;
+    color: var(--text-main);
 }
 
 h2 {
-    font-size: 1.2rem;
-    font-weight: normal;
-    color: #555;
+    margin-top: 6px;
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: var(--text-muted);
 }
 
+/* Namensbox */
 #nameBox {
-    margin-top: 20px;
+    margin-top: 26px;
     display: none;
 }
 
 #nameInput {
-    padding: 10px;
+    padding: 14px;
     font-size: 1rem;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    width: 200px;
+    border-radius: 12px;
+    border: 1px solid var(--border-soft);
+    width: 260px;
 }
 
-button {
-    margin-top: 15px;
-    padding: 10px 20px;
-    font-size: 1rem;
-    border: none;
-    border-radius: 8px;
-    background: #2b579a;
-    color: white;
-    cursor: pointer;
-}
+/* Buttons */
+button,
 .button {
-    margin-top: 15px;
-    padding: 10px 20px;
+    margin-top: 22px;
+    padding: 14px 30px;
     font-size: 1rem;
+    border-radius: 14px;
     border: none;
-    border-radius: 8px;
-    background: #2b579a;
+    background: var(--primary);
     color: white;
     cursor: pointer;
+    font-weight: 600;
+    letter-spacing: .2px;
+    transition: all .18s ease;
+    text-decoration: none;
+    display: inline-block;
 }
-button.secondary {
-    background: #666;
-    margin-left: 10px;
+
+button:hover,
+.button:hover {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+}
+
+.secondary {
+    background: #6b7280;
+}
+
+.secondary:hover {
+    background: #4b5563;
+}
+
+/* Info-Block */
+.editor-info {
+    margin-top: 46px;
+    text-align: left;
+    padding: 32px;
+    border-radius: 18px;
+    background: linear-gradient(180deg,#f9fafb,#f3f6fb);
+    border: 1px solid var(--border-soft);
+}
+
+.editor-info h2 {
+    margin-top: 0;
+    font-size: 1.5rem;
+    color: var(--text-main);
+}
+
+.editor-info p {
+    color: #374151;
+    line-height: 1.6;
+}
+
+/* CTA Bereich */
+.actions {
+    margin-top: 34px;
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+    flex-wrap: wrap;
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+    .app-shell {
+        padding: 36px 26px;
+    }
+
+    h1 {
+        font-size: 2.1rem;
+    }
 }
 </style>
 </head>
+
 <body>
+
+<div class="app-shell">
 
 <h1 id="title">Klassenblatt</h1>
 <h2 id="subtitle">Lade...</h2>
 
 <div id="nameBox">
     <input id="nameInput" placeholder="Bitte Namen eingeben">
+    <br>
     <button onclick="saveName()">Speichern</button>
 </div>
 
-<h1>Der Editor für Lehrer und Schüler</h1>
 <div class="editor-info">
-    <h2>Über mein Klassenblatt</h2>
-    <p>Der <strong>Klassenblatt-Editor</strong> ist ein praktischer Editor, mit dem eine schnelle und einfache Erstellung und Bearbeitung von Arbeitsblättern möglich ist. Texte formatieren, Schriftarten auswählen und Dokumente direkt im Browser gestalten.</p>
-    <p>Die eingebaute <em>Aeropus Sans</em> Schrift sorgt für ein klares, modernes Layout. Der Name wird gespeichert und personalisiert die Benutzeroberfläche, sodass jedes Mal mit einer passenden Begrüßung willkommen geheißen wirst.</p>
-    <p>Ideal für Lehrer, Schüler oder alle, die ihre Inhalte übersichtlich und stilvoll präsentieren möchten!</p>
+    <h2>Über Klassenblatt</h2>
+    <p>
+        Der <strong>Klassenblatt-Editor</strong> ist ein moderner Web-Editor für
+        Lehrer und Schüler zur schnellen Erstellung von Arbeitsblättern.
+    </p>
+    <p>
+        Texte formatieren, Schriftarten wählen und direkt im Browser gestalten.
+        Die integrierte <em>Aeropus Sans</em> sorgt für ein klares Layout.
+    </p>
+    <p>
+        Dein Name wird gespeichert und personalisiert die Oberfläche – damit du
+        bei jedem Besuch passend begrüßt wirst.
+    </p>
 </div>
-<a class="button" href="/app/">→ App öffnen</a>
-<div style="margin-top: 30px;">
-    <button onclick="location.href='/settings.html'">⚙️ Einstellungen</button>
+
+<div class="actions">
+    <a class="button" href="/app/">→ App öffnen</a>
+
+    <button class="secondary"
+        onclick="location.href='/settings.html'">
+        ⚙️ Einstellungen
+    </button>
+</div>
+
 </div>
 
 <script>
@@ -120,7 +212,7 @@ function saveName() {
 function getGreeting(name) {
     const hour = new Date().getHours();
     if (hour >= 5 && hour < 11) return "Guten Morgen, " + name;
-    if (hour >= 11 && hour < 14) return "Schön Sie zu Sehen, " + name;
+    if (hour >= 11 && hour < 14) return "Schön Sie zu sehen, " + name;
     if (hour >= 14 && hour < 17.5) return "Willkommen zurück, " + name;
     return "Guten Abend, " + name;
 }
@@ -146,4 +238,3 @@ checkName();
 
 </body>
 </html>
-
