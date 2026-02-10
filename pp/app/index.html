@@ -1,0 +1,2862 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PowerPresent - Präsentationssoftware</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+          @font-face {
+    font-family: 'Aeropus Sans';      /* Name, den du in CSS verwendest */
+    src: url('Fonts/aersans.ttf') format('ttf');
+    font-weight: normal;
+    font-style: normal;
+    }
+
+      * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Aeropus Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f3f3f3;
+            overflow: hidden;
+        }
+
+        /* Top Menu Bar */
+        .menu-bar {
+            background: #c43e1c;
+            color: white;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .app-title {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .menu-items {
+            display: flex;
+            gap: 4px;
+            flex: 1;
+        }
+
+        .menu-tab {
+            padding: 6px 16px;
+            cursor: default;
+            border-radius: 4px;
+            font-size: 13px;
+            transition: background 0.2s;
+        }
+
+        .menu-tab:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .menu-tab.active {
+            background: rgba(255,255,255,0.15);
+        }
+
+        .file-menu-item {
+            padding: 10px 20px;
+            cursor: default;
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            color: #2b2b2b;
+            transition: background 0.2s;
+        }
+
+        .file-menu-item:hover {
+            background: #f5f5f5;
+        }
+
+        /* Ribbon Toolbar */
+        .ribbon {
+            background: #fff;
+            border-bottom: 1px solid #d1d1d1;
+            padding: 12px 16px;
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .ribbon-group {
+            display: flex;
+            gap: 8px;
+            padding-right: 16px;
+            border-right: 1px solid #e1e1e1;
+        }
+
+        .ribbon-group:last-child {
+            border-right: none;
+        }
+
+        .ribbon-group select {
+            pointer-events: auto;
+        }
+
+        .ribbon-group select:focus {
+            outline: 2px solid #c43e1c;
+            outline-offset: -2px;
+        }
+
+        .ribbon-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px 12px;
+            border: 1px solid #d1d1d1;
+            background: white;
+            border-radius: 4px;
+            cursor: default;
+            transition: all 0.2s;
+            font-size: 11px;
+            gap: 4px;
+        }
+
+        .ribbon-btn:hover {
+            background: #f5f5f5;
+            border-color: #c43e1c;
+        }
+
+        .format-toolbar-btn {
+            width: 28px;
+            height: 28px;
+            border: 1px solid #d1d1d1;
+            background: white;
+            border-radius: 3px;
+            cursor: default;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            transition: all 0.2s;
+            font-family: Arial, sans-serif;
+        }
+
+        .format-toolbar-btn:hover {
+            background: #f5f5f5;
+            border-color: #c43e1c;
+        }
+
+        .format-toolbar-btn.active {
+            background: #ffe6e0;
+            border-color: #c43e1c;
+        }
+
+        .ribbon-btn-icon {
+            font-size: 20px;
+        }
+
+        .layout-btn {
+            width: 70px;
+            height: 50px;
+            border: 2px solid #d1d1d1;
+            background: white;
+            border-radius: 4px;
+            cursor: default;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .layout-btn:hover {
+            border-color: #c43e1c;
+            background: #fff8f6;
+        }
+
+        .layout-btn.active {
+            border-color: #c43e1c;
+            background: #ffe6e0;
+        }
+
+        /* Main Container */
+        .main-container {
+            display: flex;
+            height: calc(100vh - 120px);
+        }
+
+        /* Left Sidebar - Slide Thumbnails */
+        .slides-panel {
+            width: 240px;
+            min-width: 150px;
+            max-width: 400px;
+            background: #f9f9f9;
+            border-right: 1px solid #d1d1d1;
+            overflow-y: auto;
+            padding: 12px 8px;
+            position: relative;
+        }
+
+        .resize-handle-right {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 5px;
+            height: 100%;
+            cursor: ew-resize;
+            background: transparent;
+            z-index: 10;
+        }
+
+        .resize-handle-right:hover {
+            background: #c43e1c;
+        }
+
+        .slide-thumb {
+            background: white;
+            border: 2px solid #d1d1d1;
+            border-radius: 4px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .slide-thumb:hover {
+            border-color: #c43e1c;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .slide-thumb.active {
+            border-color: #c43e1c;
+            border-width: 3px;
+            box-shadow: 0 4px 12px rgba(196, 62, 28, 0.2);
+        }
+
+        .slide-thumb-number {
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            background: rgba(0,0,0,0.6);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .slide-thumb-content {
+            padding: 40px 20px 20px;
+            min-height: 120px;
+            font-size: 9px;
+            background: white;
+        }
+
+        .slide-thumb-title {
+            font-weight: 700;
+            font-size: 10px;
+            margin-bottom: 6px;
+            color: #333;
+        }
+
+        /* Main Editor Area */
+        .editor-area {
+            flex: 1;
+            background: #e5e5e5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 24px;
+            overflow: auto;
+        }
+
+        .slide-canvas {
+            width: 100%;
+            max-width: 960px;
+            aspect-ratio: 16/9;
+            background: white;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+            position: relative;
+            border-radius: 2px;
+        }
+
+        .slide-layout-title {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 60px 80px 30px;
+        }
+
+        .slide-layout-content {
+            position: absolute;
+            top: 140px;
+            left: 80px;
+            right: 80px;
+            bottom: 60px;
+        }
+
+        .slide-layout-two-column {
+            display: flex;
+            gap: 40px;
+        }
+
+        .slide-layout-two-column > div {
+            flex: 1;
+        }
+
+        .editable-title {
+            width: 100%;
+            border: 2px solid transparent;
+            outline: none;
+            font-size: 44px;
+            font-weight: 700;
+            color: #2b2b2b;
+            background: transparent;
+            padding: 12px;
+            transition: border-color 0.2s;
+            text-align: center;
+        }
+
+        .editable-title:focus {
+            border-color: #c43e1c;
+            background: #fff8f6;
+        }
+
+        .editable-content {
+            width: 100%;
+            height: 100%;
+            border: 2px solid transparent;
+            outline: none;
+            font-size: 24px;
+            color: #444;
+            background: transparent;
+            padding: 20px;
+            transition: border-color 0.2s;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            overflow-y: auto;
+        }
+
+        .editable-content:focus {
+            border-color: #c43e1c;
+            background: #fff8f6;
+        }
+
+        .editable-content ul, .editable-content ol {
+            margin-left: 20px;
+            padding-left: 20px;
+        }
+
+        .editable-content li {
+            margin-bottom: 8px;
+        }
+
+        /* Right Panel - Design/Format */
+        .format-panel {
+            width: 280px;
+            min-width: 200px;
+            max-width: 500px;
+            background: #f9f9f9;
+            border-left: 1px solid #d1d1d1;
+            padding: 16px;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .resize-handle-left {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            cursor: ew-resize;
+            background: transparent;
+            z-index: 10;
+        }
+
+        .resize-handle-left:hover {
+            background: #c43e1c;
+        }
+
+        .format-section {
+            margin-bottom: 24px;
+        }
+
+        .format-section-title {
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #2b2b2b;
+        }
+
+        .format-control {
+            margin-bottom: 12px;
+        }
+
+        .format-label {
+            font-size: 11px;
+            color: #666;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .format-input {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #d1d1d1;
+            border-radius: 3px;
+            font-size: 13px;
+        }
+
+        .format-select {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #d1d1d1;
+            border-radius: 3px;
+            font-size: 13px;
+            background: white;
+        }
+
+        .color-picker {
+            width: 100%;
+            height: 36px;
+            border: 1px solid #d1d1d1;
+            border-radius: 3px;
+            cursor: default;
+        }
+
+        .theme-colors {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .theme-color {
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 4px;
+            cursor: default;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .theme-color:hover {
+            transform: scale(1.1);
+            border-color: #666;
+        }
+
+        /* Present Mode */
+        .present-mode {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            z-index: 9999;
+        }
+
+        .present-mode.active {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .present-slide {
+            width: 90vw;
+            height: calc(90vw / 16 * 9);
+            max-width: 1600px;
+            max-height: 900px;
+            background: white;
+            display: none;
+            position: relative;
+        }
+
+        .present-slide.active {
+            display: block;
+            animation: slideIn 0.4s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .present-controls {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255,255,255,0.95);
+            padding: 12px 24px;
+            border-radius: 30px;
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+        }
+
+        .present-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: #c43e1c;
+            color: white;
+            border-radius: 50%;
+            cursor: default;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .present-btn:hover {
+            background: #a02e14;
+            transform: scale(1.1);
+        }
+
+        .present-counter {
+            font-size: 14px;
+            font-weight: 600;
+            color: #2b2b2b;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        /* Status Bar */
+        .status-bar {
+            background: #c43e1c;
+            color: white;
+            padding: 4px 16px;
+            font-size: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .zoom-control {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .zoom-btn {
+            background: none;
+            border: none;
+            color: white;
+            cursor: default;
+            padding: 2px 8px;
+            font-size: 14px;
+        }
+
+        .zoom-btn:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a1a1a1;
+        }
+
+        /* Overlay Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            padding: 32px;
+            max-width: 500px;
+            width: 90%;
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2b2b2b;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .modal-body {
+            margin-bottom: 24px;
+        }
+
+        .modal-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 8px;
+            margin-top: 16px;
+        }
+
+        .modal-label:first-child {
+            margin-top: 0;
+        }
+
+        .modal-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #d1d1d1;
+            border-radius: 4px;
+            font-size: 14px;
+            font-family: 'Segoe UI', sans-serif;
+            transition: border-color 0.2s;
+        }
+
+        .modal-input:focus {
+            outline: none;
+            border-color: #c43e1c;
+        }
+
+        .modal-select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #d1d1d1;
+            border-radius: 4px;
+            font-size: 14px;
+            font-family: 'Segoe UI', sans-serif;
+            background: white;
+            cursor: default;
+            transition: border-color 0.2s;
+        }
+
+        .modal-select:focus {
+            outline: none;
+            border-color: #c43e1c;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .modal-btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: default;
+            transition: all 0.2s;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .modal-btn-primary {
+            background: #c43e1c;
+            color: white;
+        }
+
+        .modal-btn-primary:hover {
+            background: #a53317;
+        }
+
+        .modal-btn-secondary {
+            background: #e1e1e1;
+            color: #2b2b2b;
+        }
+
+        .modal-btn-secondary:hover {
+            background: #d1d1d1;
+        }
+
+        .shape-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .shape-option {
+            padding: 20px;
+            border: 2px solid #d1d1d1;
+            border-radius: 8px;
+            cursor: default;
+            text-align: center;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .shape-option:hover {
+            border-color: #c43e1c;
+            background: #fff8f6;
+        }
+
+        .shape-option.selected {
+            border-color: #c43e1c;
+            background: #ffe6e0;
+        }
+
+        .shape-preview {
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .shape-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: #2b2b2b;
+        }
+
+        .chart-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .chart-option {
+            padding: 16px;
+            border: 2px solid #d1d1d1;
+            border-radius: 8px;
+            cursor: default;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .chart-option:hover {
+            border-color: #c43e1c;
+            background: #fff8f6;
+        }
+
+        .chart-option.selected {
+            border-color: #c43e1c;
+            background: #ffe6e0;
+        }
+
+        .chart-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: #2b2b2b;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Menu Bar -->
+    <div class="menu-bar">
+        <div class="app-title">PowerPresent</div>
+        <div class="menu-items">
+            <div class="menu-tab" onclick="toggleFileMenu(event)">Datei</div>
+            <div class="menu-tab active" onclick="switchTab('start')">Start</div>
+            <div class="menu-tab" onclick="switchTab('einfuegen')">Einfügen</div>
+            <div class="menu-tab" onclick="switchTab('entwurf')">Entwurf</div>
+            <div class="menu-tab" onclick="switchTab('praesentieren')">Bildschirmpräsentation</div>
+        </div>
+    </div>
+
+    <!-- File Menu Dropdown -->
+    <div id="fileMenu" style="display: none; position: absolute; top: 48px; left: 16px; background: white; border: 1px solid #d1d1d1; border-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; min-width: 200px;">
+        <div style="padding: 8px 0;">
+            <div class="file-menu-item" onclick="savePresentation()">
+                <span style="font-size: 16px; margin-right: 12px;">💾</span>
+                <span>Speichern</span>
+            </div>
+            <div class="file-menu-item" onclick="document.getElementById('fileInput').click()">
+                <span style="font-size: 16px; margin-right: 12px;">📂</span>
+                <span>Öffnen</span>
+            </div>
+            <div style="height: 1px; background: #e1e1e1; margin: 8px 0;"></div>
+            <div class="file-menu-item" onclick="exportAsPDF()">
+                <span style="font-size: 16px; margin-right: 12px;">📄</span>
+                <span>Als PDF exportieren</span>
+            </div>
+            <div class="file-menu-item" onclick="newPresentation()">
+                <span style="font-size: 16px; margin-right: 12px;">📝</span>
+                <span>Neue Präsentation</span>
+            </div>
+        </div>
+    </div>
+    <input type="file" id="fileInput" accept=".json" style="display: none;" onchange="loadPresentation(event)">
+
+    <!-- Ribbon Toolbar - Start Tab -->
+    <div class="ribbon" id="ribbon-start">
+        <div class="ribbon-group">
+            <button class="ribbon-btn" onclick="addNewSlide()">
+                <span class="ribbon-btn-icon">➕</span>
+                <span>Neue Folie</span>
+            </button>
+            <button class="ribbon-btn" onclick="duplicateSlide()">
+                <span class="ribbon-btn-icon">📋</span>
+                <span>Duplizieren</span>
+            </button>
+            <button class="ribbon-btn" onclick="deleteSlide()">
+                <span class="ribbon-btn-icon">🗑️</span>
+                <span>Löschen</span>
+            </button>
+        </div>
+
+        <div class="ribbon-group">
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+                <div style="display: flex; gap: 4px; align-items: center;">
+                    <select class="format-select" id="fontFamily" onchange="applyFontFamily()" style="width: 140px; height: 28px;">
+                        <option value="'Segoe UI', sans-serif">Segoe UI</option>
+                        <option value="Arial, sans-serif">Arial</option>
+                        <option value="'Times New Roman', serif">Times New Roman</option>
+                        <option value="Georgia, serif">Georgia</option>
+                        <option value="'Courier New', monospace">Courier New</option>
+                        <option value="Verdana, sans-serif">Verdana</option>
+                        <option value="'Comic Sans MS', cursive">Comic Sans MS</option>
+                        <option value="Impact, sans-serif">Impact</option>
+                        <option value="'Trebuchet MS', sans-serif">Trebuchet MS</option>
+                        <option value="'Palatino Linotype', serif">Palatino</option>
+                        <option value="'Garamond', serif">Garamond</option>
+                        <option value="'Bookman Old Style', serif">Bookman</option>
+                        <option value="'Arial Black', sans-serif">Arial Black</option>
+                        <option value="'Lucida Console', monospace">Lucida Console</option>
+                        <option value="'Century Gothic', sans-serif">Century Gothic</option>
+                        <option value="'Tahoma', sans-serif">Tahoma</option>
+                        <option value="'Calibri', sans-serif">Calibri</option>
+                        <option value="'Cambria', serif">Cambria</option>
+                        <option value="'Consolas', monospace">Consolas</option>
+                        <option value="'Franklin Gothic Medium', sans-serif">Franklin Gothic</option>
+                    </select>
+                    <select class="format-select" id="fontSize" onchange="applyFontSize()" style="width: 70px; height: 28px;">
+                        <option value="18">18</option>
+                        <option value="20">20</option>
+                        <option value="24" selected>24</option>
+                        <option value="28">28</option>
+                        <option value="32">32</option>
+                        <option value="36">36</option>
+                        <option value="44">44</option>
+                        <option value="48">48</option>
+                        <option value="54">54</option>
+                        <option value="60">60</option>
+                        <option value="72">72</option>
+                    </select>
+                </div>
+                <div style="display: flex; gap: 2px;">
+                    <button class="format-toolbar-btn" onclick="applyFormat('bold')" title="Fett" id="btn-bold">
+                        <strong>B</strong>
+                    </button>
+                    <button class="format-toolbar-btn" onclick="applyFormat('italic')" title="Kursiv" id="btn-italic">
+                        <em>I</em>
+                    </button>
+                    <button class="format-toolbar-btn" onclick="applyFormat('underline')" title="Unterstrichen" id="btn-underline">
+                        <u>U</u>
+                    </button>
+                    <button class="format-toolbar-btn" onclick="applyFormat('strikethrough')" title="Durchgestrichen" id="btn-strike">
+                        <s>S</s>
+                    </button>
+                    <div style="width: 1px; background: #d1d1d1; margin: 0 4px;"></div>
+                    <button class="format-toolbar-btn" onclick="applyTextColor()" title="Textfarbe" id="btn-color">
+                        <span style="position: relative;">A<span style="position: absolute; bottom: -2px; left: 0; right: 0; height: 3px; background: currentColor;"></span></span>
+                    </button>
+                    <button class="format-toolbar-btn" onclick="applyHighlight()" title="Texthervorhebung" id="btn-highlight">
+                        <span style="background: yellow; padding: 0 2px;">A</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="ribbon-group">
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+                <div style="font-size: 11px; font-weight: 600;">Ausrichtung</div>
+                <div style="display: flex; gap: 2px;">
+                    <button class="format-toolbar-btn" onclick="applyAlignment('left')" title="Linksbündig">
+                        ≡
+                    </button>
+                    <button class="format-toolbar-btn" onclick="applyAlignment('center')" title="Zentriert">
+                        ≡
+                    </button>
+                    <button class="format-toolbar-btn" onclick="applyAlignment('right')" title="Rechtsbündig">
+                        ≡
+                    </button>
+                    <button class="format-toolbar-btn" onclick="applyAlignment('justify')" title="Blocksatz">
+                        ≡
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="ribbon-group">
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+                <div style="font-size: 11px; font-weight: 600;">Listen</div>
+                <div style="display: flex; gap: 2px;">
+                    <button class="format-toolbar-btn" onclick="applyList('bullet')" title="Aufzählung">
+                        • ≡
+                    </button>
+                    <button class="format-toolbar-btn" onclick="applyList('number')" title="Nummerierung">
+                        1. ≡
+                    </button>
+                    <button class="format-toolbar-btn" onclick="decreaseIndent()" title="Einzug verkleinern">
+                        ← ≡
+                    </button>
+                    <button class="format-toolbar-btn" onclick="increaseIndent()" title="Einzug vergrößern">
+                        ≡ →
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="ribbon-group">
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <span style="font-size: 11px; font-weight: 600; margin-right: 4px;">Layout:</span>
+                <button class="layout-btn" onclick="setLayout('title')" title="Titel">
+                    <div style="border-top: 2px solid #666; width: 80%; margin-bottom: 4px;"></div>
+                    <div style="border-top: 1px solid #999; width: 80%;"></div>
+                </button>
+                <button class="layout-btn" onclick="setLayout('content')" title="Titel und Inhalt">
+                    <div style="border-top: 2px solid #666; width: 80%; margin-bottom: 4px;"></div>
+                    <div style="background: #ddd; width: 80%; height: 60%; border-radius: 2px;"></div>
+                </button>
+                <button class="layout-btn" onclick="setLayout('two-column')" title="Zwei Spalten">
+                    <div style="border-top: 2px solid #666; width: 80%; margin-bottom: 4px;"></div>
+                    <div style="display: flex; gap: 4px; width: 80%; height: 60%;">
+                        <div style="background: #ddd; flex: 1; border-radius: 2px;"></div>
+                        <div style="background: #ddd; flex: 1; border-radius: 2px;"></div>
+                    </div>
+                </button>
+            </div>
+        </div>
+
+        <div class="ribbon-group">
+            <button class="ribbon-btn" onclick="startPresentation()" style="background: #c43e1c; color: white; border-color: #c43e1c;">
+                <span class="ribbon-btn-icon">▶️</span>
+                <span>Präsentation</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Ribbon Toolbar - Einfügen Tab -->
+    <div class="ribbon" id="ribbon-einfuegen" style="display: none;">
+        <div class="ribbon-group">
+            <button class="ribbon-btn" onclick="insertTextBox()">
+                <span class="ribbon-btn-icon">📝</span>
+                <span>Textfeld</span>
+            </button>
+            <button class="ribbon-btn" onclick="insertImage()">
+                <span class="ribbon-btn-icon">🖼️</span>
+                <span>Bild</span>
+            </button>
+            <button class="ribbon-btn" onclick="insertShape()">
+                <span class="ribbon-btn-icon">⬛</span>
+                <span>Form</span>
+            </button>
+        </div>
+
+        <div class="ribbon-group">
+            <button class="ribbon-btn" onclick="insertTable()">
+                <span class="ribbon-btn-icon">📊</span>
+                <span>Tabelle</span>
+            </button>
+            <button class="ribbon-btn" onclick="insertChart()">
+                <span class="ribbon-btn-icon">📈</span>
+                <span>Diagramm</span>
+            </button>
+        </div>
+
+        <div class="ribbon-group">
+            <button class="ribbon-btn" onclick="insertIcon()">
+                <span class="ribbon-btn-icon">⭐</span>
+                <span>Symbol</span>
+            </button>
+            <button class="ribbon-btn" onclick="insertVideo()">
+                <span class="ribbon-btn-icon">🎥</span>
+                <span>Video</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Ribbon Toolbar - Entwurf Tab -->
+    <div class="ribbon" id="ribbon-entwurf" style="display: none;">
+        <div class="ribbon-group">
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <span style="font-size: 11px; font-weight: 600; margin-right: 4px;">Designs:</span>
+                <button class="layout-btn" onclick="applyDesign('classic')" title="Klassisch">
+                    <div style="background: linear-gradient(to bottom, #c43e1c 30%, white 30%); width: 100%; height: 100%; border-radius: 2px;"></div>
+                </button>
+                <button class="layout-btn" onclick="applyDesign('modern')" title="Modern">
+                    <div style="background: linear-gradient(135deg, #1a237e 50%, #e1f5ff 50%); width: 100%; height: 100%; border-radius: 2px;"></div>
+                </button>
+                <button class="layout-btn" onclick="applyDesign('minimalist')" title="Minimalistisch">
+                    <div style="background: #f9f9f9; border: 2px solid #2b2b2b; width: 100%; height: 100%; border-radius: 2px;"></div>
+                </button>
+                <button class="layout-btn" onclick="applyDesign('dark')" title="Dunkel">
+                    <div style="background: #2b2b2b; width: 100%; height: 100%; border-radius: 2px;"></div>
+                </button>
+            </div>
+        </div>
+
+        <div class="ribbon-group">
+            <button class="ribbon-btn" onclick="customizeColors()">
+                <span class="ribbon-btn-icon">🎨</span>
+                <span>Farben</span>
+            </button>
+            <button class="ribbon-btn" onclick="customizeFonts()">
+                <span class="ribbon-btn-icon">🔤</span>
+                <span>Schriftarten</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Ribbon Toolbar - Präsentieren Tab -->
+    <div class="ribbon" id="ribbon-praesentieren" style="display: none;">
+        <div class="ribbon-group">
+            <button class="ribbon-btn" onclick="startPresentation()" style="background: #c43e1c; color: white; border-color: #c43e1c;">
+                <span class="ribbon-btn-icon">▶️</span>
+                <span>Von Beginn an</span>
+            </button>
+            <button class="ribbon-btn" onclick="startPresentationFromCurrent()" style="background: #1b5e20; color: white; border-color: #1b5e20;">
+                <span class="ribbon-btn-icon">▶️</span>
+                <span>Ab aktueller Folie</span>
+            </button>
+        </div>
+
+        <div class="ribbon-group">
+            <button class="ribbon-btn" onclick="togglePresenterView()">
+                <span class="ribbon-btn-icon">👁️</span>
+                <span>Referentenansicht</span>
+            </button>
+        </div>
+
+        <div class="ribbon-group">
+            <button class="ribbon-btn" onclick="rehearseTimings()">
+                <span class="ribbon-btn-icon">⏱️</span>
+                <span>Zeitabläufe testen</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Ribbon Toolbar - Tabellentools Tab (Context Tab) -->
+    <div class="ribbon" id="ribbon-tabellentools" style="display: none; background: #fff4e6;">
+        <div class="ribbon-group">
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+                <div style="font-size: 11px; font-weight: 600; color: #c43e1c;">TABELLENTOOLS</div>
+                <div style="display: flex; gap: 4px;">
+                    <button class="ribbon-btn" onclick="insertTableRow()">
+                        <span class="ribbon-btn-icon">➕</span>
+                        <span>Zeile einfügen</span>
+                    </button>
+                    <button class="ribbon-btn" onclick="insertTableColumn()">
+                        <span class="ribbon-btn-icon">➕</span>
+                        <span>Spalte einfügen</span>
+                    </button>
+                    <button class="ribbon-btn" onclick="deleteTableRow()">
+                        <span class="ribbon-btn-icon">➖</span>
+                        <span>Zeile löschen</span>
+                    </button>
+                    <button class="ribbon-btn" onclick="deleteTableColumn()">
+                        <span class="ribbon-btn-icon">➖</span>
+                        <span>Spalte löschen</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="ribbon-group">
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+                <div style="font-size: 11px; font-weight: 600;">Tabellendesign</div>
+                <div style="display: flex; gap: 4px;">
+                    <button class="ribbon-btn" onclick="applyTableStyle('default')">
+                        <span>Standard</span>
+                    </button>
+                    <button class="ribbon-btn" onclick="applyTableStyle('colored')">
+                        <span>Farbig</span>
+                    </button>
+                    <button class="ribbon-btn" onclick="applyTableStyle('striped')">
+                        <span>Gestreift</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="ribbon-group">
+            <div style="display: flex; gap: 4px; align-items: center;">
+                <label style="font-size: 11px; font-weight: 600;">Rahmenfarbe:</label>
+                <input type="color" id="tableBorderColor" value="#333333" onchange="updateTableBorderColor()" 
+                       style="width: 40px; height: 28px; border: 1px solid #d1d1d1;">
+                <label style="font-size: 11px; font-weight: 600; margin-left: 8px;">Hintergrund:</label>
+                <input type="color" id="tableBgColor" value="#ffffff" onchange="updateTableBgColor()" 
+                       style="width: 40px; height: 28px; border: 1px solid #d1d1d1;">
+            </div>
+        </div>
+    </div>
+
+    <!-- Ribbon Toolbar - Bildtools Tab (Context Tab) -->
+    <div class="ribbon" id="ribbon-bildtools" style="display: none; background: #e8f4f8;">
+        <div class="ribbon-group">
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+                <div style="font-size: 11px; font-weight: 600; color: #1976d2;">BILDTOOLS</div>
+                <div style="display: flex; gap: 4px;">
+                    <button class="ribbon-btn" onclick="changeImageURL()">
+                        <span class="ribbon-btn-icon">🔄</span>
+                        <span>URL ändern</span>
+                    </button>
+                    <button class="ribbon-btn" onclick="resizeImage('small')">
+                        <span class="ribbon-btn-icon">📏</span>
+                        <span>Klein</span>
+                    </button>
+                    <button class="ribbon-btn" onclick="resizeImage('medium')">
+                        <span class="ribbon-btn-icon">📏</span>
+                        <span>Mittel</span>
+                    </button>
+                    <button class="ribbon-btn" onclick="resizeImage('large')">
+                        <span class="ribbon-btn-icon">📏</span>
+                        <span>Groß</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="ribbon-group">
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+                <div style="font-size: 11px; font-weight: 600;">Bildausrichtung</div>
+                <div style="display: flex; gap: 4px;">
+                    <button class="ribbon-btn" onclick="alignImage('left')">
+                        <span>Links</span>
+                    </button>
+                    <button class="ribbon-btn" onclick="alignImage('center')">
+                        <span>Zentriert</span>
+                    </button>
+                    <button class="ribbon-btn" onclick="alignImage('right')">
+                        <span>Rechts</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="ribbon-group">
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+                <div style="font-size: 11px; font-weight: 600;">Bildeffekte</div>
+                <div style="display: flex; gap: 4px;">
+                    <button class="ribbon-btn" onclick="applyImageBorder()">
+                        <span>Rahmen</span>
+                    </button>
+                    <button class="ribbon-btn" onclick="applyImageShadow()">
+                        <span>Schatten</span>
+                    </button>
+                    <button class="ribbon-btn" onclick="applyImageRounded()">
+                        <span>Abgerundet</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Left Panel - Slides -->
+        <div class="slides-panel" id="slidesPanel">
+            <div class="resize-handle-right" id="leftResizeHandle"></div>
+        </div>
+
+        <!-- Center - Editor -->
+        <div class="editor-area">
+            <div class="slide-canvas" id="slideCanvas"></div>
+        </div>
+
+        <!-- Right Panel - Format -->
+        <div class="format-panel" id="formatPanel">
+            <div class="resize-handle-left" id="rightResizeHandle"></div>
+            <div class="format-section">
+                <div class="format-section-title">Design</div>
+                <div class="format-control">
+                    <label class="format-label">Hintergrundfarbe</label>
+                    <input type="color" class="color-picker" id="bgColor" value="#ffffff" onchange="updateSlideBackground()">
+                </div>
+                <div class="theme-colors">
+                    <div class="theme-color" style="background: #ffffff;" onclick="applyThemeColor('#ffffff')"></div>
+                    <div class="theme-color" style="background: #f3f3f3;" onclick="applyThemeColor('#f3f3f3')"></div>
+                    <div class="theme-color" style="background: #e1f5ff;" onclick="applyThemeColor('#e1f5ff')"></div>
+                    <div class="theme-color" style="background: #fff4e1;" onclick="applyThemeColor('#fff4e1')"></div>
+                    <div class="theme-color" style="background: #ffe1e1;" onclick="applyThemeColor('#ffe1e1')"></div>
+                    <div class="theme-color" style="background: #e8f5e9;" onclick="applyThemeColor('#e8f5e9')"></div>
+                    <div class="theme-color" style="background: #2b2b2b;" onclick="applyThemeColor('#2b2b2b')"></div>
+                    <div class="theme-color" style="background: #1a237e;" onclick="applyThemeColor('#1a237e')"></div>
+                    <div class="theme-color" style="background: #c43e1c;" onclick="applyThemeColor('#c43e1c')"></div>
+                    <div class="theme-color" style="background: #1b5e20;" onclick="applyThemeColor('#1b5e20')"></div>
+                    <div class="theme-color" style="background: #4a148c;" onclick="applyThemeColor('#4a148c')"></div>
+                    <div class="theme-color" style="background: #006064;" onclick="applyThemeColor('#006064')"></div>
+                </div>
+            </div>
+
+            <div class="format-section">
+                <div class="format-section-title">Schriftart</div>
+                <div class="format-control">
+                    <label class="format-label">Titelschrift</label>
+                    <select class="format-select" id="titleFont" onchange="updateFonts()">
+                        <option value="'Segoe UI', sans-serif">Segoe UI</option>
+                        <option value="Arial, sans-serif">Arial</option>
+                        <option value="'Times New Roman', serif">Times New Roman</option>
+                        <option value="Georgia, serif">Georgia</option>
+                        <option value="'Courier New', monospace">Courier New</option>
+                        <option value="Verdana, sans-serif">Verdana</option>
+                    </select>
+                </div>
+                <div class="format-control">
+                    <label class="format-label">Textfarbe</label>
+                    <input type="color" class="color-picker" id="textColor" value="#2b2b2b" onchange="updateTextColor()">
+                </div>
+            </div>
+
+            <div class="format-section">
+                <div class="format-section-title">Notizen</div>
+                <textarea class="format-input" id="speakerNotes" placeholder="Vortragsnotizen..." style="height: 100px; resize: vertical;" oninput="updateNotes()"></textarea>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Bar -->
+    <div class="status-bar">
+        <div>Folie <span id="statusSlideNum">1</span> von <span id="statusSlideTotal">1</span></div>
+        <div class="zoom-control">
+            <button class="zoom-btn" onclick="zoomOut()">−</button>
+            <span id="zoomLevel">100%</span>
+            <button class="zoom-btn" onclick="zoomIn()">+</button>
+        </div>
+    </div>
+
+    <!-- Modal Overlay for Input Dialogs -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-content" id="modalContent">
+            <!-- Content will be dynamically inserted here -->
+        </div>
+    </div>
+
+    <!-- Present Mode -->
+    <div class="present-mode" id="presentMode">
+        <div id="presentSlides"></div>
+        <div class="present-controls">
+            <button class="present-btn" onclick="previousSlide()">◀</button>
+            <div class="present-counter" id="presentCounter">1 / 1</div>
+            <button class="present-btn" onclick="nextSlide()">▶</button>
+            <button class="present-btn" onclick="exitPresentation()">✕</button>
+        </div>
+    </div>
+
+    <script>
+        let slides = [
+            {
+                layout: 'title',
+                title: 'Willkommen zu PowerPresent',
+                content: 'Eine moderne Präsentationssoftware',
+                content2: '',
+                bgColor: '#ffffff',
+                textColor: '#2b2b2b',
+                titleFont: "'Segoe UI', sans-serif",
+                notes: ''
+            },
+            {
+                layout: 'content',
+                title: 'Erste Schritte',
+                content: '• Erstellen Sie neue Folien\n• Wählen Sie verschiedene Layouts\n• Passen Sie das Design an\n• Starten Sie die Präsentation',
+                content2: '',
+                bgColor: '#ffffff',
+                textColor: '#2b2b2b',
+                titleFont: "'Segoe UI', sans-serif",
+                notes: ''
+            }
+        ];
+
+        // Modal Helper Functions
+        function showModal(config) {
+            return new Promise((resolve, reject) => {
+                const overlay = document.getElementById('modalOverlay');
+                const content = document.getElementById('modalContent');
+                
+                let html = `
+                    <div class="modal-header">
+                        ${config.icon || ''}
+                        ${config.title}
+                    </div>
+                    <div class="modal-body">
+                        ${config.body}
+                    </div>
+                    <div class="modal-buttons">
+                        <button class="modal-btn modal-btn-secondary" onclick="closeModal(false)">Abbrechen</button>
+                        <button class="modal-btn modal-btn-primary" onclick="closeModal(true)">${config.confirmText || 'OK'}</button>
+                    </div>
+                `;
+                
+                content.innerHTML = html;
+                overlay.classList.add('active');
+                
+                // Focus first input if exists
+                setTimeout(() => {
+                    const firstInput = content.querySelector('.modal-input');
+                    if (firstInput) firstInput.focus();
+                }, 100);
+                
+                // Store resolve/reject for later use
+                window.currentModalResolve = resolve;
+                window.currentModalReject = reject;
+                window.currentModalConfig = config;
+            });
+        }
+
+        function closeModal(confirmed) {
+            const overlay = document.getElementById('modalOverlay');
+            overlay.classList.remove('active');
+            
+            if (confirmed && window.currentModalResolve) {
+                const config = window.currentModalConfig;
+                const result = {};
+                
+                // Collect all input values
+                if (config.inputs) {
+                    config.inputs.forEach(input => {
+                        const element = document.getElementById('modal-' + input.id);
+                        if (element) {
+                            result[input.id] = element.value;
+                        }
+                    });
+                }
+                
+                // Collect selected option
+                if (config.options) {
+                    const selected = document.querySelector('.shape-option.selected, .chart-option.selected');
+                    if (selected) {
+                        result.selected = selected.dataset.value;
+                    }
+                }
+                
+                window.currentModalResolve(result);
+            } else if (window.currentModalReject) {
+                window.currentModalReject('cancelled');
+            }
+            
+            window.currentModalResolve = null;
+            window.currentModalReject = null;
+            window.currentModalConfig = null;
+        }
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                const overlay = document.getElementById('modalOverlay');
+                if (overlay.classList.contains('active')) {
+                    closeModal(false);
+                }
+            }
+        });
+
+        // Close modal on overlay click
+        document.getElementById('modalOverlay').addEventListener('click', (e) => {
+            if (e.target.id === 'modalOverlay') {
+                closeModal(false);
+            }
+        });
+
+        let currentSlideIndex = 0;
+        let presentSlideIndex = 0;
+        let zoomLevel = 100;
+        let currentTab = 'start';
+        let currentTextFormat = {
+            bold: false,
+            italic: false,
+            underline: false,
+            strikethrough: false,
+            color: '#2b2b2b',
+            highlight: 'transparent',
+            align: 'left',
+            fontFamily: "'Segoe UI', sans-serif",
+            fontSize: '24'
+        };
+        let savedSelection = null;
+
+        // Sidebar Resize Functionality
+        let isResizingLeft = false;
+        let isResizingRight = false;
+
+        const leftResizeHandle = document.getElementById('leftResizeHandle');
+        const rightResizeHandle = document.getElementById('rightResizeHandle');
+        const slidesPanel = document.getElementById('slidesPanel');
+        const formatPanel = document.getElementById('formatPanel');
+
+        leftResizeHandle.addEventListener('mousedown', (e) => {
+            isResizingLeft = true;
+            document.body.style.cursor = 'ew-resize';
+            document.body.style.userSelect = 'none';
+        });
+
+        rightResizeHandle.addEventListener('mousedown', (e) => {
+            isResizingRight = true;
+            document.body.style.cursor = 'ew-resize';
+            document.body.style.userSelect = 'none';
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (isResizingLeft) {
+                const newWidth = e.clientX;
+                if (newWidth >= 150 && newWidth <= 400) {
+                    slidesPanel.style.width = newWidth + 'px';
+                }
+            }
+            
+            if (isResizingRight) {
+                const newWidth = window.innerWidth - e.clientX;
+                if (newWidth >= 200 && newWidth <= 500) {
+                    formatPanel.style.width = newWidth + 'px';
+                }
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (isResizingLeft || isResizingRight) {
+                isResizingLeft = false;
+                isResizingRight = false;
+                document.body.style.cursor = 'default';
+                document.body.style.userSelect = 'auto';
+            }
+        });
+
+        // File Menu Functions
+        function toggleFileMenu(event) {
+            event.stopPropagation();
+            const menu = document.getElementById('fileMenu');
+            menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // Close file menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('fileMenu');
+            if (menu.style.display === 'block' && !menu.contains(event.target)) {
+                menu.style.display = 'none';
+            }
+        });
+
+        function savePresentation() {
+            const dataStr = JSON.stringify(slides, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'praesentation.json';
+            link.click();
+            URL.revokeObjectURL(url);
+            document.getElementById('fileMenu').style.display = 'none';
+            
+            // Also save to localStorage
+            localStorage.setItem('powerpresent_slides', dataStr);
+            alert('Präsentation gespeichert!');
+        }
+
+        function loadPresentation(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const loadedSlides = JSON.parse(e.target.result);
+                        if (Array.isArray(loadedSlides) && loadedSlides.length > 0) {
+                            slides = loadedSlides;
+                            currentSlideIndex = 0;
+                            renderSlidesPanel();
+                            renderCurrentSlide();
+                            alert('Präsentation erfolgreich geladen!');
+                        } else {
+                            alert('Ungültige Datei!');
+                        }
+                    } catch (error) {
+                        alert('Fehler beim Laden der Datei: ' + error.message);
+                    }
+                };
+                reader.readAsText(file);
+            }
+            document.getElementById('fileMenu').style.display = 'none';
+        }
+
+        function newPresentation() {
+            if (confirm('Möchten Sie wirklich eine neue Präsentation erstellen? Nicht gespeicherte Änderungen gehen verloren.')) {
+                slides = [
+                    {
+                        layout: 'title',
+                        title: 'Neue Präsentation',
+                        content: 'Klicken Sie hier, um zu beginnen',
+                        content2: '',
+                        bgColor: '#ffffff',
+                        textColor: '#2b2b2b',
+                        titleFont: "'Segoe UI', sans-serif",
+                        notes: ''
+                    }
+                ];
+                currentSlideIndex = 0;
+                renderSlidesPanel();
+                renderCurrentSlide();
+                document.getElementById('fileMenu').style.display = 'none';
+            }
+        }
+
+        function exportAsPDF() {
+            alert('PDF-Export: Diese Funktion würde die Präsentation als PDF exportieren. Für eine vollständige Implementierung wird eine PDF-Bibliothek benötigt.');
+            document.getElementById('fileMenu').style.display = 'none';
+        }
+
+        // Auto-save to localStorage every 30 seconds
+        setInterval(function() {
+            localStorage.setItem('powerpresent_slides', JSON.stringify(slides));
+        }, 30000);
+
+        // Load from localStorage on startup
+        window.addEventListener('load', function() {
+            const saved = localStorage.getItem('powerpresent_slides');
+            if (saved) {
+                try {
+                    const loadedSlides = JSON.parse(saved);
+                    if (Array.isArray(loadedSlides) && loadedSlides.length > 0) {
+                        const restore = confirm('Möchten Sie die zuletzt gespeicherte Präsentation wiederherstellen?');
+                        if (restore) {
+                            slides = loadedSlides;
+                            currentSlideIndex = 0;
+                            renderSlidesPanel();
+                            renderCurrentSlide();
+                        }
+                    }
+                } catch (e) {
+                    console.error('Error loading saved presentation:', e);
+                }
+            }
+        });
+
+        // Tab Switching
+        function switchTab(tabName) {
+            // Update menu tabs
+            const tabs = document.querySelectorAll('.menu-tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Hide all ribbons
+            document.querySelectorAll('[id^="ribbon-"]').forEach(ribbon => {
+                ribbon.style.display = 'none';
+            });
+
+            // Show selected ribbon
+            const ribbon = document.getElementById(`ribbon-${tabName}`);
+            if (ribbon) {
+                ribbon.style.display = 'flex';
+            }
+
+            currentTab = tabName;
+        }
+
+        // Text Formatting Functions
+        function applyFormat(formatType) {
+            const activeElement = document.activeElement;
+            if (!activeElement || (!activeElement.classList.contains('editable-content') && !activeElement.classList.contains('editable-title'))) {
+                alert('Bitte klicken Sie zuerst in ein Textfeld.');
+                return;
+            }
+
+            const selection = window.getSelection();
+            if (!selection.rangeCount || selection.isCollapsed) {
+                alert('Bitte wählen Sie zuerst einen Text aus, um ihn zu formatieren.');
+                return;
+            }
+
+            // Save the current selection range
+            const savedRange = selection.getRangeAt(0).cloneRange();
+            
+            document.execCommand(formatType, false, null);
+            
+            // Restore the selection
+            try {
+                selection.removeAllRanges();
+                selection.addRange(savedRange);
+            } catch (e) {
+                // Selection restore failed, continue anyway
+            }
+            
+            // Update slide data
+            if (activeElement.classList.contains('editable-content')) {
+                const field = activeElement.previousElementSibling ? 'content2' : 'content';
+                updateSlideDataHTML(field, activeElement.innerHTML);
+            }
+            
+            // Update controls with slight delay
+            setTimeout(updateFormattingControls, 50);
+        }
+
+        function applyFontFamily() {
+            const fontFamily = document.getElementById('fontFamily').value;
+            
+            // Restore saved selection if exists
+            if (savedSelection) {
+                const selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(savedSelection);
+                savedSelection = null; // Clear after use
+            }
+            
+            const activeElement = document.activeElement;
+            
+            if (activeElement && (activeElement.classList.contains('editable-content') || activeElement.classList.contains('editable-title'))) {
+                const selection = window.getSelection();
+                if (selection.rangeCount > 0 && !selection.isCollapsed) {
+                    // Save the selection
+                    const savedRange = selection.getRangeAt(0).cloneRange();
+                    
+                    // For selected text
+                    document.execCommand('fontName', false, fontFamily);
+                    
+                    // Try to restore selection
+                    try {
+                        selection.removeAllRanges();
+                        selection.addRange(savedRange);
+                    } catch (e) {
+                        // Selection restore failed
+                    }
+                    
+                    // Update slide data
+                    updateSlideDataHTML(
+                        activeElement.classList.contains('editable-content') ? 
+                        (activeElement.previousElementSibling ? 'content2' : 'content') : 
+                        'title', 
+                        activeElement.innerHTML
+                    );
+                } else {
+                    // Apply to entire element if no selection
+                    activeElement.style.fontFamily = fontFamily;
+                }
+            } else {
+                // Apply to entire slide
+                slides[currentSlideIndex].titleFont = fontFamily;
+                renderCurrentSlide();
+                renderSlidesPanel();
+            }
+            
+            // Delay the update to avoid conflicts
+            setTimeout(updateFormattingControls, 100);
+        }
+
+        function applyFontSize() {
+            const fontSize = document.getElementById('fontSize').value;
+            
+            // Restore saved selection if exists
+            if (savedSelection) {
+                const selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(savedSelection);
+                savedSelection = null; // Clear after use
+            }
+            
+            const activeElement = document.activeElement;
+            
+            if (activeElement && (activeElement.classList.contains('editable-content') || activeElement.classList.contains('editable-title'))) {
+                const selection = window.getSelection();
+                if (selection.rangeCount > 0 && !selection.isCollapsed) {
+                    // Save the selection range
+                    const range = selection.getRangeAt(0);
+                    const savedRange = range.cloneRange();
+                    
+                    // For selected text, wrap in span with inline style
+                    const span = document.createElement('span');
+                    span.style.fontSize = fontSize + 'px';
+                    
+                    try {
+                        range.surroundContents(span);
+                    } catch (e) {
+                        // If surroundContents fails, use execCommand fallback
+                        document.execCommand('fontSize', false, '7');
+                        const fontElements = activeElement.querySelectorAll('font[size="7"]');
+                        fontElements.forEach(el => {
+                            el.removeAttribute('size');
+                            el.style.fontSize = fontSize + 'px';
+                        });
+                    }
+                    
+                    // Try to restore selection
+                    try {
+                        selection.removeAllRanges();
+                        selection.addRange(savedRange);
+                    } catch (e) {
+                        // Selection restore failed
+                    }
+                    
+                    // Update slide data
+                    updateSlideDataHTML(
+                        activeElement.classList.contains('editable-content') ? 
+                        (activeElement.previousElementSibling ? 'content2' : 'content') : 
+                        'title', 
+                        activeElement.innerHTML
+                    );
+                }
+            }
+            
+            // Delay the update to avoid conflicts
+            setTimeout(updateFormattingControls, 100);
+        }
+
+        // Save selection before clicking on dropdown
+        document.addEventListener('mousedown', function(e) {
+            if (e.target.id === 'fontFamily' || e.target.id === 'fontSize') {
+                const selection = window.getSelection();
+                if (selection.rangeCount > 0) {
+                    savedSelection = selection.getRangeAt(0).cloneRange();
+                }
+            }
+        });
+
+        function applyTextColor() {
+            const color = prompt('Textfarbe eingeben (z.B. #ff0000 oder red):', currentTextFormat.color);
+            if (color) {
+                const activeElement = document.activeElement;
+                if (activeElement && (activeElement.classList.contains('editable-content') || activeElement.classList.contains('editable-title'))) {
+                    document.execCommand('foreColor', false, color);
+                } else {
+                    slides[currentSlideIndex].textColor = color;
+                    renderCurrentSlide();
+                    renderSlidesPanel();
+                }
+                currentTextFormat.color = color;
+            }
+        }
+
+        function applyHighlight() {
+            const color = prompt('Hervorhebungsfarbe eingeben (z.B. yellow, #ffff00):', 'yellow');
+            if (color) {
+                const activeElement = document.activeElement;
+                if (activeElement && (activeElement.classList.contains('editable-content') || activeElement.classList.contains('editable-title'))) {
+                    document.execCommand('hiliteColor', false, color);
+                }
+                currentTextFormat.highlight = color;
+            }
+        }
+
+        function applyAlignment(align) {
+            const activeElement = document.activeElement;
+            if (activeElement && (activeElement.classList.contains('editable-content') || activeElement.classList.contains('editable-title'))) {
+                const commands = {
+                    'left': 'justifyLeft',
+                    'center': 'justifyCenter',
+                    'right': 'justifyRight',
+                    'justify': 'justifyFull'
+                };
+                document.execCommand(commands[align], false, null);
+            } else {
+                // Apply to current content area
+                const contentAreas = document.querySelectorAll('.editable-content, .editable-title');
+                contentAreas.forEach(area => {
+                    area.style.textAlign = align;
+                });
+            }
+        }
+
+        function applyList(listType) {
+            const activeElement = document.activeElement;
+            if (!activeElement || !activeElement.classList.contains('editable-content')) {
+                alert('Bitte wählen Sie einen Textbereich aus.');
+                return;
+            }
+
+            if (listType === 'bullet') {
+                document.execCommand('insertUnorderedList', false, null);
+            } else if (listType === 'number') {
+                document.execCommand('insertOrderedList', false, null);
+            }
+        }
+
+        function increaseIndent() {
+            const activeElement = document.activeElement;
+            if (activeElement && activeElement.classList.contains('editable-content')) {
+                document.execCommand('indent', false, null);
+            }
+        }
+
+        function decreaseIndent() {
+            const activeElement = document.activeElement;
+            if (activeElement && activeElement.classList.contains('editable-content')) {
+                document.execCommand('outdent', false, null);
+            }
+        }
+
+        // Insert functions
+        function insertTextBox() {
+            alert('Textfeld-Funktion: Hier können Sie später ein Textfeld zur Folie hinzufügen.');
+        }
+
+        function insertImage() {
+            alert('Bild-Funktion: Hier können Sie später ein Bild hochladen.');
+        }
+
+        function insertShape() {
+            alert('Form-Funktion: Hier können Sie später Formen einfügen.');
+        }
+
+        function insertTable() {
+            alert('Tabellen-Funktion: Hier können Sie später eine Tabelle erstellen.');
+        }
+
+        function insertChart() {
+            alert('Diagramm-Funktion: Hier können Sie später ein Diagramm einfügen.');
+        }
+
+        function insertIcon() {
+            alert('Symbol-Funktion: Hier können Sie später Symbole/Icons einfügen.');
+        }
+
+        function insertVideo() {
+            alert('Video-Funktion: Hier können Sie später Videos einbetten.');
+        }
+
+        // Design functions
+        function applyDesign(designName) {
+            const designs = {
+                classic: { bgColor: '#ffffff', textColor: '#2b2b2b', titleFont: "'Segoe UI', sans-serif" },
+                modern: { bgColor: '#e1f5ff', textColor: '#1a237e', titleFont: "'Segoe UI', sans-serif" },
+                minimalist: { bgColor: '#f9f9f9', textColor: '#2b2b2b', titleFont: "'Segoe UI', sans-serif" },
+                dark: { bgColor: '#2b2b2b', textColor: '#ffffff', titleFont: "'Segoe UI', sans-serif" }
+            };
+
+            if (designs[designName]) {
+                slides[currentSlideIndex].bgColor = designs[designName].bgColor;
+                slides[currentSlideIndex].textColor = designs[designName].textColor;
+                slides[currentSlideIndex].titleFont = designs[designName].titleFont;
+                renderCurrentSlide();
+                renderSlidesPanel();
+            }
+        }
+
+        function customizeColors() {
+            alert('Farbanpassung: Nutzen Sie das rechte Panel für individuelle Farben.');
+        }
+
+        function customizeFonts() {
+            alert('Schriftanpassung: Nutzen Sie das rechte Panel für Schriftarten.');
+        }
+
+        // Presentation functions
+        function startPresentationFromCurrent() {
+            presentSlideIndex = currentSlideIndex;
+            renderPresentSlides();
+            document.getElementById('presentMode').classList.add('active');
+            updatePresentCounter();
+        }
+
+        function togglePresenterView() {
+            alert('Referentenansicht: Diese Funktion zeigt Notizen und die nächste Folie an (in Entwicklung).');
+        }
+
+        function rehearseTimings() {
+            alert('Zeitabläufe testen: Üben Sie Ihre Präsentation mit Zeiterfassung (in Entwicklung).');
+        }
+
+        function renderSlidesPanel() {
+            const panel = document.getElementById('slidesPanel');
+            panel.innerHTML = '';
+
+            slides.forEach((slide, index) => {
+                const thumb = document.createElement('div');
+                thumb.className = `slide-thumb ${index === currentSlideIndex ? 'active' : ''}`;
+                thumb.onclick = () => selectSlide(index);
+
+                thumb.innerHTML = `
+                    <div class="slide-thumb-number">${index + 1}</div>
+                    <div class="slide-thumb-content" style="background: ${slide.bgColor}; color: ${slide.textColor};">
+                        <div class="slide-thumb-title">${slide.title || 'Unbenannt'}</div>
+                        <div style="font-size: 8px; margin-top: 4px;">${slide.content.substring(0, 60)}...</div>
+                    </div>
+                `;
+
+                panel.appendChild(thumb);
+            });
+
+            updateStatusBar();
+        }
+
+        function renderCurrentSlide() {
+            const canvas = document.getElementById('slideCanvas');
+            const slide = slides[currentSlideIndex];
+
+            canvas.style.background = slide.bgColor;
+
+            let html = '';
+            if (slide.layout === 'title') {
+                html = `
+                    <div class="slide-layout-title">
+                        <input type="text" class="editable-title" value="${slide.title}" 
+                               oninput="updateSlideData('title', this.value)"
+                               style="color: ${slide.textColor}; font-family: ${slide.titleFont};">
+                    </div>
+                    <div class="slide-layout-content">
+                        <div class="editable-content" contenteditable="true" oninput="updateSlideDataHTML('content', this.innerHTML)"
+                             style="color: ${slide.textColor}; text-align: center; font-size: 32px; outline: none; min-height: 100px;">${slide.content}</div>
+                    </div>
+                `;
+            } else if (slide.layout === 'content') {
+                html = `
+                    <div class="slide-layout-title">
+                        <input type="text" class="editable-title" value="${slide.title}" 
+                               oninput="updateSlideData('title', this.value)"
+                               style="color: ${slide.textColor}; font-family: ${slide.titleFont};">
+                    </div>
+                    <div class="slide-layout-content">
+                        <div class="editable-content" contenteditable="true" oninput="updateSlideDataHTML('content', this.innerHTML)"
+                             style="color: ${slide.textColor}; outline: none; min-height: 100px;">${slide.content}</div>
+                    </div>
+                `;
+            } else if (slide.layout === 'two-column') {
+                html = `
+                    <div class="slide-layout-title">
+                        <input type="text" class="editable-title" value="${slide.title}" 
+                               oninput="updateSlideData('title', this.value)"
+                               style="color: ${slide.textColor}; font-family: ${slide.titleFont};">
+                    </div>
+                    <div class="slide-layout-content slide-layout-two-column">
+                        <div class="editable-content" contenteditable="true" oninput="updateSlideDataHTML('content', this.innerHTML)"
+                             style="color: ${slide.textColor}; outline: none; min-height: 100px;">${slide.content}</div>
+                        <div class="editable-content" contenteditable="true" oninput="updateSlideDataHTML('content2', this.innerHTML)"
+                             style="color: ${slide.textColor}; outline: none; min-height: 100px;">${slide.content2}</div>
+                    </div>
+                `;
+            }
+
+            canvas.innerHTML = html;
+
+            // Update format panel
+            document.getElementById('bgColor').value = slide.bgColor;
+            document.getElementById('textColor').value = slide.textColor;
+            document.getElementById('titleFont').value = slide.titleFont;
+            document.getElementById('speakerNotes').value = slide.notes || '';
+        }
+
+        function selectSlide(index) {
+            currentSlideIndex = index;
+            renderSlidesPanel();
+            renderCurrentSlide();
+        }
+
+        function updateSlideData(field, value) {
+            slides[currentSlideIndex][field] = value;
+            debouncedRenderSlidesPanel();
+        }
+
+        function updateSlideDataHTML(field, value) {
+            slides[currentSlideIndex][field] = value;
+            debouncedRenderSlidesPanel();
+        }
+
+        // Debounced render for slides panel to avoid too frequent updates
+        let renderSlidesPanelTimeout = null;
+        function debouncedRenderSlidesPanel() {
+            if (renderSlidesPanelTimeout) {
+                clearTimeout(renderSlidesPanelTimeout);
+            }
+            renderSlidesPanelTimeout = setTimeout(() => {
+                renderSlidesPanel();
+            }, 300);
+        }
+
+        // Auto-update formatting controls based on cursor position
+        function updateFormattingControls() {
+            const activeElement = document.activeElement;
+            if (!activeElement || (!activeElement.classList.contains('editable-content') && !activeElement.classList.contains('editable-title'))) {
+                return;
+            }
+
+            // Update Bold
+            const isBold = document.queryCommandState('bold');
+            const btnBold = document.getElementById('btn-bold');
+            if (btnBold) btnBold.classList.toggle('active', isBold);
+
+            // Update Italic
+            const isItalic = document.queryCommandState('italic');
+            const btnItalic = document.getElementById('btn-italic');
+            if (btnItalic) btnItalic.classList.toggle('active', isItalic);
+
+            // Update Underline
+            const isUnderline = document.queryCommandState('underline');
+            const btnUnderline = document.getElementById('btn-underline');
+            if (btnUnderline) btnUnderline.classList.toggle('active', isUnderline);
+
+            // Update Strikethrough
+            const isStrike = document.queryCommandState('strikeThrough');
+            const btnStrike = document.getElementById('btn-strike');
+            if (btnStrike) btnStrike.classList.toggle('active', isStrike);
+
+            // Update Font Family
+            const fontFamily = document.queryCommandValue('fontName');
+            const fontFamilySelect = document.getElementById('fontFamily');
+            if (fontFamilySelect && fontFamily) {
+                // Try to match the font family to one of our options
+                const cleanFontName = fontFamily.replace(/['"]/g, '').toLowerCase();
+                const options = fontFamilySelect.options;
+                for (let i = 0; i < options.length; i++) {
+                    const optionValue = options[i].value.toLowerCase();
+                    if (optionValue.includes(cleanFontName) || cleanFontName.includes(optionValue.split(',')[0].replace(/['"]/g, '').trim().toLowerCase())) {
+                        fontFamilySelect.selectedIndex = i;
+                        break;
+                    }
+                }
+            }
+
+            // Update Font Size
+            const selection = window.getSelection();
+            const fontSizeSelect = document.getElementById('fontSize');
+            
+            if (fontSizeSelect && selection.rangeCount > 0) {
+                const range = selection.getRangeAt(0);
+                const container = range.commonAncestorContainer;
+                const element = container.nodeType === 3 ? container.parentElement : container;
+                
+                // Get the actual computed font size
+                const computedSize = window.getComputedStyle(element).fontSize;
+                const sizeValue = parseInt(computedSize);
+                
+                // Only update if we find an exact match or very close match
+                const options = fontSizeSelect.options;
+                let exactMatch = false;
+                
+                for (let i = 0; i < options.length; i++) {
+                    const optionSize = parseInt(options[i].value);
+                    // Allow 1px tolerance for rounding
+                    if (Math.abs(optionSize - sizeValue) <= 1) {
+                        fontSizeSelect.selectedIndex = i;
+                        exactMatch = true;
+                        break;
+                    }
+                }
+                
+                // If no exact match and size is significantly different, don't change selection
+                // This prevents the "jumping" bug
+            }
+        }
+
+        // Add event listeners to track selection changes
+        let updateFormattingTimeout = null;
+        
+        function debouncedUpdateFormattingControls() {
+            if (updateFormattingTimeout) {
+                clearTimeout(updateFormattingTimeout);
+            }
+            updateFormattingTimeout = setTimeout(updateFormattingControls, 50);
+        }
+        
+        document.addEventListener('selectionchange', debouncedUpdateFormattingControls);
+        document.addEventListener('click', debouncedUpdateFormattingControls);
+        document.addEventListener('keyup', debouncedUpdateFormattingControls);
+
+        function updateSlideBackground() {
+            const color = document.getElementById('bgColor').value;
+            slides[currentSlideIndex].bgColor = color;
+            renderCurrentSlide();
+            renderSlidesPanel();
+        }
+
+        function updateTextColor() {
+            const color = document.getElementById('textColor').value;
+            slides[currentSlideIndex].textColor = color;
+            renderCurrentSlide();
+            renderSlidesPanel();
+        }
+
+        function updateFonts() {
+            const font = document.getElementById('titleFont').value;
+            slides[currentSlideIndex].titleFont = font;
+            renderCurrentSlide();
+        }
+
+        function updateNotes() {
+            slides[currentSlideIndex].notes = document.getElementById('speakerNotes').value;
+        }
+
+        function applyThemeColor(color) {
+            document.getElementById('bgColor').value = color;
+            updateSlideBackground();
+        }
+
+        function setLayout(layout) {
+            slides[currentSlideIndex].layout = layout;
+            renderCurrentSlide();
+            renderSlidesPanel();
+        }
+
+        function addNewSlide() {
+            const newSlide = {
+                layout: 'content',
+                title: 'Neue Folie',
+                content: '',
+                content2: '',
+                bgColor: '#ffffff',
+                textColor: '#2b2b2b',
+                titleFont: "'Segoe UI', sans-serif",
+                notes: ''
+            };
+            slides.splice(currentSlideIndex + 1, 0, newSlide);
+            currentSlideIndex++;
+            renderSlidesPanel();
+            renderCurrentSlide();
+        }
+
+        function duplicateSlide() {
+            const copy = JSON.parse(JSON.stringify(slides[currentSlideIndex]));
+            slides.splice(currentSlideIndex + 1, 0, copy);
+            currentSlideIndex++;
+            renderSlidesPanel();
+            renderCurrentSlide();
+        }
+
+        function deleteSlide() {
+            if (slides.length > 1) {
+                slides.splice(currentSlideIndex, 1);
+                if (currentSlideIndex >= slides.length) {
+                    currentSlideIndex = slides.length - 1;
+                }
+                renderSlidesPanel();
+                renderCurrentSlide();
+            } else {
+                alert('Sie müssen mindestens eine Folie behalten.');
+            }
+        }
+
+        // Insert Functions
+        async function insertTable() {
+            try {
+                const result = await showModal({
+                    title: 'Tabelle einfügen',
+                    icon: '📊',
+                    inputs: [
+                        { id: 'rows', label: 'Anzahl der Zeilen', type: 'number', value: '3' },
+                        { id: 'cols', label: 'Anzahl der Spalten', type: 'number', value: '3' }
+                    ],
+                    body: `
+                        <label class="modal-label">Anzahl der Zeilen</label>
+                        <input type="number" class="modal-input" id="modal-rows" value="3" min="1" max="20">
+                        
+                        <label class="modal-label">Anzahl der Spalten</label>
+                        <input type="number" class="modal-input" id="modal-cols" value="3" min="1" max="10">
+                    `,
+                    confirmText: 'Tabelle einfügen'
+                });
+                
+                const rows = parseInt(result.rows);
+                const cols = parseInt(result.cols);
+                
+                if (rows > 0 && cols > 0) {
+                    let tableHTML = '<table border="1" class="editable-table" onclick="selectElement(this)" style="border-collapse: collapse; width: 80%; margin: 20px auto; cursor: pointer;">\n';
+                    for (let i = 0; i < rows; i++) {
+                        tableHTML += '  <tr>\n';
+                        for (let j = 0; j < cols; j++) {
+                            tableHTML += '    <td contenteditable="true" style="padding: 10px; border: 1px solid #333;">Zelle</td>\n';
+                        }
+                        tableHTML += '  </tr>\n';
+                    }
+                    tableHTML += '</table>';
+                    
+                    insertContent(tableHTML);
+                }
+            } catch (e) {
+                // User cancelled
+            }
+        }
+
+        async function insertImage() {
+            try {
+                const result = await showModal({
+                    title: 'Bild einfügen',
+                    icon: '🖼️',
+                    body: `
+                        <label class="modal-label">Bild-URL</label>
+                        <input type="text" class="modal-input" id="modal-url" value="https://via.placeholder.com/400x300" placeholder="https://...">
+                    `,
+                    inputs: [
+                        { id: 'url', label: 'Bild-URL', type: 'text', value: 'https://via.placeholder.com/400x300' }
+                    ],
+                    confirmText: 'Bild einfügen'
+                });
+                
+                if (result.url) {
+                    const imageHTML = `<img src="${result.url}" onclick="selectElement(this)" style="max-width: 80%; height: auto; display: block; margin: 20px auto; cursor: pointer;" alt="Eingefügtes Bild">`;
+                    insertContent(imageHTML);
+                }
+            } catch (e) {
+                // User cancelled
+            }
+        }
+
+        async function insertShape() {
+            try {
+                const shapes = [
+                    { name: 'Rechteck', value: 'rectangle', html: '<div style="width: 200px; height: 100px; background: #4285f4; margin: 20px auto;"></div>', preview: '<div style="width: 60px; height: 40px; background: #4285f4;"></div>' },
+                    { name: 'Kreis', value: 'circle', html: '<div style="width: 150px; height: 150px; background: #ea4335; border-radius: 50%; margin: 20px auto;"></div>', preview: '<div style="width: 50px; height: 50px; background: #ea4335; border-radius: 50%;"></div>' },
+                    { name: 'Dreieck', value: 'triangle', html: '<div style="width: 0; height: 0; border-left: 75px solid transparent; border-right: 75px solid transparent; border-bottom: 130px solid #fbbc04; margin: 20px auto;"></div>', preview: '<div style="width: 0; height: 0; border-left: 25px solid transparent; border-right: 25px solid transparent; border-bottom: 43px solid #fbbc04;"></div>' },
+                    { name: 'Stern', value: 'star', html: '<div style="font-size: 100px; color: #34a853; text-align: center; margin: 20px auto;">★</div>', preview: '<div style="font-size: 40px; color: #34a853;">★</div>' }
+                ];
+                
+                const shapeOptions = shapes.map(shape => 
+                    `<div class="shape-option" data-value="${shape.value}" onclick="selectOption(this)">
+                        <div class="shape-preview">${shape.preview}</div>
+                        <div class="shape-name">${shape.name}</div>
+                    </div>`
+                ).join('');
+                
+                const result = await showModal({
+                    title: 'Form einfügen',
+                    icon: '⬛',
+                    body: `
+                        <div class="shape-grid">
+                            ${shapeOptions}
+                        </div>
+                    `,
+                    options: shapes,
+                    confirmText: 'Form einfügen'
+                });
+                
+                if (result.selected) {
+                    const shape = shapes.find(s => s.value === result.selected);
+                    if (shape) {
+                        insertContent(shape.html);
+                    }
+                }
+            } catch (e) {
+                // User cancelled
+            }
+        }
+        
+        function selectOption(element) {
+            // Remove previous selection
+            const parent = element.parentNode;
+            parent.querySelectorAll('.shape-option, .chart-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            // Add selection to clicked element
+            element.classList.add('selected');
+        }
+
+        async function insertChart() {
+            try {
+                const charts = [
+                    { name: 'Säulendiagramm', value: '1', icon: '📊' },
+                    { name: 'Liniendiagramm', value: '2', icon: '📈' },
+                    { name: 'Kreisdiagramm', value: '3', icon: '🥧' },
+                    { name: 'Balkendiagramm', value: '4', icon: '📉' }
+                ];
+                
+                const chartOptions = charts.map(chart => 
+                    `<div class="chart-option" data-value="${chart.value}" onclick="selectOption(this)">
+                        <div style="font-size: 32px;">${chart.icon}</div>
+                        <div class="chart-name">${chart.name}</div>
+                    </div>`
+                ).join('');
+                
+                const result = await showModal({
+                    title: 'Diagramm einfügen',
+                    icon: '📈',
+                    body: `
+                        <div class="chart-grid">
+                            ${chartOptions}
+                        </div>
+                    `,
+                    options: charts,
+                    confirmText: 'Diagramm einfügen'
+                });
+                
+                if (result.selected) {
+                    const type = parseInt(result.selected);
+                    const chartHTML = createChartHTML(type);
+                    insertContent(chartHTML);
+                }
+            } catch (e) {
+                // User cancelled
+            }
+        }
+
+        function createChartHTML(type) {
+            const colors = ['#4285f4', '#ea4335', '#fbbc04', '#34a853'];
+            
+            switch(type) {
+                case 1: // Säulendiagramm
+                    return `
+                        <div style="display: flex; align-items: flex-end; justify-content: center; gap: 20px; height: 250px; margin: 20px auto; width: 80%;">
+                            <div style="background: ${colors[0]}; width: 60px; height: 70%; display: flex; align-items: flex-end; justify-content: center; padding: 10px; color: white; font-weight: bold;">70%</div>
+                            <div style="background: ${colors[1]}; width: 60px; height: 50%; display: flex; align-items: flex-end; justify-content: center; padding: 10px; color: white; font-weight: bold;">50%</div>
+                            <div style="background: ${colors[2]}; width: 60px; height: 85%; display: flex; align-items: flex-end; justify-content: center; padding: 10px; color: white; font-weight: bold;">85%</div>
+                            <div style="background: ${colors[3]}; width: 60px; height: 60%; display: flex; align-items: flex-end; justify-content: center; padding: 10px; color: white; font-weight: bold;">60%</div>
+                        </div>
+                    `;
+                case 2: // Liniendiagramm
+                    return `
+                        <div style="width: 80%; margin: 20px auto; position: relative; height: 200px; border-left: 2px solid #333; border-bottom: 2px solid #333;">
+                            <svg width="100%" height="100%" style="position: absolute; top: 0; left: 0;">
+                                <polyline points="0,150 25%,100 50%,120 75%,40 100%,80" 
+                                          fill="none" stroke="${colors[0]}" stroke-width="3"/>
+                                <circle cx="0%" cy="150" r="5" fill="${colors[0]}"/>
+                                <circle cx="25%" cy="100" r="5" fill="${colors[0]}"/>
+                                <circle cx="50%" cy="120" r="5" fill="${colors[0]}"/>
+                                <circle cx="75%" cy="40" r="5" fill="${colors[0]}"/>
+                                <circle cx="100%" cy="80" r="5" fill="${colors[0]}"/>
+                            </svg>
+                        </div>
+                    `;
+                case 3: // Kreisdiagramm
+                    return `
+                        <div style="width: 200px; height: 200px; margin: 20px auto; border-radius: 50%; background: conic-gradient(
+                            ${colors[0]} 0deg 90deg,
+                            ${colors[1]} 90deg 180deg,
+                            ${colors[2]} 180deg 270deg,
+                            ${colors[3]} 270deg 360deg
+                        );"></div>
+                    `;
+                case 4: // Balkendiagramm
+                    return `
+                        <div style="width: 80%; margin: 20px auto; display: flex; flex-direction: column; gap: 15px;">
+                            <div style="background: ${colors[0]}; height: 40px; width: 70%; display: flex; align-items: center; padding-left: 15px; color: white; font-weight: bold;">Kategorie 1</div>
+                            <div style="background: ${colors[1]}; height: 40px; width: 50%; display: flex; align-items: center; padding-left: 15px; color: white; font-weight: bold;">Kategorie 2</div>
+                            <div style="background: ${colors[2]}; height: 40px; width: 85%; display: flex; align-items: center; padding-left: 15px; color: white; font-weight: bold;">Kategorie 3</div>
+                            <div style="background: ${colors[3]}; height: 40px; width: 60%; display: flex; align-items: center; padding-left: 15px; color: white; font-weight: bold;">Kategorie 4</div>
+                        </div>
+                    `;
+            }
+        }
+
+        function insertContent(htmlContent) {
+            const canvas = document.getElementById('slideCanvas');
+            const activeElement = canvas.querySelector('[contenteditable="true"]:focus');
+            
+            if (activeElement) {
+                // Insert at cursor position in focused element
+                const selection = window.getSelection();
+                if (selection.rangeCount > 0) {
+                    const range = selection.getRangeAt(0);
+                    range.deleteContents();
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = htmlContent;
+                    range.insertNode(tempDiv.firstChild);
+                }
+            } else {
+                // Add to content area of current slide
+                const currentSlide = slides[currentSlideIndex];
+                if (currentSlide.layout === 'two-column') {
+                    currentSlide.content += '\n' + htmlContent;
+                } else {
+                    currentSlide.content += '\n' + htmlContent;
+                }
+                renderCurrentSlide();
+                renderSlidesPanel();
+            }
+        }
+
+        function updateStatusBar() {
+            document.getElementById('statusSlideNum').textContent = currentSlideIndex + 1;
+            document.getElementById('statusSlideTotal').textContent = slides.length;
+        }
+
+        function zoomIn() {
+            if (zoomLevel < 200) {
+                zoomLevel += 10;
+                updateZoom();
+            }
+        }
+
+        function zoomOut() {
+            if (zoomLevel > 50) {
+                zoomLevel -= 10;
+                updateZoom();
+            }
+        }
+
+        function updateZoom() {
+            document.getElementById('zoomLevel').textContent = zoomLevel + '%';
+            const canvas = document.getElementById('slideCanvas');
+            canvas.style.transform = `scale(${zoomLevel / 100})`;
+        }
+
+        // Context-sensitive tab detection
+        let selectedElement = null;
+        let currentContextTab = null;
+
+        function selectElement(element) {
+            selectedElement = element;
+            
+            if (element.nodeName === 'TABLE') {
+                showContextTab('tabellentools');
+            } else if (element.nodeName === 'IMG') {
+                showContextTab('bildtools');
+            }
+        }
+
+        function detectContextSelection() {
+            const selection = window.getSelection();
+            if (selection.rangeCount > 0) {
+                let node = selection.anchorNode;
+                
+                // Traverse up to find table or image
+                while (node && node !== document.body) {
+                    if (node.nodeName === 'TABLE') {
+                        showContextTab('tabellentools');
+                        selectedElement = node;
+                        return;
+                    } else if (node.nodeName === 'IMG') {
+                        showContextTab('bildtools');
+                        selectedElement = node;
+                        return;
+                    }
+                    node = node.parentNode;
+                }
+            }
+            
+            // Check if clicked element is table or image
+            const activeEl = document.activeElement;
+            if (activeEl && activeEl.tagName === 'IMG') {
+                showContextTab('bildtools');
+                selectedElement = activeEl;
+                return;
+            }
+            
+            hideContextTabs();
+        }
+
+        function showContextTab(tabName) {
+            if (currentContextTab === tabName) return;
+            
+            hideContextTabs();
+            const ribbon = document.getElementById('ribbon-' + tabName);
+            if (ribbon) {
+                ribbon.style.display = 'flex';
+                currentContextTab = tabName;
+                
+                // Add context tab indicator to menu
+                const menuBar = document.querySelector('.menu-items');
+                let contextTabButton = document.getElementById('context-tab-button');
+                if (!contextTabButton) {
+                    contextTabButton = document.createElement('div');
+                    contextTabButton.id = 'context-tab-button';
+                    contextTabButton.className = 'menu-tab active';
+                    contextTabButton.style.background = tabName === 'tabellentools' ? '#c43e1c' : '#1976d2';
+                    menuBar.appendChild(contextTabButton);
+                }
+                contextTabButton.textContent = tabName === 'tabellentools' ? 'Tabellentools' : 'Bildtools';
+                contextTabButton.style.background = tabName === 'tabellentools' ? '#c43e1c' : '#1976d2';
+            }
+        }
+
+        function hideContextTabs() {
+            if (!currentContextTab) return;
+            
+            const ribbon = document.getElementById('ribbon-' + currentContextTab);
+            if (ribbon) {
+                ribbon.style.display = 'none';
+            }
+            
+            const contextButton = document.getElementById('context-tab-button');
+            if (contextButton) {
+                contextButton.remove();
+            }
+            
+            currentContextTab = null;
+            selectedElement = null;
+        }
+
+        // Table manipulation functions
+        function insertTableRow() {
+            if (!selectedElement || selectedElement.nodeName !== 'TABLE') {
+                alert('Bitte wählen Sie eine Tabelle aus.');
+                return;
+            }
+            
+            const newRow = selectedElement.insertRow(-1);
+            const colCount = selectedElement.rows[0].cells.length;
+            for (let i = 0; i < colCount; i++) {
+                const cell = newRow.insertCell(i);
+                cell.style.padding = '10px';
+                cell.style.border = '1px solid #333';
+                cell.textContent = 'Neue Zelle';
+            }
+        }
+
+        function insertTableColumn() {
+            if (!selectedElement || selectedElement.nodeName !== 'TABLE') {
+                alert('Bitte wählen Sie eine Tabelle aus.');
+                return;
+            }
+            
+            for (let i = 0; i < selectedElement.rows.length; i++) {
+                const cell = selectedElement.rows[i].insertCell(-1);
+                cell.style.padding = '10px';
+                cell.style.border = '1px solid #333';
+                cell.textContent = 'Neue Zelle';
+            }
+        }
+
+        function deleteTableRow() {
+            if (!selectedElement || selectedElement.nodeName !== 'TABLE') {
+                alert('Bitte wählen Sie eine Tabelle aus.');
+                return;
+            }
+            
+            if (selectedElement.rows.length > 1) {
+                selectedElement.deleteRow(-1);
+            } else {
+                alert('Die Tabelle muss mindestens eine Zeile haben.');
+            }
+        }
+
+        function deleteTableColumn() {
+            if (!selectedElement || selectedElement.nodeName !== 'TABLE') {
+                alert('Bitte wählen Sie eine Tabelle aus.');
+                return;
+            }
+            
+            if (selectedElement.rows[0].cells.length > 1) {
+                for (let i = 0; i < selectedElement.rows.length; i++) {
+                    selectedElement.rows[i].deleteCell(-1);
+                }
+            } else {
+                alert('Die Tabelle muss mindestens eine Spalte haben.');
+            }
+        }
+
+        function applyTableStyle(style) {
+            if (!selectedElement || selectedElement.nodeName !== 'TABLE') {
+                alert('Bitte wählen Sie eine Tabelle aus.');
+                return;
+            }
+            
+            const colors = ['#4285f4', '#ea4335', '#fbbc04', '#34a853'];
+            
+            switch(style) {
+                case 'default':
+                    for (let i = 0; i < selectedElement.rows.length; i++) {
+                        for (let j = 0; j < selectedElement.rows[i].cells.length; j++) {
+                            selectedElement.rows[i].cells[j].style.background = '#ffffff';
+                        }
+                    }
+                    break;
+                case 'colored':
+                    for (let i = 0; i < selectedElement.rows.length; i++) {
+                        const color = colors[i % colors.length];
+                        for (let j = 0; j < selectedElement.rows[i].cells.length; j++) {
+                            selectedElement.rows[i].cells[j].style.background = color;
+                            selectedElement.rows[i].cells[j].style.color = '#ffffff';
+                        }
+                    }
+                    break;
+                case 'striped':
+                    for (let i = 0; i < selectedElement.rows.length; i++) {
+                        const bg = i % 2 === 0 ? '#f5f5f5' : '#ffffff';
+                        for (let j = 0; j < selectedElement.rows[i].cells.length; j++) {
+                            selectedElement.rows[i].cells[j].style.background = bg;
+                        }
+                    }
+                    break;
+            }
+        }
+
+        function updateTableBorderColor() {
+            if (!selectedElement || selectedElement.nodeName !== 'TABLE') {
+                alert('Bitte wählen Sie eine Tabelle aus.');
+                return;
+            }
+            
+            const color = document.getElementById('tableBorderColor').value;
+            for (let i = 0; i < selectedElement.rows.length; i++) {
+                for (let j = 0; j < selectedElement.rows[i].cells.length; j++) {
+                    selectedElement.rows[i].cells[j].style.borderColor = color;
+                }
+            }
+        }
+
+        function updateTableBgColor() {
+            if (!selectedElement || selectedElement.nodeName !== 'TABLE') {
+                alert('Bitte wählen Sie eine Tabelle aus.');
+                return;
+            }
+            
+            const color = document.getElementById('tableBgColor').value;
+            for (let i = 0; i < selectedElement.rows.length; i++) {
+                for (let j = 0; j < selectedElement.rows[i].cells.length; j++) {
+                    selectedElement.rows[i].cells[j].style.background = color;
+                }
+            }
+        }
+
+        // Image manipulation functions
+        async function changeImageURL() {
+            if (!selectedElement || selectedElement.nodeName !== 'IMG') {
+                alert('Bitte wählen Sie ein Bild aus.');
+                return;
+            }
+            
+            try {
+                const result = await showModal({
+                    title: 'Bild-URL ändern',
+                    icon: '🔄',
+                    body: `
+                        <label class="modal-label">Neue Bild-URL</label>
+                        <input type="text" class="modal-input" id="modal-url" value="${selectedElement.src}" placeholder="https://...">
+                    `,
+                    inputs: [
+                        { id: 'url', label: 'Neue Bild-URL', type: 'text', value: selectedElement.src }
+                    ],
+                    confirmText: 'URL ändern'
+                });
+                
+                if (result.url) {
+                    selectedElement.src = result.url;
+                }
+            } catch (e) {
+                // User cancelled
+            }
+        }
+
+        function resizeImage(size) {
+            if (!selectedElement || selectedElement.nodeName !== 'IMG') {
+                alert('Bitte wählen Sie ein Bild aus.');
+                return;
+            }
+            
+            switch(size) {
+                case 'small':
+                    selectedElement.style.maxWidth = '40%';
+                    break;
+                case 'medium':
+                    selectedElement.style.maxWidth = '60%';
+                    break;
+                case 'large':
+                    selectedElement.style.maxWidth = '90%';
+                    break;
+            }
+        }
+
+        function alignImage(alignment) {
+            if (!selectedElement || selectedElement.nodeName !== 'IMG') {
+                alert('Bitte wählen Sie ein Bild aus.');
+                return;
+            }
+            
+            selectedElement.style.display = 'block';
+            switch(alignment) {
+                case 'left':
+                    selectedElement.style.marginLeft = '0';
+                    selectedElement.style.marginRight = 'auto';
+                    break;
+                case 'center':
+                    selectedElement.style.marginLeft = 'auto';
+                    selectedElement.style.marginRight = 'auto';
+                    break;
+                case 'right':
+                    selectedElement.style.marginLeft = 'auto';
+                    selectedElement.style.marginRight = '0';
+                    break;
+            }
+        }
+
+        function applyImageBorder() {
+            if (!selectedElement || selectedElement.nodeName !== 'IMG') {
+                alert('Bitte wählen Sie ein Bild aus.');
+                return;
+            }
+            
+            if (selectedElement.style.border) {
+                selectedElement.style.border = '';
+            } else {
+                selectedElement.style.border = '3px solid #333';
+            }
+        }
+
+        function applyImageShadow() {
+            if (!selectedElement || selectedElement.nodeName !== 'IMG') {
+                alert('Bitte wählen Sie ein Bild aus.');
+                return;
+            }
+            
+            if (selectedElement.style.boxShadow) {
+                selectedElement.style.boxShadow = '';
+            } else {
+                selectedElement.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)';
+            }
+        }
+
+        function applyImageRounded() {
+            if (!selectedElement || selectedElement.nodeName !== 'IMG') {
+                alert('Bitte wählen Sie ein Bild aus.');
+                return;
+            }
+            
+            if (selectedElement.style.borderRadius) {
+                selectedElement.style.borderRadius = '';
+            } else {
+                selectedElement.style.borderRadius = '12px';
+            }
+        }
+
+        // Add event listeners for context detection
+        document.addEventListener('click', detectContextSelection);
+        document.addEventListener('selectionchange', detectContextSelection);
+
+        // Presentation Mode
+        function startPresentation() {
+            presentSlideIndex = 0;
+            renderPresentSlides();
+            document.getElementById('presentMode').classList.add('active');
+            updatePresentCounter();
+        }
+
+        function renderPresentSlides() {
+            const container = document.getElementById('presentSlides');
+            container.innerHTML = '';
+
+            slides.forEach((slide, index) => {
+                const slideDiv = document.createElement('div');
+                slideDiv.className = `present-slide ${index === presentSlideIndex ? 'active' : ''}`;
+                slideDiv.style.background = slide.bgColor;
+
+                let html = '';
+                if (slide.layout === 'title') {
+                    html = `
+                        <div style="padding: 150px 100px; text-align: center;">
+                            <h1 style="font-size: 72px; font-weight: 700; color: ${slide.textColor}; 
+                                       font-family: ${slide.titleFont}; margin-bottom: 40px;">${slide.title}</h1>
+                            <p style="font-size: 42px; color: ${slide.textColor};">${slide.content}</p>
+                        </div>
+                    `;
+                } else if (slide.layout === 'content') {
+                    html = `
+                        <div style="padding: 80px 100px;">
+                            <h1 style="font-size: 64px; font-weight: 700; color: ${slide.textColor}; 
+                                       font-family: ${slide.titleFont}; margin-bottom: 50px; text-align: center;">${slide.title}</h1>
+                            <div style="font-size: 36px; color: ${slide.textColor}; line-height: 1.8; white-space: pre-wrap;">${slide.content}</div>
+                        </div>
+                    `;
+                } else if (slide.layout === 'two-column') {
+                    html = `
+                        <div style="padding: 80px 100px;">
+                            <h1 style="font-size: 64px; font-weight: 700; color: ${slide.textColor}; 
+                                       font-family: ${slide.titleFont}; margin-bottom: 50px; text-align: center;">${slide.title}</h1>
+                            <div style="display: flex; gap: 60px;">
+                                <div style="flex: 1; font-size: 32px; color: ${slide.textColor}; line-height: 1.8; white-space: pre-wrap;">${slide.content}</div>
+                                <div style="flex: 1; font-size: 32px; color: ${slide.textColor}; line-height: 1.8; white-space: pre-wrap;">${slide.content2}</div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                slideDiv.innerHTML = html;
+                container.appendChild(slideDiv);
+            });
+        }
+
+        function nextSlide() {
+            if (presentSlideIndex < slides.length - 1) {
+                presentSlideIndex++;
+                showPresentSlide();
+            }
+        }
+
+        function previousSlide() {
+            if (presentSlideIndex > 0) {
+                presentSlideIndex--;
+                showPresentSlide();
+            }
+        }
+
+        function showPresentSlide() {
+            const allSlides = document.querySelectorAll('.present-slide');
+            allSlides.forEach((slide, index) => {
+                slide.classList.toggle('active', index === presentSlideIndex);
+            });
+            updatePresentCounter();
+        }
+
+        function updatePresentCounter() {
+            document.getElementById('presentCounter').textContent = 
+                `${presentSlideIndex + 1} / ${slides.length}`;
+        }
+
+        function exitPresentation() {
+            document.getElementById('presentMode').classList.remove('active');
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            const presentMode = document.getElementById('presentMode');
+            if (presentMode.classList.contains('active')) {
+                if (e.key === 'ArrowRight' || e.key === ' ') {
+                    e.preventDefault();
+                    nextSlide();
+                } else if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    previousSlide();
+                } else if (e.key === 'Escape') {
+                    exitPresentation();
+                } else if (e.key === 'Home') {
+                    e.preventDefault();
+                    presentSlideIndex = 0;
+                    showPresentSlide();
+                } else if (e.key === 'End') {
+                    e.preventDefault();
+                    presentSlideIndex = slides.length - 1;
+                    showPresentSlide();
+                }
+            } else {
+                // Editor keyboard shortcuts
+                if (e.ctrlKey || e.metaKey) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        startPresentation();
+                    }
+                }
+            }
+        });
+
+        // Initialize
+        renderSlidesPanel();
+        renderCurrentSlide();
+    </script>
+</body>
+</html>
