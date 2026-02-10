@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>PowerPresent – Präsentationen neu gedacht</title>
+
+<style>
+:root {
+    --primary: #dc2626;      /* Hauptrot */
+    --primary-dark: #b91c1c; /* Dunkleres Rot */
+    --secondary: #fee2e2;    /* Heller Rotton für Hintergründe */
+    --bg: #fff5f5;           /* Seitenhintergrund */
+    --text-dark: #330000;    /* dunkler Text auf Rot */
+}
+
+/* Grundlegendes Layout */
+body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    margin: 0;
+    background: var(--bg);
+    color: var(--text-dark);
+}
+
+/* Header */
+header {
+    background: linear-gradient(120deg, var(--primary), var(--primary-dark));
+    color: white;
+    padding: 70px 20px;
+    text-align: center;
+}
+
+header h1 {
+    font-size: 3em;
+    margin-bottom: 10px;
+}
+
+header p {
+    font-size: 1.2em;
+    max-width: 700px;
+    margin: auto;
+}
+
+/* Buttons */
+.cta-button {
+    display: inline-block;
+    margin-top: 30px;
+    padding: 16px 38px;
+    background: white;
+    color: var(--primary);
+    font-size: 1.1em;
+    font-weight: bold;
+    text-decoration: none;
+    border-radius: 999px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+    transition: all 0.25s ease;
+}
+
+.cta-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 32px rgba(0,0,0,0.35);
+}
+
+.cta-button.dark {
+    background: var(--primary);
+    color: white;
+}
+
+.cta-button.dark:hover {
+    background: var(--primary-dark);
+}
+
+/* Main Sections */
+main {
+    max-width: 1100px;
+    margin: auto;
+    padding: 40px 20px;
+}
+
+section {
+    background: var(--secondary);
+    padding: 30px;
+    border-radius: 12px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+section h2 {
+    color: var(--primary);
+}
+
+.features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.feature-box {
+    background: #ffe5e5;
+    padding: 20px;
+    border-radius: 10px;
+    border-left: 6px solid var(--primary);
+}
+
+/* Bottom Call-to-Action */
+.bottom-cta {
+    text-align: center;
+    padding: 70px 20px;
+    background: linear-gradient(120deg, #fee2e2, #fff5f5);
+    border-radius: 20px;
+}
+
+/* Footer */
+footer {
+    background: var(--primary-dark);
+    color: white;
+    text-align: center;
+    padding: 20px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>PowerPresent</h1>
+    <p>Starte PowerPresent direkt im Browser – ohne Installation, jederzeit und überall.</p>
+    <a href="#start" class="cta-button">Jetzt starten</a>
+</header>
+
+<main>
+
+<section id="start">
+    <h2>PowerPresent Web</h2>
+    <p>
+        PowerPresent ist vollständig webbasiert. Öffne die App im Browser
+        und beginne sofort mit deiner Präsentation – ohne Download
+        und ohne Installation.
+    </p>
+
+    <ul>
+        <li>🌐 Läuft in jedem modernen Browser</li>
+        <li>⚡ Sofort startklar</li>
+        <li>🔐 Sicher & online gespeichert</li>
+        <li>📱 Auch auf Tablet & Smartphone nutzbar</li>
+    </ul>
+</section>
+
+<section>
+    <h2>Hauptfunktionen</h2>
+    <div class="features">
+
+        <div class="feature-box">
+            <h3>🎨 Intelligente Designs</h3>
+            <p>Automatische Layout-Vorschläge und stilvolle Vorlagen passen sich
+            deinem Inhalt an.</p>
+        </div>
+
+        <div class="feature-box">
+            <h3>⚡ Schnelle Erstellung</h3>
+            <p>Drag-and-Drop, Schnellwerkzeuge und KI-Assistenten beschleunigen
+            deinen Workflow.</p>
+        </div>
+
+        <div class="feature-box">
+            <h3>📊 Diagramme & Medien</h3>
+            <p>Integrierte Diagramme, Videos, Audio und 3D-Objekte für dynamische
+            Präsentationen.</p>
+        </div>
+
+        <div class="feature-box">
+            <h3>☁ Cloud-Sync</h3>
+            <p>Arbeite auf mehreren Geräten und teile Präsentationen in Echtzeit.</p>
+        </div>
+
+    </div>
+</section>
+
+<section>
+    <h2>Warum PowerPresent?</h2>
+    <ul>
+        <li>Intuitive Oberfläche für Anfänger und Profis</li>
+        <li>Offline- und Online-Modus</li>
+        <li>Export als PDF, Video oder interaktive Show</li>
+        <li>Kompatibel mit gängigen Präsentationsformaten</li>
+    </ul>
+</section>
+
+<section>
+    <h2>Für wen geeignet?</h2>
+    <ul>
+        <li>👩‍🏫 Lehrkräfte und Schüler</li>
+        <li>🎓 Studierende</li>
+        <li>💼 Unternehmen & Start-ups</li>
+        <li>🎤 Speaker und Trainer</li>
+    </ul>
+</section>
+
+<section class="bottom-cta">
+    <h2>Bereit loszulegen?</h2>
+    <p>Starte PowerPresent jetzt direkt im Browser.</p>
+    <a href="app/" class="cta-button dark">Zur Web-App</a>
+</section>
+
+</main>
+
+<footer>
+    <p>© 2026 PowerPresent Software • Alle Rechte vorbehalten</p>
+    <a href="/"><br>Zu KlassenBlatt</a>
+</footer>
+
+</body>
+</html>
