@@ -1,0 +1,2268 @@
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>Tool Suite</title>
+   <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Anton&family=Bebas+Neue&family=Cinzel&family=Comfortaa&family=Dancing+Script&family=Fira+Sans&family=Inconsolata&family=Inter&family=Karla&family=Lato&family=Lobster&family=Lora&family=Merriweather&family=Montserrat&family=Noto+Sans&family=Nunito&family=Open+Sans:wght@300;400;600&family=Oswald&family=Oxygen&family=PT+Sans&family=Pacifico&family=Playfair+Display:wght@400;600;700&family=Poppins&family=Quicksand&family=Raleway&family=Righteous&family=Roboto+Mono&family=Roboto:wght@300;400;500;700&family=Source+Sans+Pro&family=Ubuntu&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Work Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+
+        body.font-roboto {
+            font-family: 'Roboto', sans-serif;
+        }
+
+        body.font-opensans {
+            font-family: 'Open Sans', sans-serif;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+            position: relative;
+        }
+
+        .mobile-header {
+            display: none;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            padding: 15px 20px;
+            color: white;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 101;
+        }
+
+        .mobile-header h1 {
+            font-size: 20px;
+            font-family: 'Playfair Display', serif;
+            margin: 0;
+        }
+
+        .mobile-menu-btn,
+        .mobile-settings-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .mobile-header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: rgba(255, 255, 255, 0.98);
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            z-index: 100;
+        }
+
+        .sidebar-header {
+            padding: 30px 20px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sidebar-header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .settings-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+
+        .settings-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .setting-select {
+          width: 100%;
+          padding: 12px;
+          border: 2px solid #e5e7eb;
+          border-radius: 8px;
+          background: white;
+          font-size: 14px;
+          outline: none;
+          cursor: pointer;
+        }
+        
+        .setting-select:focus {
+          border-color: #10b981;
+        }
+
+        .nav-items {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px 0;
+        }
+
+        .nav-item {
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #333;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover {
+            background: rgba(16, 185, 129, 0.1);
+            border-left-color: #10b981;
+        }
+
+        .nav-item.active {
+            background: rgba(16, 185, 129, 0.15);
+            border-left-color: #10b981;
+            color: #10b981;
+            font-weight: 600;
+        }
+
+        .nav-icon {
+            font-size: 20px;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+        }
+
+        .tool-container {
+            display: none;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .tool-container.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .tool-title {
+            font-size: 32px;
+            margin-bottom: 30px;
+            color: #333;
+            text-align: center;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 99;
+        }
+
+        .overlay.active {
+            display: block;
+        }
+
+        /* Settings Panel */
+        .settings-panel {
+            position: fixed;
+            right: 0;
+            top: 0;
+            width: 320px;
+            height: 100vh;
+            background: white;
+            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.2);
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            z-index: 102;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .settings-panel.open {
+            transform: translateX(0);
+        }
+
+        .settings-header {
+            padding: 20px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .settings-header h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 22px;
+            margin: 0;
+        }
+
+        .close-settings {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 28px;
+            cursor: pointer;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .settings-content {
+            padding: 20px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .setting-group {
+            margin-bottom: 25px;
+        }
+
+        .setting-label {
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: block;
+            color: #333;
+        }
+
+        .setting-options {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .setting-option {
+            flex: 1;
+            min-width: 80px;
+            padding: 10px 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .setting-option:hover {
+            border-color: #10b981;
+            background: #f0fdf4;
+        }
+
+        .setting-option.active {
+            border-color: #10b981;
+            background: #d1fae5;
+            color: #059669;
+            font-weight: 600;
+        }
+
+        /* Clock */
+        .clock-display {
+            font-size: 72px;
+            font-weight: 300;
+            text-align: center;
+            color: #10b981;
+            margin: 40px 0;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .date-display {
+            font-size: 24px;
+            text-align: center;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        /* Stopwatch */
+        .stopwatch-display {
+            font-size: 64px;
+            font-weight: 300;
+            text-align: center;
+            color: #10b981;
+            margin: 40px 0;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 15px 40px;
+            font-size: 16px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-secondary {
+            background: #d1fae5;
+            color: #059669;
+        }
+
+        .btn-secondary:hover {
+            background: #a7f3d0;
+        }
+
+        .btn-danger {
+            background: #fee;
+            color: #e11d48;
+        }
+
+        .btn-danger:hover {
+            background: #fdd;
+        }
+
+        /* Timer */
+        .timer-input {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .timer-input input {
+            width: 80px;
+            padding: 15px;
+            font-size: 24px;
+            text-align: center;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .timer-input input:focus {
+            border-color: #10b981;
+        }
+
+        .timer-input label {
+            display: block;
+            text-align: center;
+            margin-top: 10px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        /* Calendar */
+        .calendar {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .calendar-header h3 {
+            font-size: 24px;
+            color: #333;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .calendar-nav {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px 15px;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+
+        .calendar-nav:hover {
+            background: #f3f4f6;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .calendar-day.header {
+            font-weight: 600;
+            color: #10b981;
+            cursor: default;
+        }
+
+        .calendar-day.date:hover {
+            background: #d1fae5;
+        }
+
+        .calendar-day.today {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            font-weight: 600;
+        }
+
+        .calendar-day.other-month {
+            color: #ccc;
+        }
+
+        /* Calculator */
+        .calculator {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .calc-mode-toggle {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            justify-content: center;
+        }
+
+        .calc-mode-btn {
+            padding: 8px 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .calc-mode-btn.active {
+            border-color: #10b981;
+            background: #d1fae5;
+            color: #059669;
+        }
+
+        .calc-display {
+            background: #f9fafb;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: right;
+            font-size: 36px;
+            color: #333;
+            min-height: 80px;
+            word-break: break-all;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .calc-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .calc-buttons.scientific {
+            grid-template-columns: repeat(5, 1fr);
+        }
+
+        .calc-btn {
+            padding: 20px;
+            font-size: 18px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            background: #f3f4f6;
+            color: #333;
+            transition: all 0.2s;
+            font-weight: 600;
+        }
+
+        .calc-btn:hover {
+            background: #e5e7eb;
+            transform: scale(1.05);
+        }
+
+        .calc-btn.operator {
+            background: #d1fae5;
+            color: #059669;
+        }
+
+        .calc-btn.equals {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            grid-column: span 2;
+        }
+
+        .calc-btn.clear {
+            background: #fee;
+            color: #e11d48;
+        }
+
+        .calc-btn.function {
+            background: #e0f2fe;
+            color: #0369a1;
+            font-size: 14px;
+            padding: 15px;
+        }
+
+        /* Character Map */
+        .charmap-search {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 16px;
+            margin-bottom: 20px;
+            outline: none;
+        }
+
+        .charmap-search:focus {
+            border-color: #10b981;
+        }
+
+        .charmap-categories {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .charmap-category {
+            padding: 8px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .charmap-category.active {
+            border-color: #10b981;
+            background: #d1fae5;
+            color: #059669;
+            font-weight: 600;
+        }
+
+        .charmap-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+            gap: 10px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 10px;
+            background: #f9fafb;
+            border-radius: 10px;
+        }
+
+        .charmap-char {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .charmap-char:hover {
+            background: #d1fae5;
+            border-color: #10b981;
+            transform: scale(1.1);
+        }
+
+        /* Unit Converter */
+        .converter-type {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .converter-type-btn {
+            padding: 10px 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .converter-type-btn.active {
+            border-color: #10b981;
+            background: #d1fae5;
+            color: #059669;
+            font-weight: 600;
+        }
+
+        .converter-inputs {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .converter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .converter-group input,
+        .converter-group select {
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        .converter-group input:focus,
+        .converter-group select:focus {
+            border-color: #10b981;
+        }
+
+        .swap-btn {
+            background: #d1fae5;
+            border: none;
+            padding: 12px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* World Clock */
+        .timezone-add {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .timezone-add select {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        .timezone-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .timezone-item {
+            background: #f9fafb;
+            padding: 20px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .timezone-time {
+            font-size: 32px;
+            font-weight: 300;
+            color: #10b981;
+        }
+
+        .timezone-remove {
+            background: #fee;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            color: #e11d48;
+        }
+
+        /* Color Picker */
+        .color-display {
+            width: 100%;
+            height: 200px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border: 3px solid #e5e7eb;
+        }
+
+        .color-picker-native {
+            width: 100%;
+            height: 60px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+
+        .color-inputs {
+            display: grid;
+            gap: 15px;
+        }
+
+        .color-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .color-input-group input {
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        /* QR Code Generator */
+        .qr-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 16px;
+            margin-bottom: 20px;
+            outline: none;
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .qr-display {
+            display: flex;
+            justify-content: center;
+            padding: 40px;
+            background: #f9fafb;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .qr-code {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        /* Notes */
+        .notes-area {
+            width: 100%;
+            min-height: 400px;
+            padding: 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 16px;
+            font-family: inherit;
+            resize: vertical;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .notes-area:focus {
+            border-color: #10b981;
+        }
+
+        .lap-times {
+            margin-top: 30px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .lap-time {
+            padding: 10px;
+            background: #f9fafb;
+            border-radius: 5px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Mobile Styles */
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                left: 0;
+                top: 0;
+                height: 100vh;
+                transform: translateX(-100%);
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            .main-content {
+                padding: 20px 15px;
+                width: 100%;
+            }
+
+            .tool-container {
+                padding: 20px;
+            }
+
+            .tool-title {
+                font-size: 24px;
+            }
+
+            .clock-display {
+                font-size: 48px;
+            }
+
+            .stopwatch-display {
+                font-size: 48px;
+            }
+
+            .btn {
+                padding: 12px 20px;
+                font-size: 14px;
+            }
+
+            .calc-btn {
+                padding: 15px;
+                font-size: 16px;
+            }
+
+            .calc-display {
+                font-size: 28px;
+                padding: 20px;
+            }
+
+            .settings-panel {
+                width: 100%;
+                max-width: 320px;
+            }
+
+            .converter-inputs {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .swap-btn {
+                transform: rotate(90deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="mobile-header">
+        <div class="mobile-header-left">
+            <button class="mobile-menu-btn" id="mobile-menu-btn">☰</button>
+            <h1>🛠️ Tool Suite</h1>
+        </div>
+        <button class="mobile-settings-btn" id="mobile-settings-btn-mobile">⚙️</button>
+    </div>
+
+    <div class="overlay" id="overlay"></div>
+
+    <div class="container">
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h1>🛠️ Tool Suite</h1>
+                <button class="settings-btn" id="settings-btn">⚙️</button>
+            </div>
+            <div class="nav-items">
+                <div class="nav-item active" data-tool="clock">
+                    <span class="nav-icon">🕐</span>
+                    <span data-translate="clock">Uhr</span>
+                </div>
+                <div class="nav-item" data-tool="stopwatch">
+                    <span class="nav-icon">⏱️</span>
+                    <span data-translate="stopwatch">Stoppuhr</span>
+                </div>
+                <div class="nav-item" data-tool="timer">
+                    <span class="nav-icon">⏲️</span>
+                    <span data-translate="timer">Timer</span>
+                </div>
+                <div class="nav-item" data-tool="calendar">
+                    <span class="nav-icon">📅</span>
+                    <span data-translate="calendar">Kalender</span>
+                </div>
+                <div class="nav-item" data-tool="calculator">
+                    <span class="nav-icon">🔢</span>
+                    <span data-translate="calculator">Taschenrechner</span>
+                </div>
+                <div class="nav-item" data-tool="charmap">
+                    <span class="nav-icon">🔤</span>
+                    <span data-translate="charmap">Zeichentabelle</span>
+                </div>
+                <div class="nav-item" data-tool="converter">
+                    <span class="nav-icon">🔄</span>
+                    <span data-translate="converter">Einheitenrechner</span>
+                </div>
+                <div class="nav-item" data-tool="worldclock">
+                    <span class="nav-icon">🌍</span>
+                    <span data-translate="worldclock">Weltzeituhr</span>
+                </div>
+                <div class="nav-item" data-tool="colorpicker">
+                    <span class="nav-icon">🎨</span>
+                    <span data-translate="colorpicker">Farbwähler</span>
+                </div>
+                <div class="nav-item" data-tool="qrcode">
+                    <span class="nav-icon">📱</span>
+                    <span data-translate="qrcode">QR-Code</span>
+                </div>
+                <div class="nav-item" data-tool="notes">
+                    <span class="nav-icon">📝</span>
+                    <span data-translate="notes">Notizen</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <!-- Clock -->
+            <div class="tool-container active" id="clock">
+                <h2 class="tool-title" data-translate="clock">Uhr</h2>
+                <div class="date-display" id="date"></div>
+                <div class="clock-display" id="time"></div>
+            </div>
+
+            <!-- Stopwatch -->
+            <div class="tool-container" id="stopwatch">
+                <h2 class="tool-title" data-translate="stopwatch">Stoppuhr</h2>
+                <div class="stopwatch-display" id="stopwatch-display">00:00:00.000</div>
+                <div class="button-group">
+                    <button class="btn btn-primary" id="stopwatch-start" data-translate="start">Start</button>
+                    <button class="btn btn-secondary" id="stopwatch-lap" data-translate="lap">Runde</button>
+                    <button class="btn btn-danger" id="stopwatch-reset" data-translate="reset">Zurücksetzen</button>
+                </div>
+                <div class="lap-times" id="lap-times"></div>
+            </div>
+
+            <!-- Timer -->
+            <div class="tool-container" id="timer">
+                <h2 class="tool-title" data-translate="timer">Timer</h2>
+                <div class="stopwatch-display" id="timer-display">00:00:00</div>
+                <div class="timer-input">
+                    <div>
+                        <input type="number" id="timer-hours" min="0" max="23" value="0">
+                        <label data-translate="hours">Stunden</label>
+                    </div>
+                    <div>
+                        <input type="number" id="timer-minutes" min="0" max="59" value="5">
+                        <label data-translate="minutes">Minuten</label>
+                    </div>
+                    <div>
+                        <input type="number" id="timer-seconds" min="0" max="59" value="0">
+                        <label data-translate="seconds">Sekunden</label>
+                    </div>
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-primary" id="timer-start" data-translate="start">Start</button>
+                    <button class="btn btn-danger" id="timer-reset" data-translate="reset">Zurücksetzen</button>
+                </div>
+            </div>
+
+            <!-- Calendar -->
+            <div class="tool-container" id="calendar">
+                <h2 class="tool-title" data-translate="calendar">Kalender</h2>
+                <div class="calendar">
+                    <div class="calendar-header">
+                        <button class="calendar-nav" id="prev-month">‹</button>
+                        <h3 id="calendar-month-year"></h3>
+                        <button class="calendar-nav" id="next-month">›</button>
+                    </div>
+                    <div class="calendar-grid" id="calendar-grid"></div>
+                </div>
+            </div>
+
+            <!-- Calculator -->
+            <div class="tool-container" id="calculator">
+                <h2 class="tool-title" data-translate="calculator">Taschenrechner</h2>
+                <div class="calculator">
+                    <div class="calc-mode-toggle">
+                        <button class="calc-mode-btn active" data-mode="basic" data-translate="basic">Einfach</button>
+                        <button class="calc-mode-btn" data-mode="scientific" data-translate="scientific">Wissenschaftlich</button>
+                    </div>
+                    <div class="calc-display" id="calc-display">0</div>
+                    <div class="calc-buttons" id="calc-buttons">
+                        <!-- Basic buttons will be inserted here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Character Map -->
+            <div class="tool-container" id="charmap">
+                <h2 class="tool-title" data-translate="charmap">Zeichentabelle</h2>
+                <input type="text" class="charmap-search" id="charmap-search" data-translate-placeholder="search" placeholder="Zeichen suchen...">
+                <div class="charmap-categories" id="charmap-categories"></div>
+                <div class="charmap-grid" id="charmap-grid"></div>
+            </div>
+
+            <!-- Unit Converter -->
+            <div class="tool-container" id="converter">
+                <h2 class="tool-title" data-translate="converter">Einheitenrechner</h2>
+                <div class="converter-type" id="converter-type">
+                    <button class="converter-type-btn active" data-type="length" data-translate="length">Länge</button>
+                    <button class="converter-type-btn" data-type="weight" data-translate="weight">Gewicht</button>
+                    <button class="converter-type-btn" data-type="temperature" data-translate="temperature">Temperatur</button>
+                    <button class="converter-type-btn" data-type="volume" data-translate="volume">Volumen</button>
+                </div>
+                <div class="converter-inputs">
+                    <div class="converter-group">
+                        <input type="number" id="converter-input1" value="1">
+                        <select id="converter-unit1"></select>
+                    </div>
+                    <button class="swap-btn" id="converter-swap">⇄</button>
+                    <div class="converter-group">
+                        <input type="number" id="converter-input2" value="0" readonly>
+                        <select id="converter-unit2"></select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- World Clock -->
+            <div class="tool-container" id="worldclock">
+                <h2 class="tool-title" data-translate="worldclock">Weltzeituhr</h2>
+                <div class="timezone-add">
+                    <select id="timezone-select">
+                        <option value="America/New_York">New York (EST)</option>
+                        <option value="America/Los_Angeles">Los Angeles (PST)</option>
+                        <option value="Europe/London">London (GMT)</option>
+                        <option value="Europe/Paris">Paris (CET)</option>
+                        <option value="Europe/Berlin">Berlin (CET)</option>
+                        <option value="Asia/Tokyo">Tokyo (JST)</option>
+                        <option value="Asia/Shanghai">Shanghai (CST)</option>
+                        <option value="Asia/Dubai">Dubai (GST)</option>
+                        <option value="Australia/Sydney">Sydney (AEDT)</option>
+                    </select>
+                    <button class="btn btn-primary" id="add-timezone" data-translate="add">Hinzufügen</button>
+                </div>
+                <div class="timezone-list" id="timezone-list"></div>
+            </div>
+
+            <!-- Color Picker -->
+            <div class="tool-container" id="colorpicker">
+                <h2 class="tool-title" data-translate="colorpicker">Farbwähler</h2>
+                <div class="color-display" id="color-display"></div>
+                <input type="color" class="color-picker-native" id="color-picker-native" value="#10b981">
+                <div class="color-inputs">
+                    <div class="color-input-group">
+                        <label>HEX</label>
+                        <input type="text" id="color-hex" value="#10b981">
+                    </div>
+                    <div class="color-input-group">
+                        <label>RGB</label>
+                        <input type="text" id="color-rgb" value="rgb(16, 185, 129)">
+                    </div>
+                    <div class="color-input-group">
+                        <label>HSL</label>
+                        <input type="text" id="color-hsl" value="">
+                    </div>
+                </div>
+            </div>
+
+            <!-- QR Code Generator -->
+            <div class="tool-container" id="qrcode">
+                <h2 class="tool-title" data-translate="qrcode">QR-Code Generator</h2>
+                <textarea class="qr-input" id="qr-input" data-translate-placeholder="qr-placeholder" placeholder="Text oder URL eingeben..."></textarea>
+                <div class="qr-display" id="qr-display">
+                    <canvas id="qr-canvas"></canvas>
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-primary" id="generate-qr" data-translate="generate">Generieren</button>
+                    <button class="btn btn-secondary" id="download-qr" data-translate="download">Download</button>
+                </div>
+            </div>
+
+            <!-- Notes -->
+            <div class="tool-container" id="notes">
+                <h2 class="tool-title" data-translate="notes">Notizen</h2>
+                <textarea class="notes-area" id="notes-area" data-translate-placeholder="notes-placeholder" placeholder="Schreibe deine Notizen hier..."></textarea>
+                <div class="button-group">
+                    <button class="btn btn-primary" id="save-notes" data-translate="save">Speichern</button>
+                    <button class="btn btn-secondary" id="clear-notes" data-translate="clear">Leeren</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Panel -->
+    <div class="settings-panel" id="settings-panel">
+        <div class="settings-header">
+            <h2 data-translate="settings">Einstellungen</h2>
+            <button class="close-settings" id="close-settings">×</button>
+        </div>
+        <div class="settings-content">
+            <div class="setting-group">
+                <label class="setting-label" data-translate="language">Sprache</label>
+                <div class="setting-options">
+                    <button class="setting-option active" data-setting="language" data-value="de">DE</button>
+                    <button class="setting-option" data-setting="language" data-value="en">EN</button>
+                </div>
+            </div>
+            <div class="setting-group">
+    <label class="setting-label">Überschriften-Schriftart</label>
+    <select class="setting-select" id="header-font-select">
+        <optgroup label="Web Safe Fonts">
+            <option value="'Playfair Display', serif">Standard (Playfair)</option>
+            <option value="Arial, sans-serif">Arial</option>
+            <option value="'Times New Roman', serif">Times New Roman</option>
+            <option value="Georgia, serif">Georgia</option>
+            <option value="Verdana, sans-serif">Verdana</option>
+        </optgroup>
+        <optgroup label="Google Fonts (Serif & Display)">
+            <option value="'Montserrat', sans-serif">Montserrat</option>
+            <option value="'Oswald', sans-serif">Oswald</option>
+            <option value="'Raleway', sans-serif">Raleway</option>
+            <option value="'Poppins', sans-serif">Poppins</option>
+            <option value="'Bebas Neue', cursive">Bebas Neue</option>
+            <option value="'Abril Fatface', cursive">Abril Fatface</option>
+             <option value="'Inter', sans-serif">Inter</option>
+            <option value="'Merriweather', serif">Merriweather</option>
+            <option value="'Lora', serif">Lora</option>
+            <option value="'Cinzel', serif">Cinzel</option>
+            <option value="'Anton', sans-serif">Anton</option>
+            <option value="'Righteous', cursive">Righteous</option>
+            <option value="'Dancing Script', cursive">Dancing Script</option>
+            <option value="'Lobster', cursive">Lobster</option>
+            <option value="'Pacifico', cursive">Pacifico</option>
+            <option value="'Comfortaa', cursive">Comfortaa</option>
+        </optgroup>
+    </select>
+</div>
+
+<div class="setting-group">
+    <label class="setting-label">Text-Schriftart</label>
+    <select class="setting-select" id="body-font-select">
+        <optgroup label="Web Safe Fonts">
+            <option value="'Work Sans', sans-serif">Standard (Work Sans)</option>
+            <option value="Helvetica, sans-serif">Helvetica</option>
+            <option value="'Courier New', monospace">Courier New</option>
+            <option value="'Trebuchet MS', sans-serif">Trebuchet MS</option>
+            <option value="Tahoma, sans-serif">Tahoma</option>
+        </optgroup>
+        <optgroup label="Google Fonts (Sans-Serif & Mono)">
+            <option value="'Roboto', sans-serif">Roboto</option>
+            <option value="'Open Sans', sans-serif">Open Sans</option>
+            <option value="'Lato', sans-serif">Lato</option>
+            <option value="'Source Sans Pro', sans-serif">Source Sans Pro</option>
+            <option value="'Montserrat', sans-serif">Montserrat</option>
+            <option value="'Ubuntu', sans-serif">Ubuntu</option>
+            <option value="'Noto Sans', sans-serif">Noto Sans</option>
+            <option value="'PT Sans', sans-serif">PT Sans</option>
+            <option value="'Inter', sans-serif">Inter</option>
+            <option value="'Quicksand', sans-serif">Quicksand</option>
+            <option value="'Nunito', sans-serif">Nunito</option>
+            <option value="'Fira Sans', sans-serif">Fira Sans</option>
+            <option value="'Inconsolata', monospace">Inconsolata</option>
+            <option value="'Roboto Mono', monospace">Roboto Mono</option>
+            <option value="'Oxygen', sans-serif">Oxygen</option>
+            <option value="'Karla', sans-serif">Karla</option>
+        </optgroup>
+    </select>
+</div>
+        </div>
+    </div>
+
+    <audio id="timer-sound" preload="auto">
+        <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBTGH0fPTgjMGHm7A7+OZSA0PVqvm7q1aFg1Bn9ryvWsiBy+BzO/UfCUGJHjI8daQPgoTXLPn6aFMEAxOod/wt2sdBzaQ1vLNdy4FKHzK8N+ROAkSZ7zs46BKEAxNpN/wtWQbBzaP1PLOfC4FJ33N8d2TPQkTZ7zt4qBKDgxNo9/xs2QaBzWP1fLQfS0FJXzM8d6TPAkTaLvt4aFKDQxOo+DwtWMaBzaQ1fLPfS0GJnvM8d+SPwoUZ7zt4qFKDQxNouDws2MaBzaP1fLQfSwGJnvM8d+TPQoSZ7vt4aFKDQxOo+Dws2MaBjaP1fLPfS0GJXvN8d+SPwoSaLvt4aJKDQxOo+DwtGQaBjWP1vLPfS0GJXvN8d+SPQoSaLvs4qFKDQxOo+DwtGQaBjWQ1fLPfS0FJXzN8N+SPQoTZ7zs4qBKDgxNo9/ws2MaBzaP1fLPfS0FJXzN8N+RQAkSZ7zs4qBKDgxNo9/ws2MaBzWP1fLQfCwGJn3M8N6RPwoTaLzs4aFLDgxOo+Dws2MaBzWQ1fLQey0FJn3N8N6SPAoTZ7zs4aFKDQxOo+DwtGMaBzaQ1PLPfSwGJXzM8d+RQAkSaLvs4qFKDQxOo+DwtGMaBzWP1fLQfC0FJX3N8N6SPAoTaLvt4aFKDQxOo+DwtGMaBzWP1fLQfC0GJXzM8d+SQAkSZ7zs4aJKDQxOo+DwtGQaBjaQ1fLPfS0FJXzN8d+SQAkSZ7zs4qFKDgxNo9/xs2QaBzWP1vLPfSwGJXzM8d+SQAkTZ7zs4qFKDQxNo9/xs2QaBzaP1fLPfSwGJXzN8N6RPwoTaLzs4aFKDgxNo9/xs2QaBzWP1fLPfC0GJXzN8N6RPwoTaLzs4aFKDgxNo+DwtGQaBzWP1fLPfC0FJX3M8d+SQAoTZ7vs4qJKDQxNo+DwtGQaBzWQ1PLPfC0FJX3N8N6SPAoTaLvs4qJKDQxNo+DwtGQaBzWP1PLPfC0FJXzN8N+SQAoTZ7vs4qJKDQxNo+DwtGMaBzaP1PLPfC0FJXzN8N+SPAoUZ7vs4qJKDQxNo+DwtGMaBzaP1PLPey0GJXzM8d+SPAoUZ7zs4aFKDgxOo+DwtGMaBzaP1PLPey0GJXzN8N+SPAoUZ7zs4aFKDgxOo+DwtGMaBzaP1PLPey0GJXzN8N+SPQoUZ7zs4aFKDgxOo+DwtGMaBjaP1PLPey0GJXzM8d+SPQoUaLzs4aFKDgxOo+DwtGMaBjaP1PLPey0GJXzM8t+SPQoUaLzs4aFKDgxOo+DwtGQaBjaQ1PLPey0GJXzN8t+TPQoUaLzs4aFKDgxOo+DwtGQaBjaQ1PLPey0GJXzN8t+TPQoUaLzs4qFKDgxOo+DwtGQaBjaQ1PLPfC0GJXzN8t+TPQoUZ7zs4qFKDgxOo9/xtGQaBjaQ1PLPfC0FJXzN8t+TPAoUZ7zs4qFKDgxOo9/xtGQaBjaQ1fLPfC0FJXzN8t+TPAoUZ7zs4qFKDgxOo9/xtGQaBjaQ1fLPfC0FJXzN8t+TPAoUZ7zs4qFKDgxOo9/xtGMaBjaQ1fLPfC0FJXzN8t+TPAoUaLzs4qFKDgxNo9/xtGMaBjaQ1fLPfC0FJXzN8t+TPAoUaLzs4qFKDgxNo9/xtGMaBjaQ1fLPfC0FJXzN8t+SPAoUaLzs4qFKDgxNo9/xtGMaBjaQ1fLPfC0FJXzM8t+SPAoUaLzs4qFKDgxNo9/xtGMaBjaQ1fLPfC0FJXzM8t+SPAoUaLzs4qFKDgxNo9/xtGMaBjaQ1fLPfC0FJXzM8t+SPAoUaLzs4qFKDgxNo9/xs2MaBjaQ1fLPfC0FJXzM8t+SPAoUaLzs4qFKDgxNo9/xs2MaBjaP1fLPfC0FJXzM8t+SPAoUaLzs4qFKDgxNo9/xs2MaBjaP1fLPfC0FJXzM8t+SPAoUaLzs4qFKDgxNo9/xs2MaBjaP1fLPfC0FJXzM8t+SPAoUaLzs4qFKDgxNo9/xs2MaBjaP1fLPfC0FJXzM8t+SPAoUaLzs4qFKDgxNo9/xs2MaBjaP1fLPfC0FJXzM8t+SPQoUaLzs4qFKDgxNo9/xs2MaBjaP1fLPfC0FJXzM8t+SPQoUaLzs4qFKDgxNo9/xs2MaBjaP1fLPfC0FJXzM8t+SPAoUaLzs4qFKDgxNo9/xs2MaBjaP1fLPfC0FJXzM8t+SPAoUaLzs4qFKDgxNo9/xs2MaBjaP1fLPfC0FJXzM8t+SPAoUaLzs4qFKDgxNo9/xs2MaBjaP1fLPfC0FJXzM8t+TPAoUaLzs4qFKDgxNo9/xs2MaBjaP1fLPfC0FJXzM8t+TPAoUaLzs4qFKDgxNo9/xtGMaBjaP1fLPfC0FJXzM8t+TPAoUaLzs4qFKDgxNo9/xtGMaBjaP1fLPfC0FJXzM8t+TPAoUaLzs4qFKDgxNo9/xtGMaBjaP1fLPfC0FJXzM8t+TPAoUZ7zs4qFKDgxNo9/xtGMaBjaP1fLPfC0FJXzM8t+TPAoUZ7zs4qFKDgxNo9/xtGMaBjaP1fLPfC0FJXzM8t+TPAoUZ7zs4qFKDgxNo9/xtGMaBjaP1fLPfC0FJXzM8t+TPAoUZ7zs4qFKDgxNo9/xtGMaBjaP1fLPfC0FJXzM8t+TPAoUZ7zs4qFKDgxNo9/xtGMaBjaP1fLPfC0FJXzM8t+TPAoUZ7zs4qFKDgxNo9/xtGMaBjaP1fLPfC0FJXzM8t+TPAoUZ7zs4qFKDgxNo9/xtGMaBjaP1fLPfC0FJXzM8t+TPAoUZ7zs4qFKDgxNo9/xtGMaBjaP1fLPfC0FJXzM8t+TPAoUZ7zs4qFKDgxNo9/xtGMaBjaP1fLPfC0FJXzM8t+TPAoU=" type="audio/wav">
+    </audio>
+
+    <script>
+        // Translations
+        const translations = {
+            de: {
+                clock: 'Uhr',
+                stopwatch: 'Stoppuhr',
+                timer: 'Timer',
+                calendar: 'Kalender',
+                calculator: 'Taschenrechner',
+                charmap: 'Zeichentabelle',
+                converter: 'Einheitenrechner',
+                worldclock: 'Weltzeituhr',
+                colorpicker: 'Farbwähler',
+                qrcode: 'QR-Code',
+                notes: 'Notizen',
+                settings: 'Einstellungen',
+                language: 'Sprache',
+                font: 'Schriftart',
+                start: 'Start',
+                lap: 'Runde',
+                reset: 'Zurücksetzen',
+                hours: 'Stunden',
+                minutes: 'Minuten',
+                seconds: 'Sekunden',
+                save: 'Speichern',
+                clear: 'Leeren',
+                add: 'Hinzufügen',
+                generate: 'Generieren',
+                download: 'Download',
+                basic: 'Einfach',
+                scientific: 'Wissenschaftlich',
+                length: 'Länge',
+                weight: 'Gewicht',
+                temperature: 'Temperatur',
+                volume: 'Volumen',
+                search: 'Zeichen suchen...',
+                'notes-placeholder': 'Schreibe deine Notizen hier...',
+                'qr-placeholder': 'Text oder URL eingeben...'
+            },
+            en: {
+                clock: 'Clock',
+                stopwatch: 'Stopwatch',
+                timer: 'Timer',
+                calendar: 'Calendar',
+                calculator: 'Calculator',
+                charmap: 'Character Map',
+                converter: 'Unit Converter',
+                worldclock: 'World Clock',
+                colorpicker: 'Color Picker',
+                qrcode: 'QR Code',
+                notes: 'Notes',
+                settings: 'Settings',
+                language: 'Language',
+                font: 'Font',
+                start: 'Start',
+                lap: 'Lap',
+                reset: 'Reset',
+                hours: 'Hours',
+                minutes: 'Minutes',
+                seconds: 'Seconds',
+                save: 'Save',
+                clear: 'Clear',
+                add: 'Add',
+                generate: 'Generate',
+                download: 'Download',
+                basic: 'Basic',
+                scientific: 'Scientific',
+                length: 'Length',
+                weight: 'Weight',
+                temperature: 'Temperature',
+                volume: 'Volume',
+                search: 'Search characters...',
+                'notes-placeholder': 'Write your notes here...',
+                'qr-placeholder': 'Enter text or URL...'
+            }
+        };
+
+        // Settings Management
+        class Settings {
+            constructor() {
+                this.defaults = {
+                    language: 'de',
+                    font: 'worksans',
+                    tool: 'clock'
+                };
+                this.load();
+                this.applyFromURL();
+            }
+
+            load() {
+                const stored = localStorage.getItem('toolSuiteSettings');
+                this.settings = stored ? JSON.parse(stored) : { ...this.defaults };
+            }
+
+            save() {
+                localStorage.setItem('toolSuiteSettings', JSON.stringify(this.settings));
+            }
+
+            get(key) {
+                return this.settings[key] || this.defaults[key];
+            }
+
+            set(key, value) {
+                this.settings[key] = value;
+                this.save();
+                this.apply(key, value);
+            }
+
+            applyFromURL() {
+                const params = new URLSearchParams(window.location.search);
+                
+                if (params.has('tool')) {
+                    this.settings.tool = params.get('tool');
+                }
+                if (params.has('lang')) {
+                    this.settings.language = params.get('lang');
+                }
+                if (params.has('font')) {
+                    this.settings.font = params.get('font');
+                }
+
+                this.applyAll();
+            }
+
+            applyAll() {
+                this.apply('language', this.settings.language);
+                this.apply('font', this.settings.font);
+                this.apply('tool', this.settings.tool);
+            }
+
+            apply(key, value) {
+                if (key === 'language') {
+                    this.applyLanguage(value);
+                } else if (key === 'font') {
+                    this.applyFont(value);
+                } else if (key === 'tool') {
+                    this.applyTool(value);
+                }
+                this.updateURL();
+            }
+
+            applyLanguage(lang) {
+                document.documentElement.lang = lang;
+                const t = translations[lang];
+                
+                document.querySelectorAll('[data-translate]').forEach(el => {
+                    const key = el.getAttribute('data-translate');
+                    if (t[key]) el.textContent = t[key];
+                });
+
+                document.querySelectorAll('[data-translate-placeholder]').forEach(el => {
+                    const key = el.getAttribute('data-translate-placeholder');
+                    if (t[key]) el.placeholder = t[key];
+                });
+            }
+
+            applyFont(font) {
+                document.body.className = '';
+                if (font === 'roboto') {
+                    document.body.classList.add('font-roboto');
+                } else if (font === 'opensans') {
+                    document.body.classList.add('font-opensans');
+                }
+            }
+
+            applyTool(tool) {
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.classList.remove('active');
+                    if (item.dataset.tool === tool) {
+                        item.classList.add('active');
+                    }
+                });
+
+                document.querySelectorAll('.tool-container').forEach(container => {
+                    container.classList.remove('active');
+                });
+                const toolContainer = document.getElementById(tool);
+                if (toolContainer) {
+                    toolContainer.classList.add('active');
+                }
+            }
+
+            updateURL() {
+                const params = new URLSearchParams();
+                params.set('tool', this.settings.tool);
+                params.set('lang', this.settings.language);
+                params.set('font', this.settings.font);
+                const newURL = `${window.location.pathname}?${params.toString()}`;
+                window.history.replaceState({}, '', newURL);
+            }
+        }
+
+        const settings = new Settings();
+
+        // Navigation
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                settings.set('tool', item.dataset.tool);
+                if (window.innerWidth <= 768) {
+                    document.getElementById('sidebar').classList.remove('open');
+                    document.getElementById('overlay').classList.remove('active');
+                }
+            });
+        });
+
+        // Mobile menu
+        document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('overlay').classList.toggle('active');
+        });
+
+        document.getElementById('overlay').addEventListener('click', () => {
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('settings-panel').classList.remove('open');
+            document.getElementById('overlay').classList.remove('active');
+        });
+
+        // Settings panel
+        const openSettings = () => {
+            document.getElementById('settings-panel').classList.add('open');
+            document.getElementById('overlay').classList.add('active');
+        };
+
+        document.getElementById('settings-btn').addEventListener('click', openSettings);
+        document.getElementById('mobile-settings-btn-mobile').addEventListener('click', openSettings);
+
+        document.getElementById('close-settings').addEventListener('click', () => {
+            document.getElementById('settings-panel').classList.remove('open');
+            document.getElementById('overlay').classList.remove('active');
+        });
+
+        // Settings options
+        document.querySelectorAll('.setting-option').forEach(option => {
+            option.addEventListener('click', () => {
+                const setting = option.dataset.setting;
+                const value = option.dataset.value;
+                
+                option.parentElement.querySelectorAll('.setting-option').forEach(o => {
+                    o.classList.remove('active');
+                });
+                option.classList.add('active');
+                
+                settings.set(setting, value);
+            });
+        });
+
+        // Set active settings options
+        document.querySelectorAll('.setting-option').forEach(option => {
+            const setting = option.dataset.setting;
+            const value = option.dataset.value;
+            if (settings.get(setting) === value) {
+                option.classList.add('active');
+            } else {
+                option.classList.remove('active');
+            }
+        });
+
+        // Clock
+        function updateClock() {
+            const now = new Date();
+            const lang = settings.get('language');
+            const locale = lang === 'de' ? 'de-DE' : 'en-US';
+            
+            const timeString = now.toLocaleTimeString(locale);
+            const dateString = now.toLocaleDateString(locale, { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+            
+            document.getElementById('time').textContent = timeString;
+            document.getElementById('date').textContent = dateString;
+        }
+        updateClock();
+        setInterval(updateClock, 1000);
+
+        // Stopwatch
+        let stopwatchInterval;
+        let stopwatchTime = 0;
+        let stopwatchRunning = false;
+        let lapCounter = 1;
+
+        function formatStopwatchTime(ms) {
+            const hours = Math.floor(ms / 3600000);
+            const minutes = Math.floor((ms % 3600000) / 60000);
+            const seconds = Math.floor((ms % 60000) / 1000);
+            const milliseconds = ms % 1000;
+            
+            return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${String(milliseconds).padStart(3, '0')}`;
+        }
+
+        document.getElementById('stopwatch-start').addEventListener('click', () => {
+            const btn = document.getElementById('stopwatch-start');
+            if (!stopwatchRunning) {
+                stopwatchRunning = true;
+                btn.textContent = 'Pause';
+                const startTime = Date.now() - stopwatchTime;
+                
+                stopwatchInterval = setInterval(() => {
+                    stopwatchTime = Date.now() - startTime;
+                    document.getElementById('stopwatch-display').textContent = formatStopwatchTime(stopwatchTime);
+                }, 10);
+            } else {
+                stopwatchRunning = false;
+                btn.textContent = settings.get('language') === 'de' ? 'Fortsetzen' : 'Resume';
+                clearInterval(stopwatchInterval);
+            }
+        });
+
+        document.getElementById('stopwatch-lap').addEventListener('click', () => {
+            if (stopwatchRunning) {
+                const lapDiv = document.createElement('div');
+                lapDiv.className = 'lap-time';
+                const lapLabel = settings.get('language') === 'de' ? 'Runde' : 'Lap';
+                lapDiv.innerHTML = `<span>${lapLabel} ${lapCounter}</span><span>${formatStopwatchTime(stopwatchTime)}</span>`;
+                document.getElementById('lap-times').insertBefore(lapDiv, document.getElementById('lap-times').firstChild);
+                lapCounter++;
+            }
+        });
+
+        document.getElementById('stopwatch-reset').addEventListener('click', () => {
+            clearInterval(stopwatchInterval);
+            stopwatchTime = 0;
+            stopwatchRunning = false;
+            document.getElementById('stopwatch-display').textContent = '00:00:00.000';
+            document.getElementById('stopwatch-start').textContent = translations[settings.get('language')].start;
+            document.getElementById('lap-times').innerHTML = '';
+            lapCounter = 1;
+        });
+
+        // Timer
+        let timerInterval;
+        let timerRunning = false;
+        let timerSeconds = 0;
+
+        function formatTimerTime(seconds) {
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            const s = seconds % 60;
+            return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        }
+
+        document.getElementById('timer-start').addEventListener('click', () => {
+            const btn = document.getElementById('timer-start');
+            if (!timerRunning) {
+                if (timerSeconds === 0) {
+                    timerSeconds = parseInt(document.getElementById('timer-hours').value) * 3600 + 
+                                   parseInt(document.getElementById('timer-minutes').value) * 60 + 
+                                   parseInt(document.getElementById('timer-seconds').value);
+                }
+                
+                if (timerSeconds > 0) {
+                    timerRunning = true;
+                    btn.textContent = 'Pause';
+                    
+                    timerInterval = setInterval(() => {
+                        timerSeconds--;
+                        document.getElementById('timer-display').textContent = formatTimerTime(timerSeconds);
+                        
+                        if (timerSeconds === 0) {
+                            clearInterval(timerInterval);
+                            timerRunning = false;
+                            btn.textContent = translations[settings.get('language')].start;
+                            
+                            document.getElementById('timer-sound').play();
+                            const msg = settings.get('language') === 'de' ? 'Timer abgelaufen!' : 'Timer finished!';
+                            alert(msg);
+                        }
+                    }, 1000);
+                }
+            } else {
+                timerRunning = false;
+                btn.textContent = settings.get('language') === 'de' ? 'Fortsetzen' : 'Resume';
+                clearInterval(timerInterval);
+            }
+        });
+
+        document.getElementById('timer-reset').addEventListener('click', () => {
+            clearInterval(timerInterval);
+            timerSeconds = 0;
+            timerRunning = false;
+            document.getElementById('timer-display').textContent = '00:00:00';
+            document.getElementById('timer-start').textContent = translations[settings.get('language')].start;
+        });
+
+        // Calendar
+        let currentDate = new Date();
+
+        function renderCalendar() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            const lang = settings.get('language');
+            const locale = lang === 'de' ? 'de-DE' : 'en-US';
+            
+            const monthNames = {
+                de: ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
+                     'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'],
+                en: ['January', 'February', 'March', 'April', 'May', 'June',
+                     'July', 'August', 'September', 'October', 'November', 'December']
+            };
+            
+            document.getElementById('calendar-month-year').textContent = `${monthNames[lang][month]} ${year}`;
+            
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const daysInPrevMonth = new Date(year, month, 0).getDate();
+            
+            const calendarGrid = document.getElementById('calendar-grid');
+            calendarGrid.innerHTML = '';
+            
+            const dayHeaders = lang === 'de' ? 
+                ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'] :
+                ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+            
+            dayHeaders.forEach(day => {
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'calendar-day header';
+                dayDiv.textContent = day;
+                calendarGrid.appendChild(dayDiv);
+            });
+            
+            const adjustedFirstDay = firstDay === 0 ? 6 : firstDay - 1;
+            
+            for (let i = adjustedFirstDay - 1; i >= 0; i--) {
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'calendar-day date other-month';
+                dayDiv.textContent = daysInPrevMonth - i;
+                calendarGrid.appendChild(dayDiv);
+            }
+            
+            const today = new Date();
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'calendar-day date';
+                dayDiv.textContent = day;
+                
+                if (day === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
+                    dayDiv.classList.add('today');
+                }
+                
+                calendarGrid.appendChild(dayDiv);
+            }
+            
+            const remainingCells = 42 - (adjustedFirstDay + daysInMonth);
+            for (let i = 1; i <= remainingCells; i++) {
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'calendar-day date other-month';
+                dayDiv.textContent = i;
+                calendarGrid.appendChild(dayDiv);
+            }
+        }
+
+        document.getElementById('prev-month').addEventListener('click', () => {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            renderCalendar();
+        });
+
+        document.getElementById('next-month').addEventListener('click', () => {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            renderCalendar();
+        });
+
+        renderCalendar();
+
+        // Calculator
+        let calcMode = 'basic';
+        let calcDisplay = '0';
+        let calcOperator = null;
+        let calcPrevValue = null;
+        let calcWaitingForOperand = false;
+
+        function renderCalculator() {
+            const buttonsContainer = document.getElementById('calc-buttons');
+            buttonsContainer.className = calcMode === 'scientific' ? 'calc-buttons scientific' : 'calc-buttons';
+            
+            if (calcMode === 'basic') {
+                buttonsContainer.innerHTML = `
+                    <button class="calc-btn clear">C</button>
+                    <button class="calc-btn operator">÷</button>
+                    <button class="calc-btn operator">×</button>
+                    <button class="calc-btn operator">−</button>
+                    <button class="calc-btn">7</button>
+                    <button class="calc-btn">8</button>
+                    <button class="calc-btn">9</button>
+                    <button class="calc-btn operator">+</button>
+                    <button class="calc-btn">4</button>
+                    <button class="calc-btn">5</button>
+                    <button class="calc-btn">6</button>
+                    <button class="calc-btn operator">%</button>
+                    <button class="calc-btn">1</button>
+                    <button class="calc-btn">2</button>
+                    <button class="calc-btn">3</button>
+                    <button class="calc-btn operator">.</button>
+                    <button class="calc-btn">0</button>
+                    <button class="calc-btn equals">=</button>
+                `;
+            } else {
+                buttonsContainer.innerHTML = `
+                    <button class="calc-btn function">sin</button>
+                    <button class="calc-btn function">cos</button>
+                    <button class="calc-btn function">tan</button>
+                    <button class="calc-btn function">√</button>
+                    <button class="calc-btn clear">C</button>
+                    
+                    <button class="calc-btn function">ln</button>
+                    <button class="calc-btn function">log</button>
+                    <button class="calc-btn function">x²</button>
+                    <button class="calc-btn function">xʸ</button>
+                    <button class="calc-btn operator">÷</button>
+                    
+                    <button class="calc-btn function">π</button>
+                    <button class="calc-btn">7</button>
+                    <button class="calc-btn">8</button>
+                    <button class="calc-btn">9</button>
+                    <button class="calc-btn operator">×</button>
+                    
+                    <button class="calc-btn function">e</button>
+                    <button class="calc-btn">4</button>
+                    <button class="calc-btn">5</button>
+                    <button class="calc-btn">6</button>
+                    <button class="calc-btn operator">−</button>
+                    
+                    <button class="calc-btn function">!</button>
+                    <button class="calc-btn">1</button>
+                    <button class="calc-btn">2</button>
+                    <button class="calc-btn">3</button>
+                    <button class="calc-btn operator">+</button>
+                    
+                    <button class="calc-btn operator">%</button>
+                    <button class="calc-btn">0</button>
+                    <button class="calc-btn operator">.</button>
+                    <button class="calc-btn equals" style="grid-column: span 2">=</button>
+                `;
+            }
+
+            setupCalculatorButtons();
+        }
+
+        function setupCalculatorButtons() {
+            document.querySelectorAll('.calc-btn').forEach(button => {
+                button.addEventListener('click', () => {
+                    handleCalculatorInput(button.textContent);
+                });
+            });
+        }
+
+        function handleCalculatorInput(value) {
+            const displayEl = document.getElementById('calc-display');
+
+            if ((value >= '0' && value <= '9') || value === '.') {
+                if (calcWaitingForOperand) {
+                    calcDisplay = value;
+                    calcWaitingForOperand = false;
+                } else {
+                    calcDisplay = calcDisplay === '0' ? value : calcDisplay + value;
+                }
+            } else if (value === 'C') {
+                calcDisplay = '0';
+                calcOperator = null;
+                calcPrevValue = null;
+                calcWaitingForOperand = false;
+            } else if (value === '=') {
+                if (calcOperator && calcPrevValue !== null) {
+                    const current = parseFloat(calcDisplay);
+                    const previous = parseFloat(calcPrevValue);
+                    let result = 0;
+
+                    switch (calcOperator) {
+                        case '+': result = previous + current; break;
+                        case '−': result = previous - current; break;
+                        case '×': result = previous * current; break;
+                        case '÷': result = previous / current; break;
+                        case '%': result = previous % current; break;
+                        case 'xʸ': result = Math.pow(previous, current); break;
+                    }
+
+                    calcDisplay = String(result);
+                    calcOperator = null;
+                    calcPrevValue = null;
+                    calcWaitingForOperand = true;
+                }
+            } else if (['+', '−', '×', '÷', '%', 'xʸ'].includes(value)) {
+                if (calcOperator && !calcWaitingForOperand) {
+                    const current = parseFloat(calcDisplay);
+                    const previous = parseFloat(calcPrevValue);
+                    let result = 0;
+
+                    switch (calcOperator) {
+                        case '+': result = previous + current; break;
+                        case '−': result = previous - current; break;
+                        case '×': result = previous * current; break;
+                        case '÷': result = previous / current; break;
+                        case '%': result = previous % current; break;
+                        case 'xʸ': result = Math.pow(previous, current); break;
+                    }
+
+                    calcDisplay = String(result);
+                }
+
+                calcPrevValue = calcDisplay;
+                calcOperator = value;
+                calcWaitingForOperand = true;
+            } else if (['sin', 'cos', 'tan', '√', 'ln', 'log', 'x²', '!'].includes(value)) {
+                const num = parseFloat(calcDisplay);
+                let result = 0;
+
+                switch (value) {
+                    case 'sin': result = Math.sin(num); break;
+                    case 'cos': result = Math.cos(num); break;
+                    case 'tan': result = Math.tan(num); break;
+                    case '√': result = Math.sqrt(num); break;
+                    case 'ln': result = Math.log(num); break;
+                    case 'log': result = Math.log10(num); break;
+                    case 'x²': result = num * num; break;
+                    case '!': 
+                        result = 1;
+                        for (let i = 2; i <= num; i++) result *= i;
+                        break;
+                }
+
+                calcDisplay = String(result);
+                calcWaitingForOperand = true;
+            } else if (value === 'π') {
+                calcDisplay = String(Math.PI);
+                calcWaitingForOperand = true;
+            } else if (value === 'e') {
+                calcDisplay = String(Math.E);
+                calcWaitingForOperand = true;
+            }
+
+            displayEl.textContent = calcDisplay;
+        }
+
+        document.querySelectorAll('.calc-mode-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.calc-mode-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                calcMode = btn.dataset.mode;
+                renderCalculator();
+            });
+        });
+
+        renderCalculator();
+
+        // Character Map
+        const charCategories = {
+            symbols: { name: { de: 'Symbole', en: 'Symbols' }, chars: '←→↑↓↔↕⇐⇒⇑⇓⇔⇕◀▶▲▼■□●○★☆♠♣♥♦♪♫✓✗✘' },
+            math: { name: { de: 'Mathematik', en: 'Math' }, chars: '±×÷≈≠≤≥∞∑∏∫√∛∜∝∂∇∈∉∋∌⊂⊃⊄⊅⊆⊇∪∩' },
+            arrows: { name: { de: 'Pfeile', en: 'Arrows' }, chars: '←↑→↓↔↕↖↗↘↙⇐⇑⇒⇓⇔⇕⇖⇗⇘⇙⟵⟶⟷⟸⟹⟺' },
+            currency: { name: { de: 'Währung', en: 'Currency' }, chars: '$€£¥₹₽₩฿₪₫₱₨₡₵₦₴₸₮₢₣₤₧₶₷₺₼₾₿' },
+            greek: { name: { de: 'Griechisch', en: 'Greek' }, chars: 'ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩαβγδεζηθικλμνξοπρςστυφχψω' },
+            punctuation: { name: { de: 'Interpunktion', en: 'Punctuation' }, chars: '.,;:!?&()[]{}/\\|@#*+-=<>%_`~^§$€£¥¢©®™°«»¿¡†‡•…‰‐‑‒–—―‖‗‘’‚‛“”„‟†‡•‣․‥…‧‰‱′″‴‵‶‒‸‹›※‼‽‾‿⁀⁁⁂⁃⁄⁅⁆⁇⁈⁉⁊⁋⁌⁍⁎⁏⁐⁑⁒⁓⁔⁕⁖⁗⁘⁙⁚⁛⁜⁝⁞' },
+            latinBasic: { name: { de: 'Lateinische Buchstaben', en: 'Latin Letters' }, chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzẞßÄÖÜäöüÁÀÂÃÅÆÇÉÈÊËÍÌÎÏÑÓÒÔÕØÚÙÛÝÞáàâãåæçéèêëíìîïñóòôõøúùûýþÿĀāĂăĄąĆćĈĉĊċČčĎďĐđĒēĔĕĖėĘęĚěĜĝĞğĠġĢģĤĥĦħĨĩĪīĬĭĮįİıĲĳĴĵĶķĸĹĺĻļĽľĿŀŁłŃńŅņŇňŉŊŋŌōŎŏŐőŒœŔŕŖŗŘřŚśŜŝŞşŠšŢţŤťŦŧŨũŪūŬŭŮůŰűŲųŴŵŶŷŸŹźŻżŽžƀƁƂƃƄƅƆƇƈƉƊƋƌƍƎƏƐƑƒƓƔƕƖƗƘƙƚƛƜƝƞƟƠơƢƣƤƥƦƧƨƩƪƫƬƭƮƯưƱƲƳƴƵƶƷƸƹƺƻƼƽƾƿǀǁǂǃǄǅǆǇǈǉǊǋǌǍǎǏǐǑǒǓǔǕǖǗǘǙǚǛǜǝǞǟǠǡǢǣǤǥǦǧǨǩǪǫǬǭǮǯǰǱǲǳǴǵǶǷǸǹǺǻǼǽǾǿȀȁȂȃȄȅȆȇȈȉȊȋȌȍȎȏȐȑȒȓȔȕȖȗȘșȚțȜȝȞȟȠȡȢȣȤȥȦȧȨȩȪȫȬȭȮȯȰȱȲȳȴȵȶȷȸȹȺȻȼȽȾȿɀɁɂɃɄɅɆɇɈɉɊɋɌɍɎɏḀḁḂḃḄḅḆḇḈḉḊḋḌḍḎḏḐḑḒḓḔḕḖḗḘḙḚḛḜḝḞḟḠḡḢḣḤḥḦḧḨḩḪḫḬḭḮḯḰḱḲḳḴḵḶḷḸḹḺḻḼḽḾḿṀṁṂṃṄṅṆṇṈṉṊṋṌṍṎṏṐṑṒṓṔṕṖṗṘṙṚṛṜṝṞṟṠṡṢṣṤṥṦṧṨṩṪṫṬṭṮṯṰṱṲṳṴṵṶṷṸṹṺṻṼṽṾṿẀẁẂẃẄẅẆẇẈẉẊẋẌẍẎẏẐẑẒẓẔẕẖẗẘẙẚẛẠạẢảẤấẦầẨẩẪẫẬậẮắẰằẲẳẴẵẶặẸẹẺẻẼẽẾếỀềỂểỄễỆệỈỉỊịỌọỎỏỐốỒồỔổỖỗỘộỚớỜờỞởỠỡỢợỤụỦủỨứỪừỬửỮữỰựỴỵỶỷỸỹ' },
+            cyrillic: { name: { de: 'Kyrillisch', en: 'Cyrillic' }, chars: 'АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюяЄєІіЇїҐґӁӂӔӕ' },
+            emojisSmileys: { 
+    name: { de: 'Emojis: Smileys', en: 'Emojis: Smileys' }, 
+    chars: '😀😃😄😁😆😅😂🤣🥲☺️😊😇🙂🙃😉😌😍🥰😘😗😙😚😋😛😝😜🤪🤨🧐🤓😎🥸🤩🥳😏😒😞😔😟😕🙁☹️😣😖😫😩🥺😢😭😤😠😡🤬🤯😳🥵🥶😱😨😰😥😓🤗🤔🤭🤫🤥😶😐😑😬🙄😯😦😧😮😲🥱😴🤤😪😵‍💫😵🤐🥴🤢🤮🤧😷🤒🤕🤑🤠' 
+},
+emojisPeople: { 
+    name: { de: 'Emojis: Personen', en: 'Emojis: People' }, 
+    chars: '👋🤚🖐✋🖖👌🤌🤏✌️🤞🤟🤘🤙👈👉👆🖕👇☝️👍👎✊👊🤛🤜👏🙌👐🤲🤝🙏✍️💅🤳💪🦾 backdoor 🦵🦶👂🦻👃🧠🫀🫁🦷👀👁👅👄👶👧🧒👦👩🧑👨👩‍🦱🧑‍🦱👨‍🦱👩‍🦰🧑‍🦰👨‍🦰👱‍♀️👱🧓👴👵' 
+},
+emojisAnimals: { 
+    name: { de: 'Emojis: Tiere & Natur', en: 'Emojis: Animals' }, 
+    chars: '🐶🐱🐭🐹🐰🦊🐻🐼🐻‍❄️🐨🐯🦁🐮🐷🐽🐸🐵🙈🙉🙊🐒🙊🐘🦣🦏🦛🦒🦓🐆🐅🦍🦧🐕🐩🐈🐎🦄🦓🦌🦬🐄🐖羊🐏🐑🐐🐪🐫🦙🐘🦣🦏🦛🦒🦓🐆🐅🦍🦧🦜🕊️🦅🦆🦢🦉🦩🦚🥦🥬🥒🫑🌶️🌽🥕' 
+},
+emojisFood: { 
+    name: { de: 'Emojis: Essen', en: 'Emojis: Food' }, 
+    chars: '🍏🍎🍐🍊🍋🍌🍉🍇🍓🧹🫐🍈🍒🍑🥭🍍🍅🍆🥑🥦🥬🥒🌶️🫑 corn 🥕🫒 garlic 🧅 potato 🍠🥐🥯🍞🥖🥨🧀🥚🍳🧈🥞🍕🥪🥙🌮🌯🥗🥘🍜🍝🍞🥐🥖' 
+},
+emojisActivities: { 
+    name: { de: 'Emojis: Aktivitäten', en: 'Emojis: Activities' }, 
+    chars: '⚽️🏀🏈⚾️🥎🎾🏐🏉🥏🎱🪀🏓🏸🏒🏑🥍🏏🪃🥅⛳️🪁🏹🎣🤿🥊🥋🎽🛹🛼🛷⛸️🎿⛷️🏂🏋️‍♀️🤺🤼‍♂️🤸‍♀️⛹️‍♀️🤾‍♀️🏌️‍♀️🧘‍♀️🏄‍♀️🏊‍♀️🤽‍♀️🚣‍♀️🧗‍♀️🚴‍♀️🚵‍♀️' 
+},
+emojisTravel: { 
+    name: { de: 'Emojis: Reisen & Orte', en: 'Emojis: Travel' }, 
+    chars: '🚗🚕🚙🚌🚎🏎️🚓🚑🚒🚐🛻🚚🚛🚜🛵🚲🛴🚏⛵️🚤🛥️🛳️⛴️🚢✈️🛫🛬🪂💺🚁🚟🚠🚡🚀🛸🛰️🪐🌑🌒🌓🌔🌕🌙🌎🌍🌏🗼🏙️🌆🌅🌃🌉🏔️⛰️🌋🗻🏠🏡🏢' 
+},
+emojisObjects: { 
+    name: { de: 'Emojis: Objekte', en: 'Emojis: Objects' }, 
+    chars: '⌚️📱📲💻⌨️🖥️🖨️🖱️🖲️🕹️🗜️💽💾💿📀📼📷📸📹🎥📽️🎞️📞☎️📟📠📺📻🎙️🎚️🎛️🧭⏱️⏲️⏰🕰️⏳⌛️📡🔋🔌💡🔦🕯️🪔🧯🛢️💸💵💴💶💷🪙💰💳💎' 
+},
+emojisFlags: { 
+    name: { de: 'Emojis: Flaggen', en: 'Emojis: Flags' }, 
+    chars: '🏁🚩🎌🏴🏳️🏳️‍🌈🏳️‍⚧️🏴‍☠️' 
+},
+emojisSymbols: { 
+    name: { de: 'Emojis: Symbole', en: 'Emojis: Symbols' }, 
+    chars: '🏧🚮🚰♿️🚹🚺🚻🚼🚾🛂🛃🛄🛅⚠️🚸⛔️🚫🚳🚭🚯🚱🚷📵🔞☢️☣️⬆️↗️➡️↘️⬇️↙️⬅️↖️↕️↔️↩️↪️⤴️⤵️🔃🔄🔙🔚🔛🔜🔝🛐⚛️🕉️✡️☸️☯️✝️☦️☪️☮️🕎🔯♈️♉️♊️♋️♌️♍️♎️♏️♐️♑️♒️♓️⛎🔀🔁🔂▶️⏩⏭️⏯️◀️⏪⏮️🔼⏫🔽⏬⏸️⏹️⏺️⏏️🎦🔅🔆📶📳📴♀️♂️⚧️✖️➕➖➗♾️‼️⁉️❓❔❕❗️〰️💱💲' 
+},
+emojisNature: { 
+    name: { de: 'Emojis: Wetter & Klima', en: 'Emojis: Nature' }, 
+    chars: '☀️🌤️⛅️🌥️☁️🌦️🌧️⛈️🌩️🌨️❄️☃️⛄️🌬️💨🌪️🌫️🌊💧💦☔️☂️⛱️⚡️🌈🔥💥☄️🌠🌟⭐️✨⚡️☀️🌙🌑🌓🌔🌕🌍🌎🌏🪐🌑🌒🌓🌔🌕🌙' 
+}
+          
+        };
+
+        let activeCategory = 'symbols';
+
+        function renderCharMap() {
+            const lang = settings.get('language');
+            const categoriesEl = document.getElementById('charmap-categories');
+            const gridEl = document.getElementById('charmap-grid');
+            
+            categoriesEl.innerHTML = '';
+            Object.keys(charCategories).forEach(key => {
+                const btn = document.createElement('button');
+                btn.className = 'charmap-category' + (key === activeCategory ? ' active' : '');
+                btn.textContent = charCategories[key].name[lang];
+                btn.addEventListener('click', () => {
+                    activeCategory = key;
+                    renderCharMap();
+                });
+                categoriesEl.appendChild(btn);
+            });
+
+            gridEl.innerHTML = '';
+            const chars = charCategories[activeCategory].chars;
+            for (let char of chars) {
+                const div = document.createElement('div');
+                div.className = 'charmap-char';
+                div.textContent = char;
+                div.addEventListener('click', () => {
+                    navigator.clipboard.writeText(char);
+                    showCopiedNotification(char);
+                });
+                gridEl.appendChild(div);
+            }
+        }
+
+        function showCopiedNotification(char) {
+            const notification = document.createElement('div');
+            notification.className = 'charmap-copied';
+            notification.textContent = `${char} ${settings.get('language') === 'de' ? 'kopiert!' : 'copied!'}`;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 2000);
+        }
+
+        renderCharMap();
+
+        document.getElementById('charmap-search').addEventListener('input', (e) => {
+            const search = e.target.value.toLowerCase();
+            if (!search) {
+                renderCharMap();
+                return;
+            }
+
+            const gridEl = document.getElementById('charmap-grid');
+            gridEl.innerHTML = '';
+            
+            Object.values(charCategories).forEach(cat => {
+                for (let char of cat.chars) {
+                    if (char.toLowerCase().includes(search)) {
+                        const div = document.createElement('div');
+                        div.className = 'charmap-char';
+                        div.textContent = char;
+                        div.addEventListener('click', () => {
+                            navigator.clipboard.writeText(char);
+                            showCopiedNotification(char);
+                        });
+                        gridEl.appendChild(div);
+                    }
+                }
+            });
+        });
+
+        // Unit Converter
+        const conversionUnits = {
+            length: {
+                units: ['mm', 'cm', 'm', 'km', 'in', 'ft', 'yd', 'mi'],
+                toBase: {
+                    mm: 0.001, cm: 0.01, m: 1, km: 1000,
+                    in: 0.0254, ft: 0.3048, yd: 0.9144, mi: 1609.34
+                }
+            },
+            weight: {
+                units: ['mg', 'g', 'kg', 't', 'oz', 'lb'],
+                toBase: {
+                    mg: 0.000001, g: 0.001, kg: 1, t: 1000,
+                    oz: 0.0283495, lb: 0.453592
+                }
+            },
+            temperature: {
+                units: ['°C', '°F', 'K'],
+                convert: (value, from, to) => {
+                    let celsius;
+                    if (from === '°C') celsius = value;
+                    else if (from === '°F') celsius = (value - 32) * 5/9;
+                    else celsius = value - 273.15;
+
+                    if (to === '°C') return celsius;
+                    else if (to === '°F') return celsius * 9/5 + 32;
+                    else return celsius + 273.15;
+                }
+            },
+            volume: {
+                units: ['ml', 'l', 'cup', 'pt', 'qt', 'gal'],
+                toBase: {
+                    ml: 0.001, l: 1,
+                    cup: 0.236588, pt: 0.473176, qt: 0.946353, gal: 3.78541
+                }
+            }
+        };
+
+        let converterType = 'length';
+
+        function renderConverter() {
+            const unit1 = document.getElementById('converter-unit1');
+            const unit2 = document.getElementById('converter-unit2');
+            
+            unit1.innerHTML = '';
+            unit2.innerHTML = '';
+            
+            conversionUnits[converterType].units.forEach(unit => {
+                const option1 = document.createElement('option');
+                option1.value = unit;
+                option1.textContent = unit;
+                unit1.appendChild(option1);
+
+                const option2 = document.createElement('option');
+                option2.value = unit;
+                option2.textContent = unit;
+                unit2.appendChild(option2);
+            });
+
+            unit2.selectedIndex = 1;
+            updateConversion();
+        }
+
+        function updateConversion() {
+            const input1 = document.getElementById('converter-input1');
+            const input2 = document.getElementById('converter-input2');
+            const unit1 = document.getElementById('converter-unit1').value;
+            const unit2 = document.getElementById('converter-unit2').value;
+            const value = parseFloat(input1.value) || 0;
+
+            let result;
+            if (converterType === 'temperature') {
+                result = conversionUnits.temperature.convert(value, unit1, unit2);
+            } else {
+                const baseValue = value * conversionUnits[converterType].toBase[unit1];
+                result = baseValue / conversionUnits[converterType].toBase[unit2];
+            }
+
+            input2.value = result.toFixed(6).replace(/\.?0+$/, '');
+        }
+
+        document.querySelectorAll('.converter-type-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.converter-type-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                converterType = btn.dataset.type;
+                renderConverter();
+            });
+        });
+
+        document.getElementById('converter-input1').addEventListener('input', updateConversion);
+        document.getElementById('converter-unit1').addEventListener('change', updateConversion);
+        document.getElementById('converter-unit2').addEventListener('change', updateConversion);
+
+        document.getElementById('converter-swap').addEventListener('click', () => {
+            const unit1 = document.getElementById('converter-unit1');
+            const unit2 = document.getElementById('converter-unit2');
+            const temp = unit1.value;
+            unit1.value = unit2.value;
+            unit2.value = temp;
+            updateConversion();
+        });
+
+        renderConverter();
+
+        // World Clock
+        const timezones = [];
+
+        function updateWorldClocks() {
+            const list = document.getElementById('timezone-list');
+            list.innerHTML = '';
+
+            timezones.forEach((tz, index) => {
+                const now = new Date();
+                const timeString = now.toLocaleTimeString('en-US', {
+                    timeZone: tz.zone,
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+
+                const div = document.createElement('div');
+                div.className = 'timezone-item';
+                div.innerHTML = `
+                    <div class="timezone-info">
+                        <h3>${tz.name}</h3>
+                        <div class="timezone-time">${timeString}</div>
+                    </div>
+                    <button class="timezone-remove" data-index="${index}">×</button>
+                `;
+                list.appendChild(div);
+            });
+
+            document.querySelectorAll('.timezone-remove').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    timezones.splice(btn.dataset.index, 1);
+                    updateWorldClocks();
+                });
+            });
+        }
+
+        document.getElementById('add-timezone').addEventListener('click', () => {
+            const select = document.getElementById('timezone-select');
+            const option = select.options[select.selectedIndex];
+            timezones.push({
+                zone: option.value,
+                name: option.textContent
+            });
+            updateWorldClocks();
+        });
+
+        setInterval(updateWorldClocks, 1000);
+
+        // Color Picker
+        function updateColor(hex) {
+            document.getElementById('color-display').style.backgroundColor = hex;
+            document.getElementById('color-picker-native').value = hex;
+            document.getElementById('color-hex').value = hex;
+
+            const r = parseInt(hex.slice(1, 3), 16);
+            const g = parseInt(hex.slice(3, 5), 16);
+            const b = parseInt(hex.slice(5, 7), 16);
+            document.getElementById('color-rgb').value = `rgb(${r}, ${g}, ${b})`;
+
+            const h = Math.round(Math.atan2(Math.sqrt(3) * (g - b), 2 * r - g - b) * 180 / Math.PI);
+            const l = (r + g + b) / 765;
+            const s = l === 0 || l === 1 ? 0 : (Math.max(r, g, b) - Math.min(r, g, b)) / (255 - Math.abs(2 * l * 255 - 255));
+            document.getElementById('color-hsl').value = `hsl(${h}, ${Math.round(s * 100)}%, ${Math.round(l * 100)}%)`;
+        }
+
+        document.getElementById('color-picker-native').addEventListener('input', (e) => {
+            updateColor(e.target.value);
+        });
+
+        document.getElementById('color-hex').addEventListener('input', (e) => {
+            if (/^#[0-9A-F]{6}$/i.test(e.target.value)) {
+                updateColor(e.target.value);
+            }
+        });
+
+        updateColor('#10b981');
+
+        // QR Code Generator
+        function generateQRCode(text) {
+            const canvas = document.getElementById('qr-canvas');
+            const ctx = canvas.getContext('2d');
+            const size = 256;
+            canvas.width = size;
+            canvas.height = size;
+
+            // Simple QR code placeholder (would need a real QR library for production)
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, size, size);
+            ctx.fillStyle = '#000000';
+            ctx.font = '12px monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText('QR Code', size / 2, size / 2 - 10);
+            ctx.fillText(text.substring(0, 30), size / 2, size / 2 + 10);
+            ctx.fillText('(Demo)', size / 2, size / 2 + 30);
+        }
+
+        document.getElementById('generate-qr').addEventListener('click', () => {
+            const text = document.getElementById('qr-input').value;
+            if (text) {
+                generateQRCode(text);
+            }
+        });
+
+        document.getElementById('download-qr').addEventListener('click', () => {
+            const canvas = document.getElementById('qr-canvas');
+            const link = document.createElement('a');
+            link.download = 'qrcode.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        });
+
+        // Notes
+        if (localStorage.getItem('notes')) {
+            document.getElementById('notes-area').value = localStorage.getItem('notes');
+        }
+
+        document.getElementById('save-notes').addEventListener('click', () => {
+            localStorage.setItem('notes', document.getElementById('notes-area').value);
+            const msg = settings.get('language') === 'de' ? 'Notizen gespeichert!' : 'Notes saved!';
+            alert(msg);
+        });
+
+        document.getElementById('clear-notes').addEventListener('click', () => {
+            const msg = settings.get('language') === 'de' ? 
+                'Möchtest du wirklich alle Notizen löschen?' : 
+                'Do you really want to delete all notes?';
+            if (confirm(msg)) {
+                document.getElementById('notes-area').value = '';
+                localStorage.removeItem('notes');
+            }
+        });
+        // Header Font Change
+document.getElementById('header-font-select').addEventListener('change', (e) => {
+    const font = e.target.value;
+    document.querySelectorAll('h1, h2, h3, .tool-title').forEach(el => {
+        el.style.fontFamily = font;
+    });
+    localStorage.setItem('headerFont', font);
+});
+
+// Body Font Change
+document.getElementById('body-font-select').addEventListener('change', (e) => {
+    const font = e.target.value;
+    document.body.style.fontFamily = font;
+    localStorage.setItem('bodyFont', font);
+});
+
+        setInterval(() => {
+            const notes = document.getElementById('notes-area').value;
+            if (notes) {
+                localStorage.setItem('notes', notes);
+            }
+        }, 30000);
+    </script>
+</body>
+</html>
