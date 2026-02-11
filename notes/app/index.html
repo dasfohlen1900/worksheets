@@ -6,6 +6,8 @@
     <title>NotizStudio - Deine kreative Notizen-App</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Work+Sans:wght@300;400;500;600&family=Merriweather:wght@700;900&family=Lora:wght@600;700&family=Crimson+Text:wght@600;700&family=Libre+Baskerville:wght@700&family=Roboto:wght@300;400;500&family=Open+Sans:wght@300;400;500;600&family=Lato:wght@300;400;700&family=Montserrat:wght@300;400;500;600&family=Poppins:wght@300;400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -413,6 +415,21 @@
             opacity: 1;
         }
 
+        .pdf-export-btn {
+            opacity: 0;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+            font-size: 16px;
+            color: inherit;
+            transition: all 0.2s ease;
+        }
+
+        .page-item:hover .pdf-export-btn {
+            opacity: 1;
+        }
+
         /* Editor-Bereich */
         .editor-area {
             flex: 1;
@@ -456,6 +473,22 @@
             align-items: center;
             gap: 6px;
             font-weight: 500;
+            font-family: var(--font-body);
+        }
+
+        .toolbar-btn strong {
+            font-family: var(--font-body);
+            font-weight: 700;
+        }
+
+        .toolbar-btn em {
+            font-family: var(--font-body);
+            font-style: italic;
+        }
+
+        .toolbar-btn u {
+            font-family: var(--font-body);
+            text-decoration: underline;
         }
 
         .toolbar-btn:hover {
@@ -1264,7 +1297,10 @@
                     <div class="page-item ${data.currentPage === page.id ? 'active' : ''}" 
                          onclick="selectPage(${page.id})">
                         <span>${icon} ${page.title || 'Unbenannte Seite'}</span>
-                        <button class="delete-page" onclick="event.stopPropagation(); deletePage(${page.id})">×</button>
+                        <div style="display: flex; gap: 4px;">
+                            ${page.type !== 'drawing' ? `<button class="pdf-export-btn" onclick="event.stopPropagation(); exportPageAsPDF(${page.id})" title="Als PDF exportieren">📄</button>` : ''}
+                            <button class="delete-page" onclick="event.stopPropagation(); deletePage(${page.id})" title="Löschen">×</button>
+                        </div>
                     </div>
                 `;
             }).join('');
@@ -1341,6 +1377,7 @@
                     </div>
                     <div class="toolbar-group">
                         <button class="toolbar-btn" id="markdownToggle" onclick="toggleMarkdownPreview()">👁️ Vorschau</button>
+                        <button class="toolbar-btn" onclick="exportCurrentPageAsPDF()">📄 PDF Export</button>
                     </div>
                 </div>
                 <div class="editor-header">
@@ -1977,6 +2014,166 @@
             page.content = content;
             page.modified = new Date().toISOString();
             saveData();
+        }
+
+        // PDF Export Functions
+        async function exportPageAsPDF(pageId) {
+            const notebook = data.notebooks.find(nb => nb.id === data.currentNotebook);
+            if (!notebook) return;
+            const section = notebook.sections.find(sec => sec.id === data.currentSection);
+            if (!section) return;
+            const page = section.pages.find(p => p.id === pageId);
+            if (!page) return;
+
+            await generatePDF(page);
+        }
+
+        async function exportCurrentPageAsPDF() {
+            const page = getCurrentPage();
+            if (!page) {
+                alert('Keine Seite ausgewählt!');
+                return;
+            }
+            await generatePDF(page);
+        }
+
+        async function generatePDF(page) {
+            try {
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF({
+                    orientation: 'portrait',
+                    unit: 'mm',
+                    format: 'a4'
+                });
+
+                const pageWidth = pdf.internal.pageSize.getWidth();
+                const pageHeight = pdf.internal.pageSize.getHeight();
+                const margin = 20;
+                const maxWidth = pageWidth - 2 * margin;
+                let yPosition = margin;
+
+                // Add title
+                pdf.setFontSize(24);
+                pdf.setFont(undefined, 'bold');
+                const titleLines = pdf.splitTextToSize(page.title || 'Unbenannte Seite', maxWidth);
+                pdf.text(titleLines, margin, yPosition);
+                yPosition += titleLines.length * 10 + 10;
+
+                // Add metadata
+                pdf.setFontSize(10);
+                pdf.setFont(undefined, 'normal');
+                pdf.setTextColor(100, 100, 100);
+                const dateCreated = new Date(page.created).toLocaleDateString('de-DE');
+                pdf.text(`Erstellt: ${dateCreated}`, margin, yPosition);
+                yPosition += 6;
+
+                if (page.tags && page.tags.length > 0) {
+                    pdf.text(`Tags: ${page.tags.join(', ')}`, margin, yPosition);
+                    yPosition += 6;
+                }
+                yPosition += 8;
+
+                // Add content based on page type
+                pdf.setTextColor(0, 0, 0);
+                pdf.setFontSize(12);
+
+                if (page.type === 'checklist' && page.checklist) {
+                    // Handle checklist
+                    page.checklist.forEach(item => {
+                        if (yPosition > pageHeight - margin) {
+                            pdf.addPage();
+                            yPosition = margin;
+                        }
+                        const checkbox = item.checked ? '☑' : '☐';
+                        const text = `${checkbox} ${item.text}`;
+                        const lines = pdf.splitTextToSize(text, maxWidth);
+                        pdf.text(lines, margin, yPosition);
+                        yPosition += lines.length * 7 + 3;
+                    });
+                } else if (page.type === 'text' || page.type === 'drawing') {
+                    // Handle text content
+                    const content = page.content || '';
+                    const lines = content.split('\n');
+                    
+                    lines.forEach(line => {
+                        if (yPosition > pageHeight - margin) {
+                            pdf.addPage();
+                            yPosition = margin;
+                        }
+                        
+                        // Handle markdown formatting (basic)
+                        let processedLine = line;
+                        
+                        // Headers
+                        if (line.startsWith('### ')) {
+                            pdf.setFontSize(14);
+                            pdf.setFont(undefined, 'bold');
+                            processedLine = line.substring(4);
+                        } else if (line.startsWith('## ')) {
+                            pdf.setFontSize(16);
+                            pdf.setFont(undefined, 'bold');
+                            processedLine = line.substring(3);
+                        } else if (line.startsWith('# ')) {
+                            pdf.setFontSize(18);
+                            pdf.setFont(undefined, 'bold');
+                            processedLine = line.substring(2);
+                        } else {
+                            pdf.setFontSize(12);
+                            pdf.setFont(undefined, 'normal');
+                        }
+                        
+                        const wrappedLines = pdf.splitTextToSize(processedLine, maxWidth);
+                        pdf.text(wrappedLines, margin, yPosition);
+                        yPosition += wrappedLines.length * 7 + 2;
+                        
+                        // Reset font after headers
+                        if (line.startsWith('#')) {
+                            pdf.setFontSize(12);
+                            pdf.setFont(undefined, 'normal');
+                        }
+                    });
+                }
+
+                // Add drawing if exists
+                if (page.type === 'drawing' && page.drawing) {
+                    if (yPosition > pageHeight - margin - 100) {
+                        pdf.addPage();
+                        yPosition = margin;
+                    }
+                    
+                    try {
+                        const imgWidth = maxWidth;
+                        const imgHeight = (imgWidth * 2) / 3; // Maintain aspect ratio
+                        pdf.addImage(page.drawing, 'PNG', margin, yPosition, imgWidth, imgHeight);
+                        yPosition += imgHeight + 10;
+                    } catch (e) {
+                        console.error('Error adding drawing to PDF:', e);
+                    }
+                }
+
+                // Add footer
+                const totalPages = pdf.internal.getNumberOfPages();
+                for (let i = 1; i <= totalPages; i++) {
+                    pdf.setPage(i);
+                    pdf.setFontSize(9);
+                    pdf.setTextColor(150, 150, 150);
+                    pdf.text(
+                        `Seite ${i} von ${totalPages} - Erstellt mit NotizStudio`,
+                        pageWidth / 2,
+                        pageHeight - 10,
+                        { align: 'center' }
+                    );
+                }
+
+                // Save PDF
+                const filename = `${page.title.replace(/[^a-z0-9]/gi, '_')}_${Date.now()}.pdf`;
+                pdf.save(filename);
+
+                alert(`✅ PDF "${page.title}" wurde erfolgreich erstellt!`);
+            } catch (error) {
+                console.error('PDF Export Error:', error);
+                alert(`❌ Fehler beim PDF-Export: ${error.message}`);
+            }
         }
 
         // Export & Import Functions
