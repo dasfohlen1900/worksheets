@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NotizStudio - Deine kreative Notizen-App</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Work+Sans:wght@300;400;500;600&family=Merriweather:wght@700;900&family=Lora:wght@600;700&family=Crimson+Text:wght@600;700&family=Libre+Baskerville:wght@700&family=Roboto:wght@300;400;500&family=Open+Sans:wght@300;400;500;600&family=Lato:wght@300;400;700&family=Montserrat:wght@300;400;500;600&family=Poppins:wght@300;400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -528,11 +529,91 @@
             line-height: 1.8;
             border: none;
             outline: none;
-            resize: none;
             width: 100%;
             color: var(--text-dark);
             font-family: var(--font-body);
             font-weight: 400;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .content-editor:empty:before {
+            content: attr(data-placeholder);
+            color: var(--text-light);
+            opacity: 0.5;
+        }
+
+        /* Markdown rendered styles */
+        .content-editor strong {
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .content-editor em {
+            font-style: italic;
+        }
+
+        .content-editor u {
+            text-decoration: underline;
+        }
+
+        .content-editor h1, .content-editor h2, .content-editor h3 {
+            font-family: var(--font-header);
+            margin: 20px 0 10px;
+            font-weight: 700;
+        }
+
+        .content-editor h1 { font-size: 32px; }
+        .content-editor h2 { font-size: 26px; }
+        .content-editor h3 { font-size: 22px; }
+
+        .content-editor ul, .content-editor ol {
+            margin: 10px 0;
+            padding-left: 30px;
+        }
+
+        .content-editor li {
+            margin: 5px 0;
+        }
+
+        .content-editor code {
+            background: #f5f5f3;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+
+        .content-editor pre {
+            background: #f5f5f3;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+
+        .content-editor pre code {
+            background: none;
+            padding: 0;
+        }
+
+        .content-editor blockquote {
+            border-left: 4px solid var(--accent);
+            padding-left: 15px;
+            margin: 10px 0;
+            color: var(--text-light);
+            font-style: italic;
+        }
+
+        .content-editor a {
+            color: var(--primary);
+            text-decoration: underline;
+        }
+
+        .content-editor hr {
+            border: none;
+            border-top: 2px solid var(--border);
+            margin: 20px 0;
         }
 
         /* Handwriting Canvas */
@@ -1005,6 +1086,17 @@
         </div>
     </div>
 
+    <div class="modal" id="renameModal">
+        <div class="modal-content">
+            <h3 id="renameModalTitle">Umbenennen</h3>
+            <input type="text" id="renameInput" placeholder="Neuer Name">
+            <div class="modal-buttons">
+                <button class="btn-cancel" onclick="closeModal('renameModal')">Abbrechen</button>
+                <button class="btn-confirm" onclick="confirmRename()">Umbenennen</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Datenstruktur
         let data = {
@@ -1019,6 +1111,7 @@
         let isDrawing = false;
         let currentColor = '#1a1a1a';
         let currentLineWidth = 2;
+        let markdownPreviewMode = false;
 
         // LocalStorage laden
         function loadData() {
@@ -1126,6 +1219,7 @@
                      onclick="selectNotebook(${nb.id})">
                     <span class="notebook-name">${nb.name}</span>
                     <div class="notebook-actions">
+                        <button class="notebook-action-btn" onclick="event.stopPropagation(); renameNotebook(${nb.id})" title="Umbenennen">✏️</button>
                         <button class="notebook-action-btn" onclick="event.stopPropagation(); exportNotebook(${nb.id})" title="Exportieren">💾</button>
                         <button class="notebook-action-btn" onclick="event.stopPropagation(); deleteNotebook(${nb.id})" title="Löschen">×</button>
                     </div>
@@ -1144,7 +1238,10 @@
                 <div class="section-item ${data.currentSection === sec.id ? 'active' : ''}" 
                      onclick="selectSection(${sec.id})">
                     <span>${sec.name}</span>
-                    <button class="delete-section" onclick="event.stopPropagation(); deleteSection(${sec.id})">×</button>
+                    <div style="display: flex; gap: 4px;">
+                        <button class="delete-section" onclick="event.stopPropagation(); renameSection(${sec.id})" title="Umbenennen">✏️</button>
+                        <button class="delete-section" onclick="event.stopPropagation(); deleteSection(${sec.id})" title="Löschen">×</button>
+                    </div>
                 </div>
             `).join('');
         }
@@ -1174,6 +1271,7 @@
         }
 
         function renderEditor() {
+            markdownPreviewMode = false; // Reset preview mode when switching pages
             const editorArea = document.getElementById('editorArea');
             const notebook = data.notebooks.find(nb => nb.id === data.currentNotebook);
             if (!notebook) {
@@ -1241,6 +1339,9 @@
                     <div class="toolbar-group">
                         <button class="toolbar-btn" onclick="showTagInput()">🏷️ Tag hinzufügen</button>
                     </div>
+                    <div class="toolbar-group">
+                        <button class="toolbar-btn" id="markdownToggle" onclick="toggleMarkdownPreview()">👁️ Vorschau</button>
+                    </div>
                 </div>
                 <div class="editor-header">
                     <input type="text" class="page-title" value="${page.title}" 
@@ -1256,9 +1357,11 @@
                     </div>
                 </div>
                 <div class="editor-content">
-                    <textarea class="content-editor" 
-                              oninput="updatePageContent(this.value)"
-                              placeholder="Beginne hier zu schreiben...">${page.content || ''}</textarea>
+                    <div class="content-editor" 
+                         contenteditable="true"
+                         id="contentEditor"
+                         oninput="updatePageContentFromDiv()"
+                         data-placeholder="Beginne hier zu schreiben... (Markdown wird automatisch formatiert)">${escapeHtml(page.content || '')}</div>
                 </div>
             `;
         }
@@ -1523,10 +1626,14 @@
 
         // Text Formatting Functions
         function formatText(format) {
-            const textarea = document.querySelector('.content-editor');
-            const start = textarea.selectionStart;
-            const end = textarea.selectionEnd;
-            const selectedText = textarea.value.substring(start, end);
+            const editor = document.getElementById('contentEditor');
+            if (!editor) return;
+            
+            const selection = window.getSelection();
+            if (!selection.rangeCount) return;
+            
+            const range = selection.getRangeAt(0);
+            const selectedText = range.toString();
             
             if (!selectedText) return;
             
@@ -1535,22 +1642,84 @@
             if (format === 'italic') formattedText = `*${selectedText}*`;
             if (format === 'underline') formattedText = `__${selectedText}__`;
             
-            textarea.value = textarea.value.substring(0, start) + formattedText + textarea.value.substring(end);
-            updatePageContent(textarea.value);
+            range.deleteContents();
+            range.insertNode(document.createTextNode(formattedText));
+            
+            updatePageContentFromDiv();
         }
 
         function insertBulletList() {
-            const textarea = document.querySelector('.content-editor');
-            const start = textarea.selectionStart;
-            textarea.value = textarea.value.substring(0, start) + '\n• ' + textarea.value.substring(start);
-            updatePageContent(textarea.value);
+            const editor = document.getElementById('contentEditor');
+            if (!editor) return;
+            
+            const selection = window.getSelection();
+            const range = selection.getRangeAt(0);
+            range.insertNode(document.createTextNode('\n• '));
+            
+            // Move cursor after the bullet
+            range.collapse(false);
+            selection.removeAllRanges();
+            selection.addRange(range);
+            
+            updatePageContentFromDiv();
         }
 
         function insertNumberedList() {
-            const textarea = document.querySelector('.content-editor');
-            const start = textarea.selectionStart;
-            textarea.value = textarea.value.substring(0, start) + '\n1. ' + textarea.value.substring(start);
-            updatePageContent(textarea.value);
+            const editor = document.getElementById('contentEditor');
+            if (!editor) return;
+            
+            const selection = window.getSelection();
+            const range = selection.getRangeAt(0);
+            range.insertNode(document.createTextNode('\n1. '));
+            
+            range.collapse(false);
+            selection.removeAllRanges();
+            selection.addRange(range);
+            
+            updatePageContentFromDiv();
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function toggleMarkdownPreview() {
+            markdownPreviewMode = !markdownPreviewMode;
+            const editor = document.getElementById('contentEditor');
+            const toggleBtn = document.getElementById('markdownToggle');
+            
+            if (!editor) return;
+            
+            if (markdownPreviewMode) {
+                // Switch to preview mode
+                const rawContent = editor.textContent;
+                const htmlContent = marked.parse(rawContent);
+                editor.innerHTML = htmlContent;
+                editor.contentEditable = 'false';
+                editor.style.cursor = 'default';
+                toggleBtn.textContent = '✏️ Bearbeiten';
+                toggleBtn.classList.add('active');
+            } else {
+                // Switch back to edit mode
+                const page = getCurrentPage();
+                if (page) {
+                    editor.textContent = page.content || '';
+                    editor.contentEditable = 'true';
+                    editor.style.cursor = 'text';
+                    toggleBtn.textContent = '👁️ Vorschau';
+                    toggleBtn.classList.remove('active');
+                }
+            }
+        }
+
+        function updatePageContentFromDiv() {
+            const editor = document.getElementById('contentEditor');
+            if (!editor || markdownPreviewMode) return;
+            
+            const content = editor.textContent;
+            updatePageContent(content);
         }
 
         // Helper Functions
@@ -1694,6 +1863,65 @@
             closeModal('pageModal');
             saveData();
             render();
+        }
+
+        // Rename Functions
+        let renameTarget = { type: null, id: null };
+
+        function renameNotebook(id) {
+            const notebook = data.notebooks.find(nb => nb.id === id);
+            if (!notebook) return;
+            
+            renameTarget = { type: 'notebook', id: id };
+            document.getElementById('renameModalTitle').textContent = 'Notizbuch umbenennen';
+            document.getElementById('renameInput').value = notebook.name;
+            document.getElementById('renameModal').classList.add('active');
+            document.getElementById('renameInput').focus();
+            document.getElementById('renameInput').select();
+        }
+
+        function renameSection(id) {
+            const notebook = data.notebooks.find(nb => nb.id === data.currentNotebook);
+            if (!notebook) return;
+            const section = notebook.sections.find(sec => sec.id === id);
+            if (!section) return;
+            
+            renameTarget = { type: 'section', id: id };
+            document.getElementById('renameModalTitle').textContent = 'Abschnitt umbenennen';
+            document.getElementById('renameInput').value = section.name;
+            document.getElementById('renameModal').classList.add('active');
+            document.getElementById('renameInput').focus();
+            document.getElementById('renameInput').select();
+        }
+
+        function confirmRename() {
+            const newName = document.getElementById('renameInput').value.trim();
+            if (!newName) {
+                alert('Bitte gib einen Namen ein!');
+                return;
+            }
+
+            if (renameTarget.type === 'notebook') {
+                const notebook = data.notebooks.find(nb => nb.id === renameTarget.id);
+                if (notebook) {
+                    notebook.name = newName;
+                    saveData();
+                    renderNotebooks();
+                }
+            } else if (renameTarget.type === 'section') {
+                const notebook = data.notebooks.find(nb => nb.id === data.currentNotebook);
+                if (notebook) {
+                    const section = notebook.sections.find(sec => sec.id === renameTarget.id);
+                    if (section) {
+                        section.name = newName;
+                        saveData();
+                        renderSections();
+                    }
+                }
+            }
+
+            closeModal('renameModal');
+            renameTarget = { type: null, id: null };
         }
 
         // Delete Functions
@@ -1871,6 +2099,9 @@
         });
         document.getElementById('pageNameInput').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') addPage();
+        });
+        document.getElementById('renameInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') confirmRename();
         });
 
         // Modal schließen bei Klick außerhalb
