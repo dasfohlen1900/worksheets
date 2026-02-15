@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -5,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Handschriftart Creator</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/opentype.js/1.3.4/opentype.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -158,27 +158,6 @@
             background: #f8f9fa;
         }
 
-        .upload-area {
-            border: 3px dashed #667eea;
-            border-radius: 15px;
-            padding: 60px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            background: #f8f9fa;
-        }
-
-        .upload-area:hover {
-            background: #e7f0ff;
-            border-color: #764ba2;
-        }
-
-        .upload-area.dragover {
-            background: #e7f0ff;
-            border-color: #764ba2;
-            transform: scale(1.02);
-        }
-
         .preview-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -207,10 +186,6 @@
             color: #667eea;
         }
 
-        .test-area {
-            margin: 30px 0;
-        }
-
         .test-input {
             width: 100%;
             padding: 20px;
@@ -218,10 +193,6 @@
             border: 2px solid #e9ecef;
             border-radius: 10px;
             margin: 10px 0;
-        }
-
-        input[type="file"] {
-            display: none;
         }
 
         .actions {
@@ -302,6 +273,9 @@
                 <h3 style="margin-top: 30px;">Mathematische Symbole</h3>
                 <div class="char-grid" id="math-grid"></div>
 
+                
+                <h3 style="margin-top: 30px;">Weitere Symbole</h3>
+                <div class="char-grid" id="other-grid"></div>
                 <div class="actions">
                     <button class="btn btn-secondary" onclick="selectAll()">Alle auswählen</button>
                     <button class="btn btn-secondary" onclick="deselectAll()">Alle abwählen</button>
@@ -374,33 +348,35 @@
                     <h3>Bereits gezeichnet:</h3>
                     <div id="drawn-chars" style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px;"></div>
                 </div>
+
+                <div style="margin-top: 20px; padding: 20px; background: #fff3cd; border-radius: 10px; border: 2px solid #ffc107;">
+                    <h3 style="margin-bottom: 15px;">📋 Alle Zeichen (zum Anspringen)</h3>
+                    <div id="all-chars-nav" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
+                </div>
             </div>
 
             <!-- Schritt 4: Font speichern -->
             <div class="section" id="step4">
-                <h2>Schritt 4: Deinen Font testen und speichern</h2>
+                <h2>Schritt 4: Deinen Font speichern</h2>
                 
                 <div style="background: #f8f9fa; padding: 30px; border-radius: 10px; margin: 20px 0;">
                     <h3>Font-Name:</h3>
                     <input type="text" id="font-name" value="Meine Handschrift" 
                            style="width: 100%; padding: 15px; font-size: 1.2em; border: 2px solid #e9ecef; border-radius: 8px; margin: 10px 0;">
                     
-                    <h3 style="margin-top: 30px;">Teste deinen Font:</h3>
-                    <textarea class="test-input" id="test-text" 
-                              placeholder="Schreibe etwas, um deinen Font zu testen...">The quick brown fox jumps over the lazy dog.
-ABCDEFGHIJKLMNOPQRSTUVWXYZ
-1234567890</textarea>
+                    <p style="margin-top: 20px; color: #666;">
+                        Deine gezeichneten Zeichen werden als SVG-Dateien in einer ZIP-Datei gespeichert.
+                        Diese kannst du dann mit FontForge, Glyphs oder Calligraphr.com in einen echten Font umwandeln.
+                    </p>
                 </div>
 
+                <h3 style="margin: 30px 0 20px 0;">Vorschau deiner Zeichen:</h3>
                 <div class="preview-grid" id="final-preview"></div>
 
                 <div class="actions">
                     <button class="btn btn-secondary" onclick="goToStep(3)">← Zurück</button>
                     <button class="btn btn-primary" onclick="downloadFont()">
-                        💾 Font herunterladen (.ttf)
-                    </button>
-                    <button class="btn btn-primary" onclick="downloadFont('woff')">
-                        💾 Font für Web herunterladen (.woff)
+                        💾 Font als ZIP herunterladen
                     </button>
                 </div>
             </div>
@@ -410,17 +386,29 @@ ABCDEFGHIJKLMNOPQRSTUVWXYZ
     <div id="print-template" class="print-template" style="display: none;"></div>
 
     <script>
+        // Character sets
         const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
         const lowercase = 'abcdefghijklmnopqrstuvwxyz'.split('');
         const numbers = '0123456789'.split('');
-        const special = ['.',',','!','?',';',':','-','(',')','[',']','{','}','@','#','$','%','&','*','+','=','<','>','/','\\','\'','"','„','"','‚',''','»','«','›','‹'];
-        const extendedLatin = 'àáâãäåæçćðèéêëìíîïi̇ñòóôõöøœšùúûüÿþžÀÁÂÃÄÅÆÇĆÐÈÉÊËÌÍÎÏİÑÒÓÔÕÖØŒŠÙÚÛÜŸÞŽ'.split('');
+        const special = ['.',',','!','?',';',':','-','(',')','{','}','[',']','@','#','$','%','&','*','+','=','<','>','/','\\','”','\"','“','„'];
+        const extendedLatin = 'àáâãäåæçćðèéêëìíîïñòóôõöøœšßùúûüÿþžÀÁÂÃÄÅÆÇĆÐÈÉÊËÌÍÎÏİÑÒÓÔÕÖØŒŠÙÚÛÜŸÞŽ'.split('');
         const germanSpecial = 'äöüßÄÖÜ'.split('');
         const currency = '€$£¥¢'.split('');
         const math = '×÷±≠≤≥∞√∑∏∫'.split('');
+        const other = 'Ω↓↑←→π~~¶†ƒ®˙«»|¥¤©№µₑ…±'
         
         let selectedChars = new Set();
         let uploadedImages = {};
+
+        // Canvas drawing variables
+        let canvas, ctx;
+        let isDrawing = false;
+        let currentStrokes = [];
+        let allStrokes = [];
+        let charsSvgData = {};
+        let currentCharIndex = 0;
+        let charsToDrawArray = [];
+        let isEraserMode = false;
 
         // Initialize character grids
         function initGrids() {
@@ -432,6 +420,7 @@ ABCDEFGHIJKLMNOPQRSTUVWXYZ
             createGrid('german-grid', germanSpecial);
             createGrid('currency-grid', currency);
             createGrid('math-grid', math);
+            createGrid('other-grid', other);
         }
 
         function createGrid(id, chars) {
@@ -469,15 +458,18 @@ ABCDEFGHIJKLMNOPQRSTUVWXYZ
         }
 
         function updateCharCount() {
-            document.getElementById('char-count').textContent = selectedChars.size;
+            const countEl = document.getElementById('char-count');
+            if (countEl) {
+                countEl.textContent = selectedChars.size;
+            }
         }
 
         function goToStep(step) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
             
-            document.getElementById(`step${step}`).classList.add('active');
-            document.querySelector(`.step[data-step="${step}"]`).classList.add('active');
+            document.getElementById('step' + step).classList.add('active');
+            document.querySelector('.step[data-step="' + step + '"]').classList.add('active');
             
             if (step === 3) {
                 setTimeout(() => {
@@ -505,8 +497,9 @@ ABCDEFGHIJKLMNOPQRSTUVWXYZ
             container.style.display = 'block';
             container.innerHTML = '';
             
-            const chars = Array.from(selectedChars);
-            const charsPerPage = 12; // Reduced from 20 to 12 (3 rows x 4 columns)
+            // Sort characters by Unicode value
+            const chars = Array.from(selectedChars).sort((a, b) => a.charCodeAt(0) - b.charCodeAt(0));
+            const charsPerPage = 12;
             const pages = Math.ceil(chars.length / charsPerPage);
             
             for (let p = 0; p < pages; p++) {
@@ -514,7 +507,7 @@ ABCDEFGHIJKLMNOPQRSTUVWXYZ
                 page.style.cssText = 'page-break-after: always; padding: 30px; font-family: Arial, sans-serif; height: 100vh; box-sizing: border-box; display: flex; flex-direction: column;';
                 
                 const title = document.createElement('h1');
-                title.textContent = `Handschriftart Template - Seite ${p + 1}/${pages}`;
+                title.textContent = 'Handschriftart Template - Seite ' + (p + 1) + '/' + pages;
                 title.style.cssText = 'text-align: center; margin-bottom: 15px; color: #667eea; font-size: 24px;';
                 page.appendChild(title);
                 
@@ -549,16 +542,6 @@ ABCDEFGHIJKLMNOPQRSTUVWXYZ
             }
         }
 
-        // Canvas drawing variables
-        let canvas, ctx;
-        let isDrawing = false;
-        let currentStrokes = [];
-        let allStrokes = [];
-        let charsSvgData = {};
-        let currentCharIndex = 0;
-        let charsToDrawArray = [];
-        let isEraserMode = false;
-
         function initCanvas() {
             canvas = document.getElementById('draw-canvas');
             ctx = canvas.getContext('2d');
@@ -568,13 +551,11 @@ ABCDEFGHIJKLMNOPQRSTUVWXYZ
             ctx.strokeStyle = '#000';
             ctx.lineWidth = 8;
 
-            // Mouse events
             canvas.addEventListener('mousedown', startDrawing);
             canvas.addEventListener('mousemove', draw);
             canvas.addEventListener('mouseup', stopDrawing);
             canvas.addEventListener('mouseout', stopDrawing);
 
-            // Touch events
             canvas.addEventListener('touchstart', (e) => {
                 e.preventDefault();
                 const touch = e.touches[0];
@@ -601,12 +582,11 @@ ABCDEFGHIJKLMNOPQRSTUVWXYZ
                 canvas.dispatchEvent(mouseEvent);
             });
 
-            // Brush size slider
             const brushSize = document.getElementById('brush-size');
             const brushLabel = document.getElementById('brush-size-label');
             brushSize.addEventListener('input', (e) => {
                 ctx.lineWidth = e.target.value;
-                brushLabel.textContent = `${isEraserMode ? 'Radierer' : 'Pinsel'}größe: ${e.target.value}px`;
+                brushLabel.textContent = (isEraserMode ? 'Radierer' : 'Pinsel') + 'größe: ' + e.target.value + 'px';
             });
         }
 
@@ -621,7 +601,7 @@ ABCDEFGHIJKLMNOPQRSTUVWXYZ
                 btn.textContent = '✏️ Stift';
                 ctx.strokeStyle = '#fff';
                 ctx.globalCompositeOperation = 'destination-out';
-                label.textContent = `Radiergröße: ${ctx.lineWidth}px`;
+                label.textContent = 'Radiergröße: ' + ctx.lineWidth + 'px';
                 canvas.style.cursor = 'pointer';
             } else {
                 btn.classList.remove('btn-primary');
@@ -629,7 +609,7 @@ ABCDEFGHIJKLMNOPQRSTUVWXYZ
                 btn.textContent = '🧹 Radierer';
                 ctx.strokeStyle = '#000';
                 ctx.globalCompositeOperation = 'source-over';
-                label.textContent = `Pinselgröße: ${ctx.lineWidth}px`;
+                label.textContent = 'Pinselgröße: ' + ctx.lineWidth + 'px';
                 canvas.style.cursor = 'crosshair';
             }
         }
@@ -673,7 +653,6 @@ ABCDEFGHIJKLMNOPQRSTUVWXYZ
             currentStrokes = [];
             allStrokes = [];
             
-            // Reset to pen mode
             if (isEraserMode) {
                 toggleEraser();
             }
@@ -697,7 +676,6 @@ ABCDEFGHIJKLMNOPQRSTUVWXYZ
             allStrokes.forEach(strokeSet => {
                 strokeSet.forEach(stroke => {
                     if (stroke.length > 0) {
-                        // Restore stroke properties
                         if (stroke.isEraser) {
                             ctx.strokeStyle = '#fff';
                             ctx.globalCompositeOperation = 'destination-out';
@@ -717,7 +695,6 @@ ABCDEFGHIJKLMNOPQRSTUVWXYZ
                 });
             });
             
-            // Restore current mode
             ctx.strokeStyle = currentColor;
             ctx.globalCompositeOperation = currentComposite;
         }
@@ -727,21 +704,17 @@ ABCDEFGHIJKLMNOPQRSTUVWXYZ
             
             allStrokes.forEach(strokeSet => {
                 strokeSet.forEach(stroke => {
-                    // Only include pen strokes, not eraser strokes
                     if (stroke.length > 1 && !stroke.isEraser) {
-                        let pathData = `M ${stroke[0].x} ${stroke[0].y}`;
+                        let pathData = 'M ' + stroke[0].x + ' ' + stroke[0].y;
                         for (let i = 1; i < stroke.length; i++) {
-                            pathData += ` L ${stroke[i].x} ${stroke[i].y}`;
+                            pathData += ' L ' + stroke[i].x + ' ' + stroke[i].y;
                         }
-                        svgPaths += `<path d="${pathData}" stroke="black" stroke-width="${ctx.lineWidth}" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
+                        svgPaths += '<path d="' + pathData + '" stroke="black" stroke-width="' + ctx.lineWidth + '" fill="none" stroke-linecap="round" stroke-linejoin="round"/>';
                     }
                 });
             });
 
-            return `<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${canvas.width} ${canvas.height}" width="${canvas.width}" height="${canvas.height}">
-${svgPaths}
-</svg>`;
+            return '<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + canvas.width + ' ' + canvas.height + '" width="' + canvas.width + '" height="' + canvas.height + '">\n' + svgPaths + '\n</svg>';
         }
 
         function saveCharAndNext() {
@@ -786,35 +759,94 @@ ${svgPaths}
             
             // Load existing drawing if available
             if (charsSvgData[char]) {
-                // Could reload SVG here, but for simplicity we start fresh
+                // Show that this character already has a drawing
+                const indicator = document.getElementById('current-char');
+                indicator.style.color = '#28a745';
+                indicator.title = 'Bereits gezeichnet - wird beim Speichern überschrieben';
+            } else {
+                const indicator = document.getElementById('current-char');
+                indicator.style.color = '#667eea';
+                indicator.title = '';
             }
+            
+            updateCharNavigation();
         }
 
         function updateDrawnChars() {
             const container = document.getElementById('drawn-chars');
             container.innerHTML = '';
             
-            Object.keys(charsSvgData).forEach(char => {
+            // Sort characters by Unicode for display
+            const sortedChars = Object.keys(charsSvgData).sort((a, b) => a.charCodeAt(0) - b.charCodeAt(0));
+            
+            sortedChars.forEach(char => {
                 const preview = document.createElement('div');
-                preview.style.cssText = 'width: 60px; height: 60px; border: 2px solid #667eea; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 2em; background: white; cursor: pointer;';
+                preview.style.cssText = 'width: 60px; height: 60px; border: 2px solid #667eea; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 2em; background: white; cursor: pointer; position: relative;';
                 preview.textContent = char;
-                preview.title = `Klicken um ${char} zu bearbeiten`;
+                preview.title = 'Klicken um ' + char + ' zu bearbeiten';
                 preview.onclick = () => {
                     currentCharIndex = charsToDrawArray.indexOf(char);
                     loadChar();
+                    updateCharNavigation();
                 };
+                
+                // Highlight current character
+                if (charsToDrawArray[currentCharIndex] === char) {
+                    preview.style.borderColor = '#764ba2';
+                    preview.style.borderWidth = '3px';
+                    preview.style.boxShadow = '0 0 0 2px rgba(118, 75, 162, 0.2)';
+                }
+                
                 container.appendChild(preview);
+            });
+        }
+        
+        function updateCharNavigation() {
+            updateDrawnChars();
+            updateAllCharsNav();
+        }
+        
+        function updateAllCharsNav() {
+            const container = document.getElementById('all-chars-nav');
+            if (!container) return;
+            
+            container.innerHTML = '';
+            
+            charsToDrawArray.forEach((char, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'btn btn-secondary';
+                btn.style.cssText = 'padding: 8px 12px; font-size: 1.2em; min-width: 45px; margin: 0;';
+                btn.textContent = char;
+                
+                // Visual indicators
+                if (index === currentCharIndex) {
+                    btn.classList.remove('btn-secondary');
+                    btn.classList.add('btn-primary');
+                    btn.style.transform = 'scale(1.1)';
+                } else if (charsSvgData[char]) {
+                    btn.style.background = '#d4edda';
+                    btn.style.borderColor = '#28a745';
+                    btn.style.color = '#155724';
+                }
+                
+                btn.onclick = () => {
+                    currentCharIndex = index;
+                    loadChar();
+                };
+                
+                container.appendChild(btn);
             });
         }
 
         function initDrawingStep() {
-            charsToDrawArray = Array.from(selectedChars);
+            charsToDrawArray = Array.from(selectedChars).sort((a, b) => a.charCodeAt(0) - b.charCodeAt(0));
             currentCharIndex = 0;
             document.getElementById('total-count').textContent = charsToDrawArray.length;
             document.getElementById('progress-count').textContent = Object.keys(charsSvgData).length;
             
             if (charsToDrawArray.length > 0) {
                 loadChar();
+                updateCharNavigation();
             }
         }
 
@@ -834,88 +866,38 @@ ${svgPaths}
                 preview.className = 'char-preview';
                 
                 const svgData = charsSvgData[char];
-                const base64 = btoa(svgData);
+                const base64 = btoa(unescape(encodeURIComponent(svgData)));
                 
-                preview.innerHTML = `
-                    <img src="data:image/svg+xml;base64,${base64}" alt="${char}" style="max-width: 100%; height: 120px; object-fit: contain;">
-                    <div class="char-label">${char}</div>
-                `;
+                preview.innerHTML = '<img src="data:image/svg+xml;base64,' + base64 + '" alt="' + char + '" style="max-width: 100%; height: 120px; object-fit: contain;"><div class="char-label">' + char + '</div>';
                 grid.appendChild(preview);
             });
         }
 
-        function downloadFont(format = 'ttf') {
+        function downloadFont() {
             const fontName = document.getElementById('font-name').value || 'Meine Handschrift';
-            
-            // Create ZIP file with SVG files
             createZipWithSvgs(fontName);
         }
 
         async function createZipWithSvgs(fontName) {
-            // Use JSZip library
-            const JSZip = window.JSZip || await loadJSZip();
+            const JSZip = window.JSZip;
             
             if (!JSZip) {
-                // Fallback: Download JSON
-                const fontData = {
-                    name: fontName,
-                    characters: Object.keys(charsSvgData),
-                    svgs: charsSvgData,
-                    info: 'SVG-Dateien für jeden Buchstaben. Nutze Tools wie FontForge oder Glyphs um daraus einen Font zu erstellen.'
-                };
-                
-                const blob = new Blob([JSON.stringify(fontData, null, 2)], {
-                    type: 'application/json'
-                });
-                
-                downloadBlob(blob, `${fontName.replace(/\s+/g, '-')}-svgs.json`);
-                
-                alert(`SVG-Daten wurden als JSON gespeichert!\n\nZum Erstellen eines echten Fonts:\n1. Importiere die SVGs in FontForge oder Glyphs\n2. Ordne jeden SVG dem entsprechenden Zeichen zu\n3. Exportiere als TTF/OTF\n\nOder nutze Online-Services wie Calligraphr.com`);
+                alert('JSZip wird geladen... Bitte warte einen Moment und versuche es erneut.');
                 return;
             }
             
-            // Create ZIP with JSZip
             const zip = new JSZip();
             const svgFolder = zip.folder('svgs');
             
-            // Add each SVG to the ZIP
             Object.entries(charsSvgData).forEach(([char, svg]) => {
                 const filename = getCharFilename(char);
                 svgFolder.file(filename, svg);
             });
             
-            // Add README
-            const readme = `Handschrift Font - ${fontName}
-            
-Enthält ${Object.keys(charsSvgData).length} Zeichen als SVG-Dateien.
-
-So erstellst du daraus einen Font:
-
-Option 1: FontForge (Open Source)
-1. Öffne FontForge
-2. Erstelle ein neues Font
-3. Importiere die SVGs: File > Import für jedes Zeichen
-4. Exportiere als TTF: File > Generate Fonts
-
-Option 2: Glyphs (Mac, kommerziell)
-1. Erstelle ein neues Font
-2. Importiere die SVGs per Drag & Drop
-3. Exportiere als OTF/TTF
-
-Option 3: Online-Service
-- Calligraphr.com (kostenlos bis 75 Zeichen)
-- FontSelf (Adobe Plugin)
-
-Dateibenennung:
-- A.svg = Großbuchstabe A
-- a.svg = Kleinbuchstabe a
-- 0-9.svg = Zahlen
-- special_XXX.svg = Sonderzeichen (XXX = Unicode)
-`;
+            const readme = 'Handschrift Font - ' + fontName + '\n\nEnthält ' + Object.keys(charsSvgData).length + ' Zeichen als SVG-Dateien.\n\nSo erstellst du daraus einen Font:\n\nOption 1: FontForge (Open Source)\n1. Öffne FontForge\n2. Erstelle ein neues Font\n3. Importiere die SVGs: File > Import für jedes Zeichen\n4. Exportiere als TTF: File > Generate Fonts\n\nOption 2: Glyphs (Mac, kommerziell)\n1. Erstelle ein neues Font\n2. Importiere die SVGs per Drag & Drop\n3. Exportiere als OTF/TTF\n\nOption 3: Online-Service\n- Calligraphr.com (kostenlos bis 75 Zeichen)\n- FontSelf (Adobe Plugin)';
             
             zip.file('README.txt', readme);
             
-            // Add character mapping JSON
             const mapping = {};
             Object.keys(charsSvgData).forEach(char => {
                 mapping[char] = {
@@ -927,23 +909,20 @@ Dateibenennung:
             
             zip.file('character-mapping.json', JSON.stringify(mapping, null, 2));
             
-            // Generate ZIP
             const blob = await zip.generateAsync({ type: 'blob' });
-            downloadBlob(blob, `${fontName.replace(/\s+/g, '-')}-font-svgs.zip`);
+            downloadBlob(blob, fontName.replace(/\s+/g, '-') + '-font-svgs.zip');
             
-            alert(`✅ ZIP-Datei erstellt!\n\nEnthält:\n- ${Object.keys(charsSvgData).length} SVG-Dateien\n- README mit Anleitung\n- Character-Mapping JSON\n\nNutze FontForge, Glyphs oder Calligraphr.com um den Font zu erstellen.`);
+            alert('✅ ZIP-Datei erstellt!\n\nEnthält:\n- ' + Object.keys(charsSvgData).length + ' SVG-Dateien\n- README mit Anleitung\n- Character-Mapping JSON\n\nNutze FontForge, Glyphs oder Calligraphr.com um den Font zu erstellen.');
         }
 
         function getCharFilename(char) {
             const code = char.charCodeAt(0);
             
-            // Letters and numbers: use the character itself
             if (/[A-Za-z0-9]/.test(char)) {
-                return `${char}.svg`;
+                return char + '.svg';
             }
             
-            // Special characters: use unicode hex
-            return `special_U+${code.toString(16).toUpperCase()}.svg`;
+            return 'special_U+' + code.toString(16).toUpperCase() + '.svg';
         }
 
         function downloadBlob(blob, filename) {
@@ -957,19 +936,10 @@ Dateibenennung:
             URL.revokeObjectURL(url);
         }
 
-        async function loadJSZip() {
-            return new Promise((resolve) => {
-                const script = document.createElement('script');
-                script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
-                script.onload = () => resolve(window.JSZip);
-                script.onerror = () => resolve(null);
-                document.head.appendChild(script);
-            });
-        }
-
         // Initialize
-        initGrids();
-        selectAll();
+        window.addEventListener('DOMContentLoaded', () => {
+            initGrids();
+        });
     </script>
 </body>
 </html>
