@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Handschriftart Creator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/opentype.js/1.3.4/opentype.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .steps {
+            display: flex;
+            justify-content: space-around;
+            padding: 30px;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .step {
+            text-align: center;
+            flex: 1;
+            position: relative;
+        }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #667eea;
+            color: white;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .step.active .step-number {
+            background: #764ba2;
+            box-shadow: 0 0 0 4px rgba(118, 75, 162, 0.2);
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .char-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .char-btn {
+            aspect-ratio: 1;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            background: white;
+            font-size: 2em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .char-btn:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+
+        .char-btn.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 10px 5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #e9ecef;
+            color: #495057;
+        }
+
+        .btn-secondary:hover {
+            background: #dee2e6;
+        }
+
+        .template-preview {
+            border: 2px dashed #667eea;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            margin: 20px 0;
+            background: #f8f9fa;
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 60px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f8f9fa;
+        }
+
+        .upload-area:hover {
+            background: #e7f0ff;
+            border-color: #764ba2;
+        }
+
+        .upload-area.dragover {
+            background: #e7f0ff;
+            border-color: #764ba2;
+            transform: scale(1.02);
+        }
+
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .char-preview {
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            background: white;
+        }
+
+        .char-preview img {
+            max-width: 100%;
+            height: 120px;
+            object-fit: contain;
+            margin-bottom: 10px;
+        }
+
+        .char-label {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .test-area {
+            margin: 30px 0;
+        }
+
+        .test-input {
+            width: 100%;
+            padding: 20px;
+            font-size: 2em;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .actions {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 2px solid #e9ecef;
+        }
+
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            .print-template, .print-template * {
+                visibility: visible;
+            }
+            .print-template {
+                position: absolute;
+                left: 0;
+                top: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✍️ Handschriftart Creator</h1>
+            <p>Erstelle deinen eigenen Font aus deiner Handschrift</p>
+        </div>
+
+        <div class="steps">
+            <div class="step active" data-step="1">
+                <div class="step-number">1</div>
+                <div>Zeichen wählen</div>
+            </div>
+            <div class="step" data-step="2">
+                <div class="step-number">2</div>
+                <div>Template drucken</div>
+            </div>
+            <div class="step" data-step="3">
+                <div class="step-number">3</div>
+                <div>Hochladen</div>
+            </div>
+            <div class="step" data-step="4">
+                <div class="step-number">4</div>
+                <div>Font speichern</div>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- Schritt 1: Zeichen wählen -->
+            <div class="section active" id="step1">
+                <h2>Schritt 1: Wähle die Zeichen für deinen Font</h2>
+                <p style="margin: 20px 0;">Wähle die Zeichen aus, die du in deinem Font haben möchtest:</p>
+                
+                <h3 style="margin-top: 30px;">Großbuchstaben</h3>
+                <div class="char-grid" id="uppercase-grid"></div>
+                
+                <h3 style="margin-top: 30px;">Kleinbuchstaben</h3>
+                <div class="char-grid" id="lowercase-grid"></div>
+                
+                <h3 style="margin-top: 30px;">Zahlen</h3>
+                <div class="char-grid" id="numbers-grid"></div>
+                
+                <h3 style="margin-top: 30px;">Sonderzeichen</h3>
+                <div class="char-grid" id="special-grid"></div>
+
+                <div class="actions">
+                    <button class="btn btn-secondary" onclick="selectAll()">Alle auswählen</button>
+                    <button class="btn btn-secondary" onclick="deselectAll()">Alle abwählen</button>
+                    <button class="btn btn-primary" onclick="goToStep(2)">Weiter zum Template →</button>
+                </div>
+            </div>
+
+            <!-- Schritt 2: Template -->
+            <div class="section" id="step2">
+                <h2>Schritt 2: Template drucken</h2>
+                <p style="margin: 20px 0;">Drucke das Template aus und schreibe die Zeichen in die Kästchen:</p>
+                
+                <div class="template-preview">
+                    <p><strong>📄 Template ist bereit zum Drucken</strong></p>
+                    <p style="margin-top: 10px; color: #666;">
+                        Enthält <span id="char-count">0</span> Zeichen
+                    </p>
+                </div>
+
+                <div class="actions">
+                    <button class="btn btn-secondary" onclick="goToStep(1)">← Zurück</button>
+                    <button class="btn btn-primary" onclick="printTemplate()">🖨️ Template drucken</button>
+                    <button class="btn btn-primary" onclick="downloadTemplate()">💾 Als PDF herunterladen</button>
+                    <button class="btn btn-primary" onclick="goToStep(3)">Weiter zum Upload →</button>
+                </div>
+            </div>
+
+            <!-- Schritt 3: Upload -->
+            <div class="section" id="step3">
+                <h2>Schritt 3: Ausgefülltes Template hochladen</h2>
+                <p style="margin: 20px 0;">Scanne oder fotografiere dein ausgefülltes Template und lade es hier hoch:</p>
+
+                <div class="upload-area" id="upload-area">
+                    <input type="file" id="file-input" accept="image/*" multiple>
+                    <div style="font-size: 3em; margin-bottom: 20px;">📤</div>
+                    <h3>Template hochladen</h3>
+                    <p style="margin-top: 10px; color: #666;">
+                        Klicke hier oder ziehe Dateien hierher<br>
+                        (JPG, PNG, PDF)
+                    </p>
+                </div>
+
+                <div class="preview-grid" id="preview-grid"></div>
+
+                <div class="actions">
+                    <button class="btn btn-secondary" onclick="goToStep(2)">← Zurück</button>
+                    <button class="btn btn-primary" onclick="goToStep(4)" id="process-btn" style="display: none;">
+                        Font erstellen →
+                    </button>
+                </div>
+            </div>
+
+            <!-- Schritt 4: Font speichern -->
+            <div class="section" id="step4">
+                <h2>Schritt 4: Deinen Font testen und speichern</h2>
+                
+                <div style="background: #f8f9fa; padding: 30px; border-radius: 10px; margin: 20px 0;">
+                    <h3>Font-Name:</h3>
+                    <input type="text" id="font-name" value="Meine Handschrift" 
+                           style="width: 100%; padding: 15px; font-size: 1.2em; border: 2px solid #e9ecef; border-radius: 8px; margin: 10px 0;">
+                    
+                    <h3 style="margin-top: 30px;">Teste deinen Font:</h3>
+                    <textarea class="test-input" id="test-text" 
+                              placeholder="Schreibe etwas, um deinen Font zu testen...">The quick brown fox jumps over the lazy dog.
+ABCDEFGHIJKLMNOPQRSTUVWXYZ
+1234567890</textarea>
+                </div>
+
+                <div class="preview-grid" id="final-preview"></div>
+
+                <div class="actions">
+                    <button class="btn btn-secondary" onclick="goToStep(3)">← Zurück</button>
+                    <button class="btn btn-primary" onclick="downloadFont()">
+                        💾 Font herunterladen (.ttf)
+                    </button>
+                    <button class="btn btn-primary" onclick="downloadFont('woff')">
+                        💾 Font für Web herunterladen (.woff)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="print-template" class="print-template" style="display: none;"></div>
+
+    <script>
+        const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+        const lowercase = 'abcdefghijklmnopqrstuvwxyz'.split('');
+        const numbers = '0123456789'.split('');
+        const special = '.,!?;:-()[]{}@#$%&*+=<>/\'"'.split('');
+        
+        let selectedChars = new Set();
+        let uploadedImages = {};
+
+        // Initialize character grids
+        function initGrids() {
+            createGrid('uppercase-grid', uppercase);
+            createGrid('lowercase-grid', lowercase);
+            createGrid('numbers-grid', numbers);
+            createGrid('special-grid', special);
+        }
+
+        function createGrid(id, chars) {
+            const grid = document.getElementById(id);
+            chars.forEach(char => {
+                const btn = document.createElement('button');
+                btn.className = 'char-btn';
+                btn.textContent = char;
+                btn.onclick = () => toggleChar(char, btn);
+                grid.appendChild(btn);
+            });
+        }
+
+        function toggleChar(char, btn) {
+            if (selectedChars.has(char)) {
+                selectedChars.delete(char);
+                btn.classList.remove('selected');
+            } else {
+                selectedChars.add(char);
+                btn.classList.add('selected');
+            }
+            updateCharCount();
+        }
+
+        function selectAll() {
+            selectedChars = new Set([...uppercase, ...lowercase, ...numbers, ...special]);
+            document.querySelectorAll('.char-btn').forEach(btn => btn.classList.add('selected'));
+            updateCharCount();
+        }
+
+        function deselectAll() {
+            selectedChars.clear();
+            document.querySelectorAll('.char-btn').forEach(btn => btn.classList.remove('selected'));
+            updateCharCount();
+        }
+
+        function updateCharCount() {
+            document.getElementById('char-count').textContent = selectedChars.size;
+        }
+
+        function goToStep(step) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+            
+            document.getElementById(`step${step}`).classList.add('active');
+            document.querySelector(`.step[data-step="${step}"]`).classList.add('active');
+            
+            if (step === 4) {
+                displayFinalPreview();
+            }
+        }
+
+        function printTemplate() {
+            generateTemplate();
+            setTimeout(() => window.print(), 100);
+        }
+
+        function downloadTemplate() {
+            generateTemplate();
+            alert('Verwende Strg+P (oder Cmd+P auf Mac) und wähle "Als PDF speichern"');
+            window.print();
+        }
+
+        function generateTemplate() {
+            const container = document.getElementById('print-template');
+            container.style.display = 'block';
+            container.innerHTML = '';
+            
+            const chars = Array.from(selectedChars);
+            const charsPerPage = 20;
+            const pages = Math.ceil(chars.length / charsPerPage);
+            
+            for (let p = 0; p < pages; p++) {
+                const page = document.createElement('div');
+                page.style.cssText = 'page-break-after: always; padding: 40px; font-family: Arial, sans-serif;';
+                
+                const title = document.createElement('h1');
+                title.textContent = `Handschriftart Template - Seite ${p + 1}/${pages}`;
+                title.style.cssText = 'text-align: center; margin-bottom: 30px; color: #667eea;';
+                page.appendChild(title);
+                
+                const instructions = document.createElement('p');
+                instructions.textContent = 'Schreibe jeden Buchstaben in das entsprechende Kästchen. Verwende einen schwarzen Stift und schreibe klar und deutlich.';
+                instructions.style.cssText = 'text-align: center; margin-bottom: 40px; color: #666;';
+                page.appendChild(instructions);
+                
+                const grid = document.createElement('div');
+                grid.style.cssText = 'display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;';
+                
+                const pageChars = chars.slice(p * charsPerPage, (p + 1) * charsPerPage);
+                
+                pageChars.forEach(char => {
+                    const cell = document.createElement('div');
+                    cell.style.cssText = 'border: 3px solid #333; padding: 20px; aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: space-between;';
+                    
+                    const label = document.createElement('div');
+                    label.textContent = char;
+                    label.style.cssText = 'font-size: 24px; font-weight: bold; color: #999;';
+                    
+                    const writeArea = document.createElement('div');
+                    writeArea.style.cssText = 'width: 100%; height: 80%; border-bottom: 2px solid #ccc;';
+                    
+                    cell.appendChild(label);
+                    cell.appendChild(writeArea);
+                    grid.appendChild(cell);
+                });
+                
+                page.appendChild(grid);
+                container.appendChild(page);
+            }
+        }
+
+        // File upload
+        const uploadArea = document.getElementById('upload-area');
+        const fileInput = document.getElementById('file-input');
+
+        uploadArea.onclick = () => fileInput.click();
+
+        uploadArea.ondragover = (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        };
+
+        uploadArea.ondragleave = () => {
+            uploadArea.classList.remove('dragover');
+        };
+
+        uploadArea.ondrop = (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            handleFiles(e.dataTransfer.files);
+        };
+
+        fileInput.onchange = (e) => {
+            handleFiles(e.target.files);
+        };
+
+        function handleFiles(files) {
+            const previewGrid = document.getElementById('preview-grid');
+            previewGrid.innerHTML = '';
+            
+            Array.from(files).forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    uploadedImages[index] = e.target.result;
+                    
+                    const preview = document.createElement('div');
+                    preview.className = 'char-preview';
+                    preview.innerHTML = `
+                        <img src="${e.target.result}" alt="Upload ${index + 1}">
+                        <div style="color: #666;">Bild ${index + 1}</div>
+                    `;
+                    previewGrid.appendChild(preview);
+                };
+                reader.readAsDataURL(file);
+            });
+            
+            document.getElementById('process-btn').style.display = 'inline-block';
+        }
+
+        function displayFinalPreview() {
+            const grid = document.getElementById('final-preview');
+            grid.innerHTML = '';
+            
+            const chars = Array.from(selectedChars).slice(0, 12);
+            
+            chars.forEach(char => {
+                const preview = document.createElement('div');
+                preview.className = 'char-preview';
+                preview.innerHTML = `
+                    <div style="font-size: 4em; height: 120px; display: flex; align-items: center; justify-content: center;">
+                        ${char}
+                    </div>
+                    <div class="char-label">${char}</div>
+                `;
+                grid.appendChild(preview);
+            });
+        }
+
+        function downloadFont(format = 'ttf') {
+            const fontName = document.getElementById('font-name').value || 'Meine Handschrift';
+            
+            const fontData = {
+                name: fontName,
+                characters: Array.from(selectedChars),
+                images: uploadedImages,
+                format: format,
+                info: 'Dies ist eine Demo-Version. Für einen echten Font benötigst du eine Serverseite Verarbeitung mit OCR und Font-Generierung.'
+            };
+            
+            const blob = new Blob([JSON.stringify(fontData, null, 2)], {
+                type: 'application/json'
+            });
+            
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${fontName.replace(/\s+/g, '-')}-data.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            alert(`Font-Daten wurden gespeichert!\n\nHinweis: Dies ist eine Demo-Version. Für einen echten Font benötigst du:\n\n1. OCR-Software zur Zeichenerkennung\n2. Font-Generierung Software (z.B. FontForge)\n3. Serverseite Verarbeitung\n\nDie JSON-Datei enthält deine Auswahl und hochgeladenen Bilder.`);
+        }
+
+        // Initialize
+        initGrids();
+        selectAll();
+    </script>
+</body>
+</html>
