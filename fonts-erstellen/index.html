@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -21,29 +20,50 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            border-radius: 24px;
+            box-shadow: 0 25px 70px rgba(0,0,0,0.3);
             overflow: hidden;
         }
 
         .header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 30px;
+            padding: 40px;
             text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
         }
 
         .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
+            font-size: 3em;
+            margin-bottom: 15px;
+            position: relative;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
         }
 
         .header p {
-            opacity: 0.9;
-            font-size: 1.1em;
+            opacity: 0.95;
+            font-size: 1.2em;
+            position: relative;
         }
 
         .steps {
@@ -100,34 +120,37 @@
         .char-btn {
             aspect-ratio: 1;
             border: 2px solid #e9ecef;
-            border-radius: 10px;
+            border-radius: 12px;
             background: white;
             font-size: 2em;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
         .char-btn:hover {
             border-color: #667eea;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
         }
 
         .char-btn.selected {
-            background: #667eea;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
         }
 
         .btn {
-            padding: 12px 30px;
+            padding: 14px 32px;
             border: none;
-            border-radius: 8px;
+            border-radius: 12px;
             font-size: 1em;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             margin: 10px 5px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
         .btn-primary {
@@ -136,17 +159,23 @@
         }
 
         .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 24px rgba(102, 126, 234, 0.5);
+        }
+
+        .btn-primary:active {
+            transform: translateY(-1px);
         }
 
         .btn-secondary {
-            background: #e9ecef;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
             color: #495057;
         }
 
         .btn-secondary:hover {
-            background: #dee2e6;
+            background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
         }
 
         .template-preview {
@@ -261,7 +290,7 @@
                 <h3 style="margin-top: 30px;">Sonderzeichen</h3>
                 <div class="char-grid" id="special-grid"></div>
 
-                <h3 style="margin-top: 30px;">Erweiterte Lateinische Zeichen</h3>
+                <h3 style="margin-top: 30px;">Erweiterte Lateinische Zeichen (inkl. PL, CZ, SK, EO, HU, RO, TR)</h3>
                 <div class="char-grid" id="extended-grid"></div>
 
                 <h3 style="margin-top: 30px;">Deutsche Sonderzeichen</h3>
@@ -273,12 +302,41 @@
                 <h3 style="margin-top: 30px;">Mathematische Symbole</h3>
                 <div class="char-grid" id="math-grid"></div>
 
-                
-                <h3 style="margin-top: 30px;">Weitere Symbole</h3>
-                <div class="char-grid" id="other-grid"></div>
+                <h3 style="margin-top: 30px;">Griechische Buchstaben</h3>
+                <div class="char-grid" id="greek-grid"></div>
+
+                <h3 style="margin-top: 30px;">Kyrillische Buchstaben</h3>
+                <div class="char-grid" id="cyrillic-grid"></div>
+
+                <h3 style="margin-top: 30px;">Pfeile</h3>
+                <div class="char-grid" id="arrows-grid"></div>
+
+                <h3 style="margin-top: 30px;">Interpunktion & Anführungszeichen</h3>
+                <div class="char-grid" id="punctuation-grid"></div>
+
+                <h3 style="margin-top: 30px;">Brüche</h3>
+                <div class="char-grid" id="fractions-grid"></div>
+
+                <h3 style="margin-top: 30px;">Hochgestellt</h3>
+                <div class="char-grid" id="superscript-grid"></div>
+
+                <h3 style="margin-top: 30px;">Tiefgestellt</h3>
+                <div class="char-grid" id="subscript-grid"></div>
+
+                <h3 style="margin-top: 30px;">Symbole</h3>
+                <div class="char-grid" id="symbols-grid"></div>
+
+                <h3 style="margin-top: 30px;">Formen</h3>
+                <div class="char-grid" id="shapes-grid"></div>
+
+                <h3 style="margin-top: 30px;">Emoji</h3>
+                <div class="char-grid" id="emoji-grid"></div>
+
                 <div class="actions">
                     <button class="btn btn-secondary" onclick="selectAll()">Alle auswählen</button>
                     <button class="btn btn-secondary" onclick="deselectAll()">Alle abwählen</button>
+                    <button class="btn btn-secondary" onclick="selectBasic()">Nur Basis (A-Z, a-z, 0-9)</button>
+                    <button class="btn btn-secondary" onclick="selectExtended()">Mit Umlauten</button>
                     <button class="btn btn-primary" onclick="goToStep(2)">Weiter zum Template →</button>
                 </div>
             </div>
@@ -308,33 +366,41 @@
                 <h2>Schritt 3: Zeichne deine Zeichen</h2>
                 <p style="margin: 20px 0;">Zeichne jedes Zeichen in den Canvas. Die Zeichen werden als SVG gespeichert:</p>
 
-                <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0; display: flex; justify-content: space-between; align-items: center;">
+                <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 25px; border-radius: 16px; margin: 20px 0; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
                     <div>
-                        <h3 style="margin: 0;">Aktuelles Zeichen:</h3>
-                        <div id="current-char" style="font-size: 4em; color: #667eea; margin-top: 10px;">A</div>
+                        <h3 style="margin: 0; color: #495057; font-size: 0.9em; text-transform: uppercase; letter-spacing: 1px;">Aktuelles Zeichen</h3>
+                        <div id="current-char" style="font-size: 5em; color: #667eea; margin-top: 10px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">A</div>
                     </div>
                     <div style="text-align: right;">
-                        <div style="color: #666; margin-bottom: 5px;">Fortschritt:</div>
-                        <div style="font-size: 1.5em; font-weight: bold; color: #667eea;">
+                        <div style="color: #6c757d; margin-bottom: 8px; font-size: 0.9em; text-transform: uppercase; letter-spacing: 1px;">Fortschritt</div>
+                        <div style="font-size: 2.5em; font-weight: bold; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
                             <span id="progress-count">0</span> / <span id="total-count">0</span>
                         </div>
                     </div>
                 </div>
 
-                <div style="text-align: center; margin: 30px 0;">
-                    <canvas id="draw-canvas" width="600" height="600" 
-                            style="border: 3px solid #667eea; border-radius: 10px; cursor: crosshair; background: white; max-width: 100%; touch-action: none;"></canvas>
+                <div style="text-align: center; margin: 40px 0; position: relative;">
+                    <div style="display: inline-block; position: relative;">
+                        <canvas id="draw-canvas" width="600" height="600" 
+                                style="border: 4px solid #667eea; border-radius: 20px; cursor: crosshair; background: white; max-width: 100%; touch-action: none; box-shadow: 0 8px 32px rgba(102, 126, 234, 0.25);"></canvas>
+                        <div id="pen-indicator" style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.7); color: white; padding: 8px 16px; border-radius: 20px; font-size: 0.9em; display: none; backdrop-filter: blur(10px);">
+                            🖊️ Stift erkannt
+                        </div>
+                    </div>
                     
-                    <div style="margin-top: 20px;">
-                        <button class="btn btn-secondary" onclick="toggleEraser()" id="eraser-btn">
+                    <div style="margin-top: 25px; padding: 20px; background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.06);">
+                        <button class="btn btn-secondary" onclick="toggleEraser()" id="eraser-btn" style="font-size: 1.1em;">
                             🧹 Radierer
                         </button>
-                        <button class="btn btn-secondary" onclick="clearCanvas()">🗑️ Alles löschen</button>
-                        <button class="btn btn-secondary" onclick="undoStroke()">↶ Rückgängig</button>
+                        <button class="btn btn-secondary" onclick="clearCanvas()" style="font-size: 1.1em;">🗑️ Alles löschen</button>
+                        <button class="btn btn-secondary" onclick="undoStroke()" style="font-size: 1.1em;">↶ Rückgängig</button>
                         <br>
-                        <input type="range" id="brush-size" min="2" max="20" value="8" 
-                               style="width: 200px; margin: 10px 20px 0 0; vertical-align: middle;">
-                        <span id="brush-size-label">Pinselgröße: 8px</span>
+                        <div style="display: inline-flex; align-items: center; margin-top: 15px; padding: 10px 20px; background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                            <span style="margin-right: 15px; font-weight: 600; color: #495057;">Größe:</span>
+                            <input type="range" id="brush-size" min="2" max="20" value="8" 
+                                   style="width: 200px; vertical-align: middle; cursor: pointer;">
+                            <span id="brush-size-label" style="margin-left: 15px; font-weight: 600; color: #667eea;">8px</span>
+                        </div>
                     </div>
                 </div>
 
@@ -344,13 +410,13 @@
                     <button class="btn btn-primary" onclick="saveCharAndNext()">Speichern & Weiter →</button>
                 </div>
 
-                <div style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 10px;">
-                    <h3>Bereits gezeichnet:</h3>
-                    <div id="drawn-chars" style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px;"></div>
+                <div style="margin-top: 30px; padding: 25px; background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); border-radius: 16px; box-shadow: 0 4px 12px rgba(76, 175, 80, 0.15);">
+                    <h3 style="color: #2e7d32; margin-bottom: 15px;">✅ Bereits gezeichnet</h3>
+                    <div id="drawn-chars" style="display: flex; flex-wrap: wrap; gap: 10px;"></div>
                 </div>
 
-                <div style="margin-top: 20px; padding: 20px; background: #fff3cd; border-radius: 10px; border: 2px solid #ffc107;">
-                    <h3 style="margin-bottom: 15px;">📋 Alle Zeichen (zum Anspringen)</h3>
+                <div style="margin-top: 20px; padding: 25px; background: linear-gradient(135deg, #fff9e6 0%, #ffe9b3 100%); border-radius: 16px; border: 3px solid #ffc107; box-shadow: 0 4px 12px rgba(255, 193, 7, 0.2);">
+                    <h3 style="color: #f57f17; margin-bottom: 15px;">📋 Alle Zeichen (zum Anspringen)</h3>
                     <div id="all-chars-nav" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
                 </div>
             </div>
@@ -390,12 +456,21 @@
         const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
         const lowercase = 'abcdefghijklmnopqrstuvwxyz'.split('');
         const numbers = '0123456789'.split('');
-        const special = ['.',',','!','?',';',':','-','(',')','{','}','[',']','@','#','$','%','&','*','+','=','<','>','/','\\','”','\"','“','„'];
-        const extendedLatin = 'àáâãäåæçćðèéêëìíîïñòóôõöøœšßùúûüÿþžÀÁÂÃÄÅÆÇĆÐÈÉÊËÌÍÎÏİÑÒÓÔÕÖØŒŠÙÚÛÜŸÞŽ'.split('');
+        const special = ['.',',','!','?',';',':','-','(',')','{','}','[',']','@','#','$','%','&','*','+','=','<','>','/','\\'];
+        const extendedLatin = 'AÁÂÃÄÅÆĄĀĂĄĆÇĈĊČĎĐÐEÈÉÊËĖĘĚGĜĞHĤIÌÍÎÏİĮJĴKLŁMNŃŇÑOÒÓÔÕÖØŒPQRŔŘSŚŠŞTŤUÙÚÛÜŰŮVWXÝYŸZŹŽŻaáâãäåæąćāăćčĉċčďđðeèéêëėęěgĝğhĥiìíîïi̇įjĵklłmnńňñoòóôõöøœpqrŕřsśšştťuùúûüűůvwxýyÿzźžż'.split('');
         const germanSpecial = 'äöüßÄÖÜ'.split('');
-        const currency = '€$£¥¢'.split('');
-        const math = '×÷±≠≤≥∞√∑∏∫'.split('');
-        const other = 'Ω↓↑←→π~¶†ƒ®˙«»|¥¤©№µₑ…±'
+        const currency = '€$£¥¢₹₽₩₪₨₱₡₴₵₸₺₼₾'.split('');
+        const math = '×÷±≠≤≥∞√∑∏∫∂∆∇≈°'.split('');
+        const greek = 'αβγδεζηθικλμνξοπρστυφχψωΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ'.split('');
+        const cyrillic = 'абвгдежзийклмнопрстуфхцчшщъыьэюяАБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ'.split('');
+        const arrows = '←→↑↓↔↕↖↗↘↙⇐⇒⇑⇓⇔⇕'.split('');
+        const punctuation = ['\u201E','\u201C','\u201D','\u2018','\u2019','\u201A','\u2039','\u203A','\u00AB','\u00BB','\u2013','\u2014','\u2026','\u00B7','\u2022','\u2030','\u2031'];
+        const fractions = '¼½¾⅓⅔⅛⅜⅝⅞'.split('');
+        const superscript = '⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻⁼⁽⁾ⁿ'.split('');
+        const subscript = '₀₁₂₃₄₅₆₇₈₉₊₋₌₍₎'.split('');
+        const symbols = '©®™§¶†‡°′″‰‱№℃℉'.split('');
+        const shapes = '■□▪▫●○◆◇★☆♠♣♥♦'.split('');
+        const emoji = '😀😁😂😃😄😅😆😊😍🤔🎉🎨🎵🎶💡📝✅❌'.split('');
         
         let selectedChars = new Set();
         let uploadedImages = {};
@@ -420,7 +495,16 @@
             createGrid('german-grid', germanSpecial);
             createGrid('currency-grid', currency);
             createGrid('math-grid', math);
-            createGrid('other-grid', other);
+            createGrid('greek-grid', greek);
+            createGrid('cyrillic-grid', cyrillic);
+            createGrid('arrows-grid', arrows);
+            createGrid('punctuation-grid', punctuation);
+            createGrid('fractions-grid', fractions);
+            createGrid('superscript-grid', superscript);
+            createGrid('subscript-grid', subscript);
+            createGrid('symbols-grid', symbols);
+            createGrid('shapes-grid', shapes);
+            createGrid('emoji-grid', emoji);
         }
 
         function createGrid(id, chars) {
@@ -446,7 +530,13 @@
         }
 
         function selectAll() {
-            selectedChars = new Set([...uppercase, ...lowercase, ...numbers, ...special, ...extendedLatin, ...germanSpecial, ...currency, ...math]);
+            selectedChars = new Set([
+                ...uppercase, ...lowercase, ...numbers, ...special, 
+                ...extendedLatin, ...germanSpecial, ...currency, ...math,
+                ...greek, ...cyrillic, ...arrows, ...punctuation,
+                ...fractions, ...superscript, ...subscript, ...symbols,
+                ...shapes, ...emoji
+            ]);
             document.querySelectorAll('.char-btn').forEach(btn => btn.classList.add('selected'));
             updateCharCount();
         }
@@ -455,6 +545,34 @@
             selectedChars.clear();
             document.querySelectorAll('.char-btn').forEach(btn => btn.classList.remove('selected'));
             updateCharCount();
+        }
+
+        function selectBasic() {
+            deselectAll();
+            selectedChars = new Set([...uppercase, ...lowercase, ...numbers]);
+            updateSelectedButtons();
+            updateCharCount();
+        }
+
+        function selectExtended() {
+            deselectAll();
+            selectedChars = new Set([
+                ...uppercase, ...lowercase, ...numbers, 
+                ...germanSpecial, ...extendedLatin, ...special, 
+                ...punctuation, ...currency
+            ]);
+            updateSelectedButtons();
+            updateCharCount();
+        }
+
+        function updateSelectedButtons() {
+            document.querySelectorAll('.char-btn').forEach(btn => {
+                if (selectedChars.has(btn.textContent)) {
+                    btn.classList.add('selected');
+                } else {
+                    btn.classList.remove('selected');
+                }
+            });
         }
 
         function updateCharCount() {
@@ -551,11 +669,20 @@
             ctx.strokeStyle = '#000';
             ctx.lineWidth = 8;
 
+            // Pointer events for better pen support
+            canvas.addEventListener('pointerdown', handlePointerDown);
+            canvas.addEventListener('pointermove', handlePointerMove);
+            canvas.addEventListener('pointerup', handlePointerUp);
+            canvas.addEventListener('pointerout', handlePointerUp);
+            canvas.addEventListener('pointercancel', handlePointerUp);
+
+            // Fallback mouse events
             canvas.addEventListener('mousedown', startDrawing);
             canvas.addEventListener('mousemove', draw);
             canvas.addEventListener('mouseup', stopDrawing);
             canvas.addEventListener('mouseout', stopDrawing);
 
+            // Touch events
             canvas.addEventListener('touchstart', (e) => {
                 e.preventDefault();
                 const touch = e.touches[0];
@@ -586,8 +713,75 @@
             const brushLabel = document.getElementById('brush-size-label');
             brushSize.addEventListener('input', (e) => {
                 ctx.lineWidth = e.target.value;
-                brushLabel.textContent = (isEraserMode ? 'Radierer' : 'Pinsel') + 'größe: ' + e.target.value + 'px';
+                brushLabel.textContent = e.target.value + 'px';
             });
+        }
+
+        function handlePointerDown(e) {
+            e.preventDefault();
+            
+            // Check if it's an eraser (inverted pen/stylus eraser)
+            if (e.pointerType === 'pen') {
+                showPenIndicator();
+                
+                // Detect eraser - button value of 32 or 5 typically indicates eraser
+                if (e.button === 5 || e.buttons === 32) {
+                    if (!isEraserMode) {
+                        toggleEraser();
+                    }
+                } else {
+                    if (isEraserMode) {
+                        toggleEraser();
+                    }
+                }
+            }
+            
+            const pos = getMousePos(e);
+            isDrawing = true;
+            const newStroke = [];
+            newStroke.isEraser = isEraserMode;
+            currentStrokes.push(newStroke);
+            ctx.beginPath();
+            ctx.moveTo(pos.x, pos.y);
+            currentStrokes[currentStrokes.length - 1].push(pos);
+        }
+
+        function handlePointerMove(e) {
+            if (!isDrawing) return;
+            e.preventDefault();
+            const pos = getMousePos(e);
+            ctx.lineTo(pos.x, pos.y);
+            ctx.stroke();
+            currentStrokes[currentStrokes.length - 1].push(pos);
+        }
+
+        function handlePointerUp(e) {
+            if (isDrawing) {
+                isDrawing = false;
+                allStrokes.push([...currentStrokes]);
+            }
+            if (e.pointerType === 'pen') {
+                hidePenIndicator();
+            }
+        }
+
+        function showPenIndicator() {
+            const indicator = document.getElementById('pen-indicator');
+            if (indicator) {
+                indicator.style.display = 'block';
+                setTimeout(() => {
+                    if (indicator) indicator.style.display = 'none';
+                }, 2000);
+            }
+        }
+
+        function hidePenIndicator() {
+            const indicator = document.getElementById('pen-indicator');
+            if (indicator) {
+                setTimeout(() => {
+                    indicator.style.display = 'none';
+                }, 500);
+            }
         }
 
         function toggleEraser() {
@@ -779,9 +973,14 @@
             // Sort characters by Unicode for display
             const sortedChars = Object.keys(charsSvgData).sort((a, b) => a.charCodeAt(0) - b.charCodeAt(0));
             
+            if (sortedChars.length === 0) {
+                container.innerHTML = '<p style="color: #666; font-style: italic;">Noch keine Zeichen gezeichnet</p>';
+                return;
+            }
+            
             sortedChars.forEach(char => {
                 const preview = document.createElement('div');
-                preview.style.cssText = 'width: 60px; height: 60px; border: 2px solid #667eea; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 2em; background: white; cursor: pointer; position: relative;';
+                preview.style.cssText = 'width: 65px; height: 65px; border: 3px solid #4caf50; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 2.2em; background: white; cursor: pointer; position: relative; transition: all 0.3s; box-shadow: 0 2px 8px rgba(76, 175, 80, 0.2);';
                 preview.textContent = char;
                 preview.title = 'Klicken um ' + char + ' zu bearbeiten';
                 preview.onclick = () => {
@@ -793,9 +992,24 @@
                 // Highlight current character
                 if (charsToDrawArray[currentCharIndex] === char) {
                     preview.style.borderColor = '#764ba2';
-                    preview.style.borderWidth = '3px';
-                    preview.style.boxShadow = '0 0 0 2px rgba(118, 75, 162, 0.2)';
+                    preview.style.borderWidth = '4px';
+                    preview.style.boxShadow = '0 4px 16px rgba(118, 75, 162, 0.4)';
+                    preview.style.transform = 'scale(1.1)';
                 }
+                
+                preview.addEventListener('mouseenter', () => {
+                    if (charsToDrawArray[currentCharIndex] !== char) {
+                        preview.style.transform = 'scale(1.15)';
+                        preview.style.boxShadow = '0 4px 16px rgba(76, 175, 80, 0.4)';
+                    }
+                });
+                
+                preview.addEventListener('mouseleave', () => {
+                    if (charsToDrawArray[currentCharIndex] !== char) {
+                        preview.style.transform = 'scale(1)';
+                        preview.style.boxShadow = '0 2px 8px rgba(76, 175, 80, 0.2)';
+                    }
+                });
                 
                 container.appendChild(preview);
             });
