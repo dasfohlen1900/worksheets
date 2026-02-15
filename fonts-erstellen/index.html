@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Handschriftart Creator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/opentype.js/1.3.4/opentype.min.js"></script>
     <style>
         * {
@@ -259,11 +260,11 @@
             </div>
             <div class="step" data-step="2">
                 <div class="step-number">2</div>
-                <div>Template drucken</div>
+                <div>Template (optional)</div>
             </div>
             <div class="step" data-step="3">
                 <div class="step-number">3</div>
-                <div>Hochladen</div>
+                <div>Zeichnen</div>
             </div>
             <div class="step" data-step="4">
                 <div class="step-number">4</div>
@@ -289,6 +290,18 @@
                 <h3 style="margin-top: 30px;">Sonderzeichen</h3>
                 <div class="char-grid" id="special-grid"></div>
 
+                <h3 style="margin-top: 30px;">Erweiterte Lateinische Zeichen</h3>
+                <div class="char-grid" id="extended-grid"></div>
+
+                <h3 style="margin-top: 30px;">Deutsche Sonderzeichen</h3>
+                <div class="char-grid" id="german-grid"></div>
+
+                <h3 style="margin-top: 30px;">Währungssymbole</h3>
+                <div class="char-grid" id="currency-grid"></div>
+
+                <h3 style="margin-top: 30px;">Mathematische Symbole</h3>
+                <div class="char-grid" id="math-grid"></div>
+
                 <div class="actions">
                     <button class="btn btn-secondary" onclick="selectAll()">Alle auswählen</button>
                     <button class="btn btn-secondary" onclick="deselectAll()">Alle abwählen</button>
@@ -298,8 +311,8 @@
 
             <!-- Schritt 2: Template -->
             <div class="section" id="step2">
-                <h2>Schritt 2: Template drucken</h2>
-                <p style="margin: 20px 0;">Drucke das Template aus und schreibe die Zeichen in die Kästchen:</p>
+                <h2>Schritt 2: Template drucken (Optional)</h2>
+                <p style="margin: 20px 0;">Optional: Drucke ein Template zum Üben. Du kannst die Zeichen auch direkt digital im nächsten Schritt zeichnen.</p>
                 
                 <div class="template-preview">
                     <p><strong>📄 Template ist bereit zum Drucken</strong></p>
@@ -310,34 +323,56 @@
 
                 <div class="actions">
                     <button class="btn btn-secondary" onclick="goToStep(1)">← Zurück</button>
-                    <button class="btn btn-primary" onclick="printTemplate()">🖨️ Template drucken</button>
-                    <button class="btn btn-primary" onclick="downloadTemplate()">💾 Als PDF herunterladen</button>
-                    <button class="btn btn-primary" onclick="goToStep(3)">Weiter zum Upload →</button>
+                    <button class="btn btn-secondary" onclick="printTemplate()">🖨️ Template drucken</button>
+                    <button class="btn btn-secondary" onclick="downloadTemplate()">💾 Als PDF herunterladen</button>
+                    <button class="btn btn-primary" onclick="goToStep(3)">Überspringen / Weiter zum Zeichnen →</button>
                 </div>
             </div>
 
-            <!-- Schritt 3: Upload -->
+            <!-- Schritt 3: Zeichnen -->
             <div class="section" id="step3">
-                <h2>Schritt 3: Ausgefülltes Template hochladen</h2>
-                <p style="margin: 20px 0;">Scanne oder fotografiere dein ausgefülltes Template und lade es hier hoch:</p>
+                <h2>Schritt 3: Zeichne deine Zeichen</h2>
+                <p style="margin: 20px 0;">Zeichne jedes Zeichen in den Canvas. Die Zeichen werden als SVG gespeichert:</p>
 
-                <div class="upload-area" id="upload-area">
-                    <input type="file" id="file-input" accept="image/*" multiple>
-                    <div style="font-size: 3em; margin-bottom: 20px;">📤</div>
-                    <h3>Template hochladen</h3>
-                    <p style="margin-top: 10px; color: #666;">
-                        Klicke hier oder ziehe Dateien hierher<br>
-                        (JPG, PNG, PDF)
-                    </p>
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h3 style="margin: 0;">Aktuelles Zeichen:</h3>
+                        <div id="current-char" style="font-size: 4em; color: #667eea; margin-top: 10px;">A</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="color: #666; margin-bottom: 5px;">Fortschritt:</div>
+                        <div style="font-size: 1.5em; font-weight: bold; color: #667eea;">
+                            <span id="progress-count">0</span> / <span id="total-count">0</span>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="preview-grid" id="preview-grid"></div>
+                <div style="text-align: center; margin: 30px 0;">
+                    <canvas id="draw-canvas" width="600" height="600" 
+                            style="border: 3px solid #667eea; border-radius: 10px; cursor: crosshair; background: white; max-width: 100%; touch-action: none;"></canvas>
+                    
+                    <div style="margin-top: 20px;">
+                        <button class="btn btn-secondary" onclick="toggleEraser()" id="eraser-btn">
+                            🧹 Radierer
+                        </button>
+                        <button class="btn btn-secondary" onclick="clearCanvas()">🗑️ Alles löschen</button>
+                        <button class="btn btn-secondary" onclick="undoStroke()">↶ Rückgängig</button>
+                        <br>
+                        <input type="range" id="brush-size" min="2" max="20" value="8" 
+                               style="width: 200px; margin: 10px 20px 0 0; vertical-align: middle;">
+                        <span id="brush-size-label">Pinselgröße: 8px</span>
+                    </div>
+                </div>
 
                 <div class="actions">
-                    <button class="btn btn-secondary" onclick="goToStep(2)">← Zurück</button>
-                    <button class="btn btn-primary" onclick="goToStep(4)" id="process-btn" style="display: none;">
-                        Font erstellen →
-                    </button>
+                    <button class="btn btn-secondary" onclick="previousChar()">← Vorheriges</button>
+                    <button class="btn btn-secondary" onclick="skipChar()">Überspringen</button>
+                    <button class="btn btn-primary" onclick="saveCharAndNext()">Speichern & Weiter →</button>
+                </div>
+
+                <div style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 10px;">
+                    <h3>Bereits gezeichnet:</h3>
+                    <div id="drawn-chars" style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px;"></div>
                 </div>
             </div>
 
@@ -375,10 +410,14 @@ ABCDEFGHIJKLMNOPQRSTUVWXYZ
     <div id="print-template" class="print-template" style="display: none;"></div>
 
     <script>
-        const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZÀÁÂÃÄÅÆÇĆÐÈÉÊËÌÍÎÏİÑÒÓÔÕÖØŒŠÙÚÛÜŸÞŽ'.split('');
-        const lowercase = 'abcdefghijklmnopqrstuvwxyzàáâãäåæçćðèéêëìíîïi̇ñòóôõöøœšùúûüÿþžß'.split('');
-        const numbers = '0123456789²³¹'.split('');
-        const special = '.,!?;:-()[]{}@#$%&*+=<>/\'"^`€±”“„§|°'.split('');
+        const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+        const lowercase = 'abcdefghijklmnopqrstuvwxyz'.split('');
+        const numbers = '0123456789'.split('');
+        const special = ['.',',','!','?',';',':','-','(',')','[',']','{','}','@','#','$','%','&','*','+','=','<','>','/','\\','\'','"','„','"','‚',''','»','«','›','‹'];
+        const extendedLatin = 'àáâãäåæçćðèéêëìíîïi̇ñòóôõöøœšùúûüÿþžÀÁÂÃÄÅÆÇĆÐÈÉÊËÌÍÎÏİÑÒÓÔÕÖØŒŠÙÚÛÜŸÞŽ'.split('');
+        const germanSpecial = 'äöüßÄÖÜ'.split('');
+        const currency = '€$£¥¢'.split('');
+        const math = '×÷±≠≤≥∞√∑∏∫'.split('');
         
         let selectedChars = new Set();
         let uploadedImages = {};
@@ -389,6 +428,10 @@ ABCDEFGHIJKLMNOPQRSTUVWXYZ
             createGrid('lowercase-grid', lowercase);
             createGrid('numbers-grid', numbers);
             createGrid('special-grid', special);
+            createGrid('extended-grid', extendedLatin);
+            createGrid('german-grid', germanSpecial);
+            createGrid('currency-grid', currency);
+            createGrid('math-grid', math);
         }
 
         function createGrid(id, chars) {
@@ -414,7 +457,7 @@ ABCDEFGHIJKLMNOPQRSTUVWXYZ
         }
 
         function selectAll() {
-            selectedChars = new Set([...uppercase, ...lowercase, ...numbers, ...special]);
+            selectedChars = new Set([...uppercase, ...lowercase, ...numbers, ...special, ...extendedLatin, ...germanSpecial, ...currency, ...math]);
             document.querySelectorAll('.char-btn').forEach(btn => btn.classList.add('selected'));
             updateCharCount();
         }
@@ -436,7 +479,12 @@ ABCDEFGHIJKLMNOPQRSTUVWXYZ
             document.getElementById(`step${step}`).classList.add('active');
             document.querySelector(`.step[data-step="${step}"]`).classList.add('active');
             
-            if (step === 4) {
+            if (step === 3) {
+                setTimeout(() => {
+                    initCanvas();
+                    initDrawingStep();
+                }, 100);
+            } else if (step === 4) {
                 displayFinalPreview();
             }
         }
@@ -458,38 +506,38 @@ ABCDEFGHIJKLMNOPQRSTUVWXYZ
             container.innerHTML = '';
             
             const chars = Array.from(selectedChars);
-            const charsPerPage = 20;
+            const charsPerPage = 12; // Reduced from 20 to 12 (3 rows x 4 columns)
             const pages = Math.ceil(chars.length / charsPerPage);
             
             for (let p = 0; p < pages; p++) {
                 const page = document.createElement('div');
-                page.style.cssText = 'page-break-after: always; padding: 40px; font-family: Arial, sans-serif;';
+                page.style.cssText = 'page-break-after: always; padding: 30px; font-family: Arial, sans-serif; height: 100vh; box-sizing: border-box; display: flex; flex-direction: column;';
                 
                 const title = document.createElement('h1');
                 title.textContent = `Handschriftart Template - Seite ${p + 1}/${pages}`;
-                title.style.cssText = 'text-align: center; margin-bottom: 30px; color: #667eea;';
+                title.style.cssText = 'text-align: center; margin-bottom: 15px; color: #667eea; font-size: 24px;';
                 page.appendChild(title);
                 
                 const instructions = document.createElement('p');
                 instructions.textContent = 'Schreibe jeden Buchstaben in das entsprechende Kästchen. Verwende einen schwarzen Stift und schreibe klar und deutlich.';
-                instructions.style.cssText = 'text-align: center; margin-bottom: 40px; color: #666;';
+                instructions.style.cssText = 'text-align: center; margin-bottom: 25px; color: #666; font-size: 14px;';
                 page.appendChild(instructions);
                 
                 const grid = document.createElement('div');
-                grid.style.cssText = 'display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;';
+                grid.style.cssText = 'display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; flex: 1; align-content: start;';
                 
                 const pageChars = chars.slice(p * charsPerPage, (p + 1) * charsPerPage);
                 
                 pageChars.forEach(char => {
                     const cell = document.createElement('div');
-                    cell.style.cssText = 'border: 3px solid #333; padding: 20px; aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: space-between;';
+                    cell.style.cssText = 'border: 3px solid #333; padding: 15px; aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: space-between; box-sizing: border-box;';
                     
                     const label = document.createElement('div');
                     label.textContent = char;
-                    label.style.cssText = 'font-size: 24px; font-weight: bold; color: #999;';
+                    label.style.cssText = 'font-size: 20px; font-weight: bold; color: #999;';
                     
                     const writeArea = document.createElement('div');
-                    writeArea.style.cssText = 'width: 100%; height: 80%; border-bottom: 2px solid #ccc;';
+                    writeArea.style.cssText = 'width: 100%; flex: 1; border-bottom: 2px solid #ccc; margin-top: 10px;';
                     
                     cell.appendChild(label);
                     cell.appendChild(writeArea);
@@ -501,67 +549,295 @@ ABCDEFGHIJKLMNOPQRSTUVWXYZ
             }
         }
 
-        // File upload
-        const uploadArea = document.getElementById('upload-area');
-        const fileInput = document.getElementById('file-input');
+        // Canvas drawing variables
+        let canvas, ctx;
+        let isDrawing = false;
+        let currentStrokes = [];
+        let allStrokes = [];
+        let charsSvgData = {};
+        let currentCharIndex = 0;
+        let charsToDrawArray = [];
+        let isEraserMode = false;
 
-        uploadArea.onclick = () => fileInput.click();
-
-        uploadArea.ondragover = (e) => {
-            e.preventDefault();
-            uploadArea.classList.add('dragover');
-        };
-
-        uploadArea.ondragleave = () => {
-            uploadArea.classList.remove('dragover');
-        };
-
-        uploadArea.ondrop = (e) => {
-            e.preventDefault();
-            uploadArea.classList.remove('dragover');
-            handleFiles(e.dataTransfer.files);
-        };
-
-        fileInput.onchange = (e) => {
-            handleFiles(e.target.files);
-        };
-
-        function handleFiles(files) {
-            const previewGrid = document.getElementById('preview-grid');
-            previewGrid.innerHTML = '';
+        function initCanvas() {
+            canvas = document.getElementById('draw-canvas');
+            ctx = canvas.getContext('2d');
             
-            Array.from(files).forEach((file, index) => {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    uploadedImages[index] = e.target.result;
-                    
-                    const preview = document.createElement('div');
-                    preview.className = 'char-preview';
-                    preview.innerHTML = `
-                        <img src="${e.target.result}" alt="Upload ${index + 1}">
-                        <div style="color: #666;">Bild ${index + 1}</div>
-                    `;
-                    previewGrid.appendChild(preview);
-                };
-                reader.readAsDataURL(file);
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 8;
+
+            // Mouse events
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseout', stopDrawing);
+
+            // Touch events
+            canvas.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                const touch = e.touches[0];
+                const mouseEvent = new MouseEvent('mousedown', {
+                    clientX: touch.clientX,
+                    clientY: touch.clientY
+                });
+                canvas.dispatchEvent(mouseEvent);
+            });
+
+            canvas.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                const touch = e.touches[0];
+                const mouseEvent = new MouseEvent('mousemove', {
+                    clientX: touch.clientX,
+                    clientY: touch.clientY
+                });
+                canvas.dispatchEvent(mouseEvent);
+            });
+
+            canvas.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                const mouseEvent = new MouseEvent('mouseup', {});
+                canvas.dispatchEvent(mouseEvent);
+            });
+
+            // Brush size slider
+            const brushSize = document.getElementById('brush-size');
+            const brushLabel = document.getElementById('brush-size-label');
+            brushSize.addEventListener('input', (e) => {
+                ctx.lineWidth = e.target.value;
+                brushLabel.textContent = `${isEraserMode ? 'Radierer' : 'Pinsel'}größe: ${e.target.value}px`;
+            });
+        }
+
+        function toggleEraser() {
+            isEraserMode = !isEraserMode;
+            const btn = document.getElementById('eraser-btn');
+            const label = document.getElementById('brush-size-label');
+            
+            if (isEraserMode) {
+                btn.classList.add('btn-primary');
+                btn.classList.remove('btn-secondary');
+                btn.textContent = '✏️ Stift';
+                ctx.strokeStyle = '#fff';
+                ctx.globalCompositeOperation = 'destination-out';
+                label.textContent = `Radiergröße: ${ctx.lineWidth}px`;
+                canvas.style.cursor = 'pointer';
+            } else {
+                btn.classList.remove('btn-primary');
+                btn.classList.add('btn-secondary');
+                btn.textContent = '🧹 Radierer';
+                ctx.strokeStyle = '#000';
+                ctx.globalCompositeOperation = 'source-over';
+                label.textContent = `Pinselgröße: ${ctx.lineWidth}px`;
+                canvas.style.cursor = 'crosshair';
+            }
+        }
+
+        function getMousePos(e) {
+            const rect = canvas.getBoundingClientRect();
+            return {
+                x: (e.clientX - rect.left) * (canvas.width / rect.width),
+                y: (e.clientY - rect.top) * (canvas.height / rect.height)
+            };
+        }
+
+        function startDrawing(e) {
+            isDrawing = true;
+            const pos = getMousePos(e);
+            const newStroke = [];
+            newStroke.isEraser = isEraserMode;
+            currentStrokes.push(newStroke);
+            ctx.beginPath();
+            ctx.moveTo(pos.x, pos.y);
+            currentStrokes[currentStrokes.length - 1].push(pos);
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            const pos = getMousePos(e);
+            ctx.lineTo(pos.x, pos.y);
+            ctx.stroke();
+            currentStrokes[currentStrokes.length - 1].push(pos);
+        }
+
+        function stopDrawing() {
+            if (isDrawing) {
+                isDrawing = false;
+                allStrokes.push([...currentStrokes]);
+            }
+        }
+
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            currentStrokes = [];
+            allStrokes = [];
+            
+            // Reset to pen mode
+            if (isEraserMode) {
+                toggleEraser();
+            }
+        }
+
+        function undoStroke() {
+            if (allStrokes.length > 0) {
+                allStrokes.pop();
+                redrawCanvas();
+            }
+        }
+
+        function redrawCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            currentStrokes = [];
+            
+            const currentMode = isEraserMode;
+            const currentColor = ctx.strokeStyle;
+            const currentComposite = ctx.globalCompositeOperation;
+            
+            allStrokes.forEach(strokeSet => {
+                strokeSet.forEach(stroke => {
+                    if (stroke.length > 0) {
+                        // Restore stroke properties
+                        if (stroke.isEraser) {
+                            ctx.strokeStyle = '#fff';
+                            ctx.globalCompositeOperation = 'destination-out';
+                        } else {
+                            ctx.strokeStyle = '#000';
+                            ctx.globalCompositeOperation = 'source-over';
+                        }
+                        
+                        ctx.beginPath();
+                        ctx.moveTo(stroke[0].x, stroke[0].y);
+                        stroke.forEach(point => {
+                            ctx.lineTo(point.x, point.y);
+                        });
+                        ctx.stroke();
+                        currentStrokes.push(stroke);
+                    }
+                });
             });
             
-            document.getElementById('process-btn').style.display = 'inline-block';
+            // Restore current mode
+            ctx.strokeStyle = currentColor;
+            ctx.globalCompositeOperation = currentComposite;
+        }
+
+        function canvasToSvg() {
+            let svgPaths = '';
+            
+            allStrokes.forEach(strokeSet => {
+                strokeSet.forEach(stroke => {
+                    // Only include pen strokes, not eraser strokes
+                    if (stroke.length > 1 && !stroke.isEraser) {
+                        let pathData = `M ${stroke[0].x} ${stroke[0].y}`;
+                        for (let i = 1; i < stroke.length; i++) {
+                            pathData += ` L ${stroke[i].x} ${stroke[i].y}`;
+                        }
+                        svgPaths += `<path d="${pathData}" stroke="black" stroke-width="${ctx.lineWidth}" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
+                    }
+                });
+            });
+
+            return `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${canvas.width} ${canvas.height}" width="${canvas.width}" height="${canvas.height}">
+${svgPaths}
+</svg>`;
+        }
+
+        function saveCharAndNext() {
+            const currentChar = charsToDrawArray[currentCharIndex];
+            const svg = canvasToSvg();
+            
+            if (allStrokes.length > 0) {
+                charsSvgData[currentChar] = svg;
+                updateDrawnChars();
+            }
+            
+            if (currentCharIndex < charsToDrawArray.length - 1) {
+                currentCharIndex++;
+                loadChar();
+            } else {
+                goToStep(4);
+            }
+        }
+
+        function skipChar() {
+            if (currentCharIndex < charsToDrawArray.length - 1) {
+                currentCharIndex++;
+                loadChar();
+            } else {
+                goToStep(4);
+            }
+        }
+
+        function previousChar() {
+            if (currentCharIndex > 0) {
+                currentCharIndex--;
+                loadChar();
+            }
+        }
+
+        function loadChar() {
+            const char = charsToDrawArray[currentCharIndex];
+            document.getElementById('current-char').textContent = char;
+            document.getElementById('progress-count').textContent = Object.keys(charsSvgData).length;
+            
+            clearCanvas();
+            
+            // Load existing drawing if available
+            if (charsSvgData[char]) {
+                // Could reload SVG here, but for simplicity we start fresh
+            }
+        }
+
+        function updateDrawnChars() {
+            const container = document.getElementById('drawn-chars');
+            container.innerHTML = '';
+            
+            Object.keys(charsSvgData).forEach(char => {
+                const preview = document.createElement('div');
+                preview.style.cssText = 'width: 60px; height: 60px; border: 2px solid #667eea; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 2em; background: white; cursor: pointer;';
+                preview.textContent = char;
+                preview.title = `Klicken um ${char} zu bearbeiten`;
+                preview.onclick = () => {
+                    currentCharIndex = charsToDrawArray.indexOf(char);
+                    loadChar();
+                };
+                container.appendChild(preview);
+            });
+        }
+
+        function initDrawingStep() {
+            charsToDrawArray = Array.from(selectedChars);
+            currentCharIndex = 0;
+            document.getElementById('total-count').textContent = charsToDrawArray.length;
+            document.getElementById('progress-count').textContent = Object.keys(charsSvgData).length;
+            
+            if (charsToDrawArray.length > 0) {
+                loadChar();
+            }
         }
 
         function displayFinalPreview() {
             const grid = document.getElementById('final-preview');
             grid.innerHTML = '';
             
-            const chars = Array.from(selectedChars).slice(0, 12);
+            const chars = Object.keys(charsSvgData).slice(0, 12);
+            
+            if (chars.length === 0) {
+                grid.innerHTML = '<p style="text-align: center; color: #666; grid-column: 1/-1;">Keine Zeichen gezeichnet. Gehe zurück zu Schritt 3.</p>';
+                return;
+            }
             
             chars.forEach(char => {
                 const preview = document.createElement('div');
                 preview.className = 'char-preview';
+                
+                const svgData = charsSvgData[char];
+                const base64 = btoa(svgData);
+                
                 preview.innerHTML = `
-                    <div style="font-size: 4em; height: 120px; display: flex; align-items: center; justify-content: center;">
-                        ${char}
-                    </div>
+                    <img src="data:image/svg+xml;base64,${base64}" alt="${char}" style="max-width: 100%; height: 120px; object-fit: contain;">
                     <div class="char-label">${char}</div>
                 `;
                 grid.appendChild(preview);
@@ -571,28 +847,124 @@ ABCDEFGHIJKLMNOPQRSTUVWXYZ
         function downloadFont(format = 'ttf') {
             const fontName = document.getElementById('font-name').value || 'Meine Handschrift';
             
-            const fontData = {
-                name: fontName,
-                characters: Array.from(selectedChars),
-                images: uploadedImages,
-                format: format,
-                info: 'Dies ist eine Demo-Version. Für einen echten Font benötigst du eine Serverseite Verarbeitung mit OCR und Font-Generierung.'
-            };
+            // Create ZIP file with SVG files
+            createZipWithSvgs(fontName);
+        }
+
+        async function createZipWithSvgs(fontName) {
+            // Use JSZip library
+            const JSZip = window.JSZip || await loadJSZip();
             
-            const blob = new Blob([JSON.stringify(fontData, null, 2)], {
-                type: 'application/json'
+            if (!JSZip) {
+                // Fallback: Download JSON
+                const fontData = {
+                    name: fontName,
+                    characters: Object.keys(charsSvgData),
+                    svgs: charsSvgData,
+                    info: 'SVG-Dateien für jeden Buchstaben. Nutze Tools wie FontForge oder Glyphs um daraus einen Font zu erstellen.'
+                };
+                
+                const blob = new Blob([JSON.stringify(fontData, null, 2)], {
+                    type: 'application/json'
+                });
+                
+                downloadBlob(blob, `${fontName.replace(/\s+/g, '-')}-svgs.json`);
+                
+                alert(`SVG-Daten wurden als JSON gespeichert!\n\nZum Erstellen eines echten Fonts:\n1. Importiere die SVGs in FontForge oder Glyphs\n2. Ordne jeden SVG dem entsprechenden Zeichen zu\n3. Exportiere als TTF/OTF\n\nOder nutze Online-Services wie Calligraphr.com`);
+                return;
+            }
+            
+            // Create ZIP with JSZip
+            const zip = new JSZip();
+            const svgFolder = zip.folder('svgs');
+            
+            // Add each SVG to the ZIP
+            Object.entries(charsSvgData).forEach(([char, svg]) => {
+                const filename = getCharFilename(char);
+                svgFolder.file(filename, svg);
             });
             
+            // Add README
+            const readme = `Handschrift Font - ${fontName}
+            
+Enthält ${Object.keys(charsSvgData).length} Zeichen als SVG-Dateien.
+
+So erstellst du daraus einen Font:
+
+Option 1: FontForge (Open Source)
+1. Öffne FontForge
+2. Erstelle ein neues Font
+3. Importiere die SVGs: File > Import für jedes Zeichen
+4. Exportiere als TTF: File > Generate Fonts
+
+Option 2: Glyphs (Mac, kommerziell)
+1. Erstelle ein neues Font
+2. Importiere die SVGs per Drag & Drop
+3. Exportiere als OTF/TTF
+
+Option 3: Online-Service
+- Calligraphr.com (kostenlos bis 75 Zeichen)
+- FontSelf (Adobe Plugin)
+
+Dateibenennung:
+- A.svg = Großbuchstabe A
+- a.svg = Kleinbuchstabe a
+- 0-9.svg = Zahlen
+- special_XXX.svg = Sonderzeichen (XXX = Unicode)
+`;
+            
+            zip.file('README.txt', readme);
+            
+            // Add character mapping JSON
+            const mapping = {};
+            Object.keys(charsSvgData).forEach(char => {
+                mapping[char] = {
+                    filename: getCharFilename(char),
+                    unicode: char.charCodeAt(0),
+                    unicodeHex: '0x' + char.charCodeAt(0).toString(16).toUpperCase()
+                };
+            });
+            
+            zip.file('character-mapping.json', JSON.stringify(mapping, null, 2));
+            
+            // Generate ZIP
+            const blob = await zip.generateAsync({ type: 'blob' });
+            downloadBlob(blob, `${fontName.replace(/\s+/g, '-')}-font-svgs.zip`);
+            
+            alert(`✅ ZIP-Datei erstellt!\n\nEnthält:\n- ${Object.keys(charsSvgData).length} SVG-Dateien\n- README mit Anleitung\n- Character-Mapping JSON\n\nNutze FontForge, Glyphs oder Calligraphr.com um den Font zu erstellen.`);
+        }
+
+        function getCharFilename(char) {
+            const code = char.charCodeAt(0);
+            
+            // Letters and numbers: use the character itself
+            if (/[A-Za-z0-9]/.test(char)) {
+                return `${char}.svg`;
+            }
+            
+            // Special characters: use unicode hex
+            return `special_U+${code.toString(16).toUpperCase()}.svg`;
+        }
+
+        function downloadBlob(blob, filename) {
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `${fontName.replace(/\s+/g, '-')}-data.json`;
+            a.download = filename;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
-            
-            alert(`Font-Daten wurden gespeichert!\n\nHinweis: Dies ist eine Demo-Version. Für einen echten Font benötigst du:\n\n1. OCR-Software zur Zeichenerkennung\n2. Font-Generierung Software (z.B. FontForge)\n3. Serverseite Verarbeitung\n\nDie JSON-Datei enthält deine Auswahl und hochgeladenen Bilder.`);
+        }
+
+        async function loadJSZip() {
+            return new Promise((resolve) => {
+                const script = document.createElement('script');
+                script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+                script.onload = () => resolve(window.JSZip);
+                script.onerror = () => resolve(null);
+                document.head.appendChild(script);
+            });
         }
 
         // Initialize
